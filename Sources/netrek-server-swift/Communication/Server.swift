@@ -4,7 +4,7 @@
 //
 //  Created by Darrell Root on 5/31/20.
 //  Copyright © 2020 Darrell Root. All rights reserved.
-//
+// 
 // some code from https://rderik.com/blog/building-a-server-client-aplication-using-apple-s-network-framework/
 
 import Foundation
