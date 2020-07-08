@@ -8,6 +8,7 @@
 
 import Foundation
 import Network
+import NIO
 
 class Universe {
     
@@ -169,7 +170,16 @@ class Universe {
             }
         }
     }
-    func player(connection: NWConnection) -> Player? {
+    func player(context: ChannelHandlerContext) -> Player? {
+        for (slot, player) in self.players.enumerated() {
+            if context === player.context {
+                return player
+            }
+        }
+        debugPrint("Error: \(#file) \(#function) unable to find player for context \(context)")
+        return nil
+    }
+    /*func player(connection: NWConnection) -> Player? {
         for (slot, player) in self.players.enumerated() {
             if connection === player.connection?.connection {
                 return player
@@ -177,26 +187,32 @@ class Universe {
         }
         debugPrint("Error: \(#file) \(#function) unable to find player for connection \(connection)")
         return nil
-    }
-    func connectionEnded(connection: ServerConnection) {
+    }*/
+    /*func connectionEnded(connection: ServerConnection) {
         for (slot,player) in self.players.enumerated() {
             if player.connection === connection {
                 player.disconnected()
             }
         }
-    }
-    func addPlayer(connection: ServerConnection) {
+    }*/
+    /*func addPlayer(connection: ServerConnection) {
         if let freeSlot = firstFreeSlot() {
             self.players[freeSlot].connected(connection: connection)
         }
+    }*/
+    func addPlayer(context: ChannelHandlerContext) {
+        if let freeSlot = firstFreeSlot() {
+            self.players[freeSlot].connected(context: context)
+        }
     }
+
     
-    func send(playerid: Int, data: Data) {
+    /*func send(playerid: Int, data: Data) {
         guard let player = players[safe: playerid] else {
             debugPrint("Error \(#file) \(#function) no connection for id \(playerid) ")
             return
         }
         debugPrint("sending \(data.count) bytes to playerid \(playerid)")
         player.connection?.send(data: data)
-    }
+    }*/
 }

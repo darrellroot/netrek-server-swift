@@ -7,11 +7,40 @@
 //
 
 import Foundation
+import NIO
 
 print("Initializing server")
 
 let universe = Universe()
-let server = Server(port: 2592, universe: universe)
-try! server.start()
+//let server = Server(port: 2592, universe: universe)
+//try! server.start()
 
-RunLoop.current.run()
+let netrekChannelHandler = NetrekChannelHandler()
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let bootstrap = ServerBootstrap(group: group)
+    .serverChannelOption(ChannelOptions.backlog, value: 32)
+    .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr),value: 1)
+    .childChannelInitializer { channel in
+        channel.pipeline.addHandler(ByteToMessageHandler(NetrekServerDecoder()))
+}
+    .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
+    .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 16)
+    .childChannelOption(ChannelOptions.recvAllocator, value: AdaptiveRecvByteBufferAllocator())
+defer {
+    try! group.syncShutdownGracefully()
+}
+
+let channel = try { () -> Channel in
+    return try bootstrap.bind(host: "::", port: 2592).wait()
+}()
+
+guard let localAddress = channel.localAddress else {
+    fatalError("Address unable to bind")
+}
+
+print("Server started and listening on \(localAddress)")
+// This will never unblock as we don't close the ServerChannel.
+
+try channel.closeFuture.wait()
+print("Netrek server closed")
+//RunLoop.current.run()

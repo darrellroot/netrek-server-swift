@@ -7,6 +7,7 @@
 // 
 
 import Foundation
+import NIO
 
 class Player {
     static let orbitRadius = 800.0
@@ -18,7 +19,8 @@ class Player {
     var slot: Int
     //var state: PlayerState
     let universe: Universe
-    var connection: ServerConnection?
+    //var connection: ServerConnection?
+    var context: ChannelHandlerContext?
     var user: User? = nil
     var team: Team
     var armies = 0
@@ -312,12 +314,21 @@ class Player {
             
             let spPStatus = MakePacket.spPStatus(player: self)
             for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
-                player.connection?.send(data: spPStatus)
+                if let context = player.context {
+                    let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
+                //player.connection?.send(data: spPStatus)
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 self.status = .dead
                 for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
-                    player.connection?.send(data: spPStatus)
+                    if let context = player.context {
+                        let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
+
+                    //player.connection?.send(data: spPStatus)
                 }
             }
         }
@@ -361,21 +372,31 @@ class Player {
     }
     func reset() {
         debugPrint("player \(slot) resetting")
-        self.connection = nil
+        self.context = nil
+        //self.connection = nil
         self.user = nil
         self.team = .independent
         newShip(ship: .cruiser)
         self.status = .free
         let spPStatus = MakePacket.spPStatus(player: self)
+
         for player in universe.players.filter ({ $0.status != .free}) {
-            player.connection?.send(data: spPStatus)
+            if let context = player.context {
+                let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+            //player.connection?.send(data: spPStatus)
 
         }
     }
     func enterOrbit() {
         guard self.speed <= 2.0 else {
             let spMessage = MakePacket.spMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!", from: 255)
-            self.connection?.send(data: spMessage)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                _ = context.channel.writeAndFlush(buffer)
+
+            }
             return
         }
         self.orbit = nil
@@ -387,13 +408,23 @@ class Player {
         }
         guard let orbit = self.orbit else {
             let spMessage = MakePacket.spMessage(message: "Captain: We are not in orbit range of a planet", from: 255)
-            self.connection?.send(data: spMessage)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+
+            //self.connection?.send(data: spMessage)
             return
         }
         
         self.orbitRadian = atan2(-1 * self.positionY - orbit.positionY, self.positionX - orbit.positionX)
         let spMessage = MakePacket.spMessage(message: "Entering standard orbit of \(orbit.name)", from: 255)
-        self.connection?.send(data: spMessage)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: spMessage)
+            _ = context.channel.writeAndFlush(buffer)
+        }
+
+        //self.connection?.send(data: spMessage)
         self.speed = 1
         self.helmSpeed = 1
         self.planetLock = nil
@@ -452,7 +483,23 @@ class Player {
     deinit {
         debugPrint("Player \(slot) deinit")
     }
-    func connected(connection: ServerConnection) {
+    func connected(context: ChannelHandlerContext) {
+        self.context = context
+        self.status = .outfit
+        
+        do {
+            debugPrint("sending SP MOTD")
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server")
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+
+        //TODO implement queue
+        self.sendSpYou()
+    }
+
+    
+    /*func connected(connection: ServerConnection) {
         self.connection = connection
         self.status = .outfit
         
@@ -464,7 +511,7 @@ class Player {
 
         //TODO implement queue
         self.sendSpYou()
-    }
+    }*/
     func activateCloak(_ newStatus: Bool) {
         guard self.status == .alive else {
             return
@@ -477,8 +524,13 @@ class Player {
     }
     func sendSpYou() {
         let data = MakePacket.spYou(player: self)
-        debugPrint("sending SP YOU")
-        self.connection?.send(data: data)
+        debugPrint("sending SP_YOU")
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            _ = context.channel.writeAndFlush(buffer)
+        }
+
+        //self.connection?.send(data: data)
     }
     func sendMessage(message: String, from: UInt8? = nil) {
         let data: Data
@@ -489,7 +541,12 @@ class Player {
             //which means from server
             data = MakePacket.spMessage(message: message, from: 255)
         }
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            _ = context.channel.writeAndFlush(buffer)
+        }
+
+        //connection?.send(data: data)
     }
     func planetLockDirection() {
         guard let planet = self.planetLock else {
@@ -592,8 +649,9 @@ class Player {
         self.planetLock = nil
         self.orbit = nil
         playerLockDirection()
-        let spMessage = MakePacket.spMessage(message: "Setting intercept course for \(player.user?.name ?? "player \(player.slot)")", from: 255)
-        self.connection?.send(data: spMessage)
+        self.sendMessage(message: "Setting intercept course for \(player.user?.name ?? "player \(player.slot)")")
+        //let spMessage = MakePacket.spMessage(message: "Setting intercept course for \(player.user?.name ?? "player \(player.slot)")", from: 255)
+        //self.connection?.send(data: spMessage)
     }
     func receivedPlanetLock(planetID: Int) {
         guard self.status == .alive else {
@@ -607,8 +665,9 @@ class Player {
         self.playerLock = nil
         self.orbit = nil
         planetLockDirection()
-        let spMessage = MakePacket.spMessage(message: "Course set for planet \(planet.name)", from: 255)
-        self.connection?.send(data: spMessage)
+        //let spMessage = MakePacket.spMessage(message: "Course set for planet \(planet.name)", from: 255)
+        self.sendMessage(message: "Course set for planet \(planet.name)")
+        //self.connection?.send(data: spMessage)
     }
     func receivedDetMyTorp() {
         guard self.status == .alive else {
@@ -643,28 +702,46 @@ class Player {
     func receivedCpOutfit(team: Team, ship: ShipType) {
         guard team == universe.team1 || team == universe.team2 else {
             
-            let data1 = MakePacket.spMessage(message: "I cannot allow that.  Pick another team or ship", from: 255)
-            connection?.send(data: data1)
+            //let data1 = MakePacket.spMessage(message: "I cannot allow that.  Pick another team or ship", from: 255)
+            self.sendMessage(message: "I cannot allow that.  Pick another team or ship")
+            //connection?.send(data: data1)
             
             let data2 = MakePacket.spPickOk(false)
-            connection?.send(data: data2)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: data2)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+
+            //connection?.send(data: data2)
             return
         }
         guard self.status == .outfit || self.status == .dead else {
-            let data = MakePacket.spMessage(message: "Outfiting ship not available in state \(self.status.rawValue)", from: 255)
-            connection?.send(data: data)
+            //let data = MakePacket.spMessage(message: "Outfiting ship not available in state \(self.status.rawValue)", from: 255)
+            self.sendMessage(message: "Outfiting ship not available in state \(self.status.rawValue)")
+            //connection?.send(data: data)
             
             let data2 = MakePacket.spPickOk(false)
-            connection?.send(data: data2)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: data2)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+
+            //connection?.send(data: data2)
             return
         }
         guard let homeworld = universe.homeworld[team] else {
             debugPrint("\(#file) \(#function) error unable to identify homeworld for team \(team)")
-            let data = MakePacket.spMessage(message: "Unexpected server error, cannot find homeworld", from: 255)
-            connection?.send(data: data)
+            //let data = MakePacket.spMessage(message: "Unexpected server error, cannot find homeworld", from: 255)
+            self.sendMessage(message: "Unexpected server error, cannot find homeworld")
+            //connection?.send(data: data)
 
             let data2 = MakePacket.spPickOk(false)
-            connection?.send(data: data2)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: data2)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+
+            //connection?.send(data: data2)
 
             return
         }
@@ -672,11 +749,18 @@ class Player {
         self.newShip(ship: ship)
         self.positionX = homeworld.positionX + Double.random(in: -5000 ..< 5000)
         self.positionY = homeworld.positionY + Double.random(in: -5000 ..< 5000)
-        let data = MakePacket.spMessage(message: "Admiralty: we expect all sentients to do their duty", from: 255)
-        connection?.send(data: data)
+        //let data = MakePacket.spMessage(message: "Admiralty: we expect all sentients to do their duty", from: 255)
+        //connection?.send(data: data)
+        self.sendMessage(message: "Admiralty: we expect all sentients to do their duty!")
 
         let data2 = MakePacket.spPickOk(true)
-        connection?.send(data: data2)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data2)
+            _ = context.channel.writeAndFlush(buffer)
+        }
+
+
+        //connection?.send(data: data2)
     }
     func receivedCpSpeed(speed: Int) {
         guard self.status == .alive else {
@@ -722,10 +806,16 @@ class Player {
         } else if let existingUser = universe.users.first(where: {$0.name == name}) {
             guard existingUser.password == password else {
                 debugPrint("Sending SP_LOGIN failure to player \(self.slot)")
-                let message = MakePacket.spMessage(message: "Incorrect password for existing user \(name)", from: 255)
-                connection?.send(data: message)
+                //let message = MakePacket.spMessage(message: "Incorrect password for existing user \(name)", from: 255)
+                self.sendMessage(message: "Incorrect password for existing user \(name)")
+                //connection?.send(data: message)
                 let spLogin = MakePacket.spLogin(success: false)
-                connection?.send(data: spLogin)
+                if let context = context {
+                    let buffer = context.channel.allocator.buffer(bytes: spLogin)
+                    context.channel.writeAndFlush(buffer)
+                }
+
+                //connection?.send(data: spLogin)
                 return
             }
             self.user = existingUser
@@ -738,7 +828,12 @@ class Player {
             
         let data = MakePacket.spLogin(success: true)
         debugPrint("Sending SP_LOGIN success to player \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+
+        //connection?.send(data: data)
         
         self.sendInitialTransfer()
         self.sendPlanetLoc()
@@ -750,7 +845,12 @@ class Player {
         for planet in universe.planets {
             let data = MakePacket.spPlanetLoc(planet: planet)
             debugPrint("Sending SP_PLANET_LOC for planet \(planet.planetID) to \(self.slot)")
-            connection?.send(data: data)
+            if let context = context {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
+
+            //connection?.send(data: data)
         }
     }
     
@@ -825,7 +925,11 @@ class Player {
     }
     func sendSpMask() {
         let data = MakePacket.spMask(universe: universe)
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
         debugPrint("Sending SP_MASK to player \(self.slot)")
     }
     
@@ -1191,7 +1295,12 @@ class Player {
         //this sends this players stats to all players
         if let spStats = MakePacket.spStats(player: self) {
             for player in self.universe.players {
-                player.connection?.send(data: spStats)
+                if let context = player.context {
+                    let buffer = context.channel.allocator.buffer(bytes: spStats)
+                    context.channel.writeAndFlush(buffer)
+                }
+
+                //player.connection?.send(data: spStats)
             }
         }
     }
@@ -1224,33 +1333,57 @@ class Player {
     func sendSpPlanet(planet: Planet) {
         let data = MakePacket.spPlanet(planet: planet)
         debugPrint("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     
     func sendSpHostile(player: Player) {
         let data = MakePacket.spHostile(player: player)
         debugPrint("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     func sendSpPlLogin(player: Player) {
         let data = MakePacket.spPlLogin(player: player)
         debugPrint("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     func sendSpPlayerInfo(player: Player) {
         let data = MakePacket.spPlayerInfo(player: player)
         debugPrint("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     func sendSpKills(player: Player) {
         let data = MakePacket.spKills(player: player)
         debugPrint("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     func sendSpFlags(player: Player) {
         let data = MakePacket.spFlags(player: player)
         debugPrint("Sending SP_Flags for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     // full transfer sent after CP_LOGIN
     func sendInitialTransfer() {
@@ -1267,11 +1400,19 @@ class Player {
     func sendSpPlayerStatus(player: Player) {
         let data = MakePacket.spPStatus(player: player)
         debugPrint("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
     func sendSpPlayer(player: Player) {
         let data = MakePacket.spPlayer(player: player)
         debugPrint("Sending SP_Player for player \(player.slot) to \(self.slot)")
-        connection?.send(data: data)
+        if let context = context {
+            let buffer = context.channel.allocator.buffer(bytes: data)
+            context.channel.writeAndFlush(buffer)
+        }
+        //connection?.send(data: data)
     }
 }

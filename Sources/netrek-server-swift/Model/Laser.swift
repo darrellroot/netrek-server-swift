@@ -91,22 +91,32 @@ class Laser {
             let damage = shooter.ship.laserDamage * (1.0 - closestRange / myRange)
             debugPrint("Laser myRange \(myRange) closestRange \(closestRange) damage \(damage)")
             closestHit.impact(damage: damage, attacker: self.player, whyDead: .laser)
-            let spMessage = MakePacket.spMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage", from: 255)
-            shooter.connection?.send(data: spMessage)
+            //let spMessage = MakePacket.spMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage", from: 255)
+            shooter.sendMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage")
+            //shooter.connection?.send(data: spMessage)
         } else {
             self.status = .miss
-            let spMessage = MakePacket.spMessage(message: "Laser missed", from: 255)
-            shooter.connection?.send(data: spMessage)
+            shooter.sendMessage(message: "Laser missed")
+            //let spMessage = MakePacket.spMessage(message: "Laser missed", from: 255)
+            //shooter.connection?.send(data: spMessage)
         }
         let spLaser = MakePacket.spLaser(laser: self)
         for player in universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
-            player.connection?.send(data: spLaser)
+            if let context = player.context {
+                let buffer = context.channel.allocator.buffer(bytes: spLaser)
+                _ = context.channel.writeAndFlush(buffer)
+            }
+            //player.connection?.send(data: spLaser)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + shooter.ship.laserRecharge) {
             self.status = .free
             let spLaser = MakePacket.spLaser(laser: self)
             for player in self.universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
-                player.connection?.send(data: spLaser)
+                if let context = player.context {
+                    let buffer = context.channel.allocator.buffer(bytes: spLaser)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
+                //player.connection?.send(data: spLaser)
             }
         }
         

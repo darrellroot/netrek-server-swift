@@ -7,6 +7,7 @@
 // 
 // some code from https://rderik.com/blog/building-a-server-client-aplication-using-apple-s-network-framework/
 
+/*
 import Foundation
 import Network
 
@@ -101,3 +102,4 @@ class ServerConnection {
     }
     
 }
+ */
