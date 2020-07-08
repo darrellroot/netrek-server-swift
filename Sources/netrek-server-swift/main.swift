@@ -16,7 +16,7 @@ let universe = Universe()
 //try! server.start()
 
 let netrekChannelHandler = NetrekChannelHandler()
-let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
 let bootstrap = ServerBootstrap(group: group)
     .serverChannelOption(ChannelOptions.backlog, value: 32)
     .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr),value: 1)
@@ -39,8 +39,7 @@ guard let localAddress = channel.localAddress else {
 }
 
 print("Server started and listening on \(localAddress)")
-// This will never unblock as we don't close the ServerChannel.
 
+// This will never unblock as we don't close the ServerChannel.
 try channel.closeFuture.wait()
-print("Netrek server closed")
-//RunLoop.current.run()
+RunLoop.current.run()

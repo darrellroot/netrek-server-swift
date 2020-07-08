@@ -26,12 +26,13 @@ class Universe {
     var team2 = Team.roman
     
     var users: [User] = []
-    
+        
     var gameState: GameState = .intramural
     
     //var connectionsById: [Int: ServerConnection] = [:]
     
     init() {
+        debugPrint("Universe.init")
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let player = Player(slot: slotnum, universe: self)
             self.players.append(player)
@@ -85,11 +86,18 @@ class Universe {
         homeworld[.kazari] = planets.first(where: {$0.name == "Kazari"})!
         homeworld[.orion] = planets.first(where: {$0.name == "Orion"})!
         
+        //timer = Timer.scheduledTimer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
+
         timer = Timer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
         timer?.tolerance = 0.3 / updatesPerSecond
+        debugPrint("Timer initialized")
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
         }
+    }
+    
+    deinit {
+        debugPrint("universe.deinit")
     }
     /*
      SP_PLANET_LOC pnum= 1 x= 10000 y= 60000 name= Rigel
@@ -143,7 +151,7 @@ class Universe {
     }
     @objc func timerFired() {
         self.timerCount += 1
-        //debugPrint("\(#file) (#function) count \(self.timerCount)")
+        debugPrint("\(#file) (#function) count \(self.timerCount)")
         for player in self.players {
             if player.status != .free {
                 player.shortTimerFired()
