@@ -393,8 +393,10 @@ class Player {
         guard self.speed <= 2.0 else {
             let spMessage = MakePacket.spMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!", from: 255)
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
 
             }
             return
@@ -409,8 +411,10 @@ class Player {
         guard let orbit = self.orbit else {
             let spMessage = MakePacket.spMessage(message: "Captain: We are not in orbit range of a planet", from: 255)
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
 
             //self.connection?.send(data: spMessage)
@@ -489,9 +493,11 @@ class Player {
         
         do {
             debugPrint("sending SP MOTD")
-            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server")
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.1-alpha feedback@networkmom.net")
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
 
         //TODO implement queue
@@ -526,8 +532,10 @@ class Player {
         let data = MakePacket.spYou(player: self)
         debugPrint("sending SP_YOU")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            _ = context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data)
+                    _ = context.channel.writeAndFlush(buffer)
+            }
         }
 
         //self.connection?.send(data: data)
@@ -542,8 +550,10 @@ class Player {
             data = MakePacket.spMessage(message: message, from: 255)
         }
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            _ = context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                _ = context.channel.writeAndFlush(buffer)
+            }
         }
 
         //connection?.send(data: data)
@@ -708,8 +718,10 @@ class Player {
             
             let data2 = MakePacket.spPickOk(false)
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: data2)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data2)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
 
             //connection?.send(data: data2)
@@ -722,8 +734,10 @@ class Player {
             
             let data2 = MakePacket.spPickOk(false)
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: data2)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data2)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
 
             //connection?.send(data: data2)
@@ -737,8 +751,10 @@ class Player {
 
             let data2 = MakePacket.spPickOk(false)
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: data2)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data2)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
 
             //connection?.send(data: data2)
@@ -755,8 +771,10 @@ class Player {
 
         let data2 = MakePacket.spPickOk(true)
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data2)
-            _ = context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data2)
+                _ = context.channel.writeAndFlush(buffer)
+            }
         }
 
 
@@ -811,8 +829,10 @@ class Player {
                 //connection?.send(data: message)
                 let spLogin = MakePacket.spLogin(success: false)
                 if let context = context {
-                    let buffer = context.channel.allocator.buffer(bytes: spLogin)
-                    context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spLogin)
+                        context.channel.writeAndFlush(buffer)
+                    }
                 }
 
                 //connection?.send(data: spLogin)
@@ -829,8 +849,10 @@ class Player {
         let data = MakePacket.spLogin(success: true)
         debugPrint("Sending SP_LOGIN success to player \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
 
         //connection?.send(data: data)
@@ -846,8 +868,10 @@ class Player {
             let data = MakePacket.spPlanetLoc(planet: planet)
             debugPrint("Sending SP_PLANET_LOC for planet \(planet.planetID) to \(self.slot)")
             if let context = context {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data)
+                    context.channel.writeAndFlush(buffer)
+                }
             }
 
             //connection?.send(data: data)
@@ -926,8 +950,10 @@ class Player {
     func sendSpMask() {
         let data = MakePacket.spMask(universe: universe)
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
         debugPrint("Sending SP_MASK to player \(self.slot)")
@@ -1334,8 +1360,10 @@ class Player {
         let data = MakePacket.spPlanet(planet: planet)
         debugPrint("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1344,8 +1372,10 @@ class Player {
         let data = MakePacket.spHostile(player: player)
         debugPrint("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1353,8 +1383,10 @@ class Player {
         let data = MakePacket.spPlLogin(player: player)
         debugPrint("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1362,8 +1394,10 @@ class Player {
         let data = MakePacket.spPlayerInfo(player: player)
         debugPrint("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1371,8 +1405,10 @@ class Player {
         let data = MakePacket.spKills(player: player)
         debugPrint("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1380,8 +1416,10 @@ class Player {
         let data = MakePacket.spFlags(player: player)
         debugPrint("Sending SP_Flags for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1401,8 +1439,10 @@ class Player {
         let data = MakePacket.spPStatus(player: player)
         debugPrint("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }
@@ -1410,8 +1450,10 @@ class Player {
         let data = MakePacket.spPlayer(player: player)
         debugPrint("Sending SP_Player for player \(player.slot) to \(self.slot)")
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: data)
-            context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                context.channel.writeAndFlush(buffer)
+            }
         }
         //connection?.send(data: data)
     }

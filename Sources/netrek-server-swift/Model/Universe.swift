@@ -151,7 +151,7 @@ class Universe {
     }
     @objc func timerFired() {
         self.timerCount += 1
-        debugPrint("\(#file) (#function) count \(self.timerCount)")
+        debugPrint("\(#file) \(#function) count \(self.timerCount)")
         for player in self.players {
             if player.status != .free {
                 player.shortTimerFired()

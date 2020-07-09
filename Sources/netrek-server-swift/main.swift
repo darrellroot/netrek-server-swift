@@ -40,6 +40,11 @@ guard let localAddress = channel.localAddress else {
 
 print("Server started and listening on \(localAddress)")
 
-// This will never unblock as we don't close the ServerChannel.
-try channel.closeFuture.wait()
+/*let nioQueue = DispatchQueue(label: "swift-nio")
+
+nioQueue.async {
+    // This will never unblock as we don't close the ServerChannel.
+    //debugPrint("hi")
+    try! channel.closeFuture.wait()
+}*/
 RunLoop.current.run()
