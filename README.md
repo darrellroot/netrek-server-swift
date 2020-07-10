@@ -1,6 +1,6 @@
 # netrek-server-swift
 
-## July 2020: WARNING: Code in middle of Swift-NIO conversion and is not currently usable.
+## July 2020: WARNING: EARLY ALPHA.
 
 ## This is a new experimental Netrek Server written in Swift!
 This does not use any Apple-specific frameworks.  It is developed on MacOS but is expected to run on Linux.
