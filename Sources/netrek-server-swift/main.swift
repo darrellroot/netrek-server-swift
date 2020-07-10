@@ -15,13 +15,15 @@ let universe = Universe()
 //let server = Server(port: 2592, universe: universe)
 //try! server.start()
 
-let netrekChannelHandler = NetrekChannelHandler()
+let netrekChannelHandler = NetrekChannelHandler(universe: universe)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
 let bootstrap = ServerBootstrap(group: group)
     .serverChannelOption(ChannelOptions.backlog, value: 32)
     .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr),value: 1)
     .childChannelInitializer { channel in
+        channel.pipeline.addHandler(netrekChannelHandler).flatMap { v in
         channel.pipeline.addHandler(ByteToMessageHandler(NetrekServerDecoder()))
+        }
 }
     .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
     .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 16)

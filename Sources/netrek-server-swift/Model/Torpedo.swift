@@ -74,6 +74,15 @@ class Torpedo {
         self.number = number // 8 * player.slot + torp#
     }
     
+    func reset() {
+        self.state = .free
+        self.positionX = 0
+        self.positionY = 0
+        self.vectorX = 0
+        self.vectorY = 0
+        
+    }
+    
     func fire(player: Player, direction: Double) {
         self.direction = direction
         self.positionX = player.positionX

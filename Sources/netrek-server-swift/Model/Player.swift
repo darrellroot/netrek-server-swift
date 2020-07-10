@@ -21,6 +21,8 @@ class Player {
     let universe: Universe
     //var connection: ServerConnection?
     var context: ChannelHandlerContext?
+    var remoteAddress: SocketAddress? = nil
+
     var user: User? = nil
     var team: Team
     var armies = 0
@@ -377,6 +379,7 @@ class Player {
     func reset() {
         debugPrint("player \(slot) resetting")
         self.context = nil
+        self.remoteAddress = nil
         //self.connection = nil
         self.user = nil
         self.team = .independent
@@ -384,6 +387,9 @@ class Player {
         self.status = .free
         let spPStatus = MakePacket.spPStatus(player: self)
 
+        for torpedo in self.torpedoes {
+            torpedo.reset()
+        }
         for player in universe.players.filter ({ $0.status != .free}) {
             if let context = player.context {
                 context.eventLoop.execute {
@@ -498,6 +504,7 @@ class Player {
     func connected(context: ChannelHandlerContext) {
         self.context = context
         self.status = .outfit
+        self.remoteAddress = context.remoteAddress
         
         do {
             debugPrint("sending SP MOTD")

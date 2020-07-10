@@ -15,7 +15,7 @@ class Universe {
     let updatesPerSecond = 10.0
     var timer: Timer?
     var timerCount = 0
-    
+        
     var players: [Player] = []
     var planets: [Planet] = []
     //var queue: [Player] = []
@@ -189,6 +189,9 @@ class Universe {
         }
         debugPrint("Error: \(#file) \(#function) unable to find player for context \(context)")
         return nil
+    }
+    func player(remoteAddress: SocketAddress) -> Player? {
+        return self.players.first(where: {$0.remoteAddress == remoteAddress })
     }
     /*func player(connection: NWConnection) -> Player? {
         for (slot, player) in self.players.enumerated() {
