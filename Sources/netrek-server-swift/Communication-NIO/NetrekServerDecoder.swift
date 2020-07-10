@@ -125,8 +125,10 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 let spMessage = MakePacket.spMessage(message: prefix + messageString, from: UInt8(sender.slot))
                 for player in universe.players.filter({ $0.status != .free}) {
                     if let context = player.context {
-                        let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                        context.channel.writeAndFlush(buffer)
+                        context.eventLoop.execute {
+                            let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                            context.channel.writeAndFlush(buffer)
+                        }
                     }
                     //player.connection?.send(data: spMessage)
                 }
@@ -140,8 +142,10 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 
                 for player in universe.players.filter({ $0.status != .free && $0.team.rawValue == indiv}) {
                     if let context = player.context {
-                        let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                        context.channel.writeAndFlush(buffer)
+                        context.eventLoop.execute {
+                            let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                            context.channel.writeAndFlush(buffer)
+                        }
                         //player.connection?.send(data: spMessage)
                     }
                 }
@@ -154,8 +158,10 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 let prefix = "\(sender.team.letter)\(sender.slot)->\(player.team.letter)\(player.slot): "
                 let spMessage = MakePacket.spMessage(message: prefix + messageString, from: UInt8(sender.slot))
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                    context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                        context.channel.writeAndFlush(buffer)
+                    }
                 }
                 //player.connection?.send(data: spMessage)
             default:
@@ -185,6 +191,48 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             player.receivedCpDirection(netrekDirection: direction)
+        case 4: //CP_LASER 4
+            let direction = data[1]
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_LASER 4 direction \(direction)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.fireLaser(direction: direction)
+        case 5: //CP_PLASMA 5
+            let direction = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_PLASMA direction \(direction)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.sendMessage(message: "Plasma torpedoes not implemented on this server")
+            
+        case 6: //CP_TORP 6
+            let direction = data[1]
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_TORP 6 direction \(direction)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.fireTorpedo(direction: NetrekMath.directionNetrek2Radian(direction))
+
+        case 7: //CP_QUIT 7
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Received CP_QUIT 7")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.sendMessage(message: "CP_QUIT not implemented on this server")
 
         case 8: //CP_LOGIN 8  TODO NOT ENCRYPTED
             let query = Int(data[1])
@@ -249,6 +297,201 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             }
             player.receivedCpOutfit(team: team, ship: ship)
 
+        case 10: // CP_WAR
+            let newmask = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_WAR 10 newmask \(newmask)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.sendMessage(message: "On this server, you are always at war")
+
+        case 11: // CP_PRACTR
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Received CP_PRACTR")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.sendMessage(message: "Practice robot not implemented")
+
+        case 12: // CP_SHIELD
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_SHIELD 12 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            if state == 1 {
+                player.shieldsUp = true
+            } else {
+                player.shieldsUp = false
+            }
+            
+        case 13: //CP_REPAIR
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_REPAIR 13 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            if state == 1 {
+                player.receivedRepair(true)
+                player.sendMessage(message: "Damage control parties to all decks!")
+            } else {
+                player.receivedRepair(false)
+                player.sendMessage(message: "Secure from damage control operations")
+            }
+            
+        case 14: //CP_ORBIT
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_ORBIT 14 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.enterOrbit()
+
+        case 15: //CP_PLANLOCK 15
+            let planetNum = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_PLANLOCK 15 planetNum \(planetNum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedPlanetLock(planetID: planetNum)
+
+        case 16: //CP_PLAYLOCK 16
+            let playerNum = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Recieved CP_PLAYLOCK 16 playerNum \(playerNum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedPlayerLock(playerID: playerNum)
+
+        case 17: //CP_BOMB 17
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_BOMB 17 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedCpBomb()
+
+        case 18: //CP_BEAM 18
+            let state = Int(data[1]) //state 1 means beamup, 2 means beamdown
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_BEAM 18 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            switch state {
+            case 1:
+                player.receivedCbBeam(up: true)
+            case 2:
+                player.receivedCbBeam(up: false)
+            default:
+                debugPrint("\(#file) \(#function) error unexpected CP_BEAM state \(state)")
+            }
+
+        case 20: //CP_DET_TORPS 20
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Received CP_DET_TORPS 20")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedDetTorp()
+
+        case 21: //CP_DET_MYTORP 21
+            let pad1 = Int(data[1])
+            let torpnum = Int(data.subdata(in: (2..<4)).to(type: UInt16.self).byteSwapped)
+            debugPrint("Received CP_DET_MYTORP 21 torpnum \(torpnum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedDetMyTorp()
+
+        case 22: //CP_COPILOT 22
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_COPILOT 22 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_COPILOT not implemented on this server for connection \(context.remoteAddress?.description ?? "unknown")")
+            player.sendMessage(message: "CP_COPILOT not implemented on this server")
+
+        case 23: // CP_REFIT 23
+            let ship = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_REFIT 23 ship \(ship)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_Refit not implemented on this server")
+            player.sendMessage(message: "CP_REFIT not implemented on this server")
+
+        case 24: // CP_TRACTOR 24
+            let state = Int(data[1])
+            let playerNum = Int(data[2])
+            let pad1 = Int(data[3])
+            debugPrint("Received CP_TRACTOR 24 state \(state) playerNum \(playerNum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedCpTractor(state: state, target: playerNum, mode: .tractor)
+        
+        case 25: // CP_REPRESS 25
+            let state = Int(data[1])
+            let playerNum = Int(data[2])
+            let pad1 = Int(data[3])
+            debugPrint("Received CP_REPRESS 25 state \(state) playerNum \(playerNum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            player.receivedCpTractor(state: state, target: playerNum, mode: .pressor)
+            
+        case 26: // CP_COUP 26
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Recieved CP_COUP 26")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_COUP not implemented on this server")
+            player.sendMessage(message: "CP_COUP not implemented on this server")
+
         case 27: // CP_SOCKET 27
             let type = Int(data[1])
             let version = Int(data[2])
@@ -256,6 +499,173 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             let socket = Int(data.subdata(in: (4..<8)).to(type: UInt32.self).byteSwapped)
             debugPrint("Received CP_SOCKET 27 type \(type) version \(version) udpVersion \(udpVersion) socket \(socket)")
             universe.addPlayer(context: context)
+
+        case 28: //CP_OPTIONS 28
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            let flags = Int(data.subdata(in: (4..<8)).to(type: UInt32.self).byteSwapped)
+            let keymap = data.subdata(in: 8 ..< 8 + keymap_len)
+            debugPrint("Received CP_OPTIONS 28 flags \(flags) plus keymap")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_OPTIONS not implemented on this server")
+            player.sendMessage(message: "CP_OPTIONS not implemented on this server")
+
+        case 29: //CP_BYE 29
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Received CP_BYE 29")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_BYE not implemented on this server")
+            player.sendMessage(message: "CP_BYE not implemented on this server")
+            
+        case 30: //CP_DOCKPERM 30
+            let state = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Recieved CP_DOCKPERM 30 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_DOCKPERM not implemented on this server")
+            player.sendMessage(message: "CP_DOCKPERM not implemented on this server")
+
+       case 31: //CP_UPDATES 31
+           let pad1 = Int(data[1])
+           let pad2 = Int(data[2])
+           let pad3 = Int(data[3])
+           let microseconds = Int(data.subdata(in: 4 ..< 8).to(type: UInt32.self).byteSwapped)
+           //TODO we do nothing with CP_UPDATES
+           /*debugPrint("Received CP_UPDATES 31 microseconds \(microseconds)")
+           guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_UPDATES not implemented on this server")
+            player.sendMessage(message: "CP_UPDATES not implemented on this server")*/
+
+        case 32: //CP_RESETSTATS 32
+            let verify = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            debugPrint("Recieved CP_RESETSTATS verify \(verify)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_RESETSTATS not implemented on this server")
+            player.sendMessage(message: "CP_RESETSTATS not implemented on this server")
+
+        case 33: //CP_RESERVED 33
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            let reservedData = data.subdata(in: 4 ..< 4 + reserved_size)
+            let reservedResponse = data.subdata(in: 4 + reserved_size ..< 4 + 2 * reserved_size)
+            debugPrint("Received CP_RESERVED 33")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_RESERVED not implemented on this server")
+            player.sendMessage(message: "CP_RESERVED not implemented on this server")
+
+        case 34: //CP_SCAN 34
+            let playerNum = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_SCAN 34 playerNum \(playerNum)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_SCAN not implemented on this server")
+            player.sendMessage(message: "CP_SCAN not implemented on this server")
+
+        case 35: //CP_UDP_REQ 35
+            let request = Int(data[1])
+            let connmode = Int(data[2])
+            let pad2 = Int(data[3])
+            let port = Int(data.subdata(in: (4..<8)).to(type: UInt32.self).byteSwapped)
+            debugPrint("Received CP_UDP_REQ 35 request \(request) connmode \(connmode) port \(port)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_UDP_REQ not implemented on this server")
+            player.sendMessage(message: "CP_UDP_REQ not implemented on this server")
+
+        case 36: //CP_SEQUENCE 36 UDP only
+            let pad1 = Int(data[1])
+            let sequence = Int(data.subdata(in: (2..<4)).to(type: UInt16.self).byteSwapped)
+            debugPrint("Received CP_SEQUENCE 36 sequence \(sequence)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_SEQUENCE not implemented on this server")
+            player.sendMessage(message: "CP_SEQUENCE not implemented on this server")
+
+        case 37: //CP_RSA_KEY 37
+            let pad1 = Int(data[1])
+            let pad2 = Int(data[2])
+            let pad3 = Int(data[3])
+            let global = data.subdata(in: (4 ..< 4 + key_size))
+            let publicKey = data.subdata(in: (4 + key_size ..< 4 + key_size * 2))
+            let response = data.subdata(in: 4 + key_size * 2 ..< 4 + key_size * 3)
+            debugPrint("Received CP_RSA_KEY 37")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_RSA_KEY not implemented on this server")
+            player.sendMessage(message: "CP_RSA_KEY not implemented on this server")
+
+        case 38: //CP_PLANET 38
+            let planetNum = Int(data[1])
+            let owner = Int(data[2])
+            let info = Int(data[3])
+            let flags = Int(data.subdata(in: 4 ..< 6).to(type: UInt16.self).byteSwapped)
+            let armies = Int(data.subdata(in: 6 ..< 10).to(type: UInt32.self).byteSwapped)  //TODO CHECK DECODE
+            debugPrint("Received CP_PLANET 38 planetNum \(planetNum) owner \(owner) info \(info) flags \(flags) armies \(armies)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_PLANET not implemented on this server")
+            player.sendMessage(message: "CP_PLANET not implemented on this server")
+
+        case 43: //CP_S_REQ 43  Short request
+            let request = Int(data[1])
+            let version = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Recived CP_SHORT_REQUEST 39 request \(request) version \(version)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_SHORT_REQUEST not implemented on this server")
+            player.sendMessage(message: "CP_SHORT_REQUEST not implemented on this server")
+
+        case 44: //CP_SHORT_THRESHOLD 44
+            let pad1 = Int(data[1])
+            let threshold = Int(data.subdata(in: 2..<4).to(type: UInt16.self).byteSwapped)
+            debugPrint("Received CP_SHORT_THRESHOLD threshold \(threshold)")
+
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            debugPrint("CP_SHORT_THRESHOLD not implemented on this server")
+            player.sendMessage(message: "CP_SHORT_THRESHOLD not implemented on this server")
 
         case 60: //CP_FEATURE
             let featureType = Int(data[1])

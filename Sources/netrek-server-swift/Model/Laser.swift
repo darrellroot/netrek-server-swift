@@ -103,8 +103,10 @@ class Laser {
         let spLaser = MakePacket.spLaser(laser: self)
         for player in universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
             if let context = player.context {
-                let buffer = context.channel.allocator.buffer(bytes: spLaser)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: spLaser)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
             //player.connection?.send(data: spLaser)
         }
@@ -113,8 +115,10 @@ class Laser {
             let spLaser = MakePacket.spLaser(laser: self)
             for player in self.universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spLaser)
-                    _ = context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spLaser)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
                 }
                 //player.connection?.send(data: spLaser)
             }

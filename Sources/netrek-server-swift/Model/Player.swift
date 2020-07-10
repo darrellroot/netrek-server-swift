@@ -315,8 +315,10 @@ class Player {
             let spPStatus = MakePacket.spPStatus(player: self)
             for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                    _ = context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
                 }
                 //player.connection?.send(data: spPStatus)
             }
@@ -324,8 +326,10 @@ class Player {
                 self.status = .dead
                 for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
                     if let context = player.context {
-                        let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                        _ = context.channel.writeAndFlush(buffer)
+                        context.eventLoop.execute {
+                            let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                            _ = context.channel.writeAndFlush(buffer)
+                        }
                     }
 
                     //player.connection?.send(data: spPStatus)
@@ -382,8 +386,10 @@ class Player {
 
         for player in universe.players.filter ({ $0.status != .free}) {
             if let context = player.context {
-                let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                _ = context.channel.writeAndFlush(buffer)
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
             }
             //player.connection?.send(data: spPStatus)
 
@@ -424,8 +430,10 @@ class Player {
         self.orbitRadian = atan2(-1 * self.positionY - orbit.positionY, self.positionX - orbit.positionX)
         let spMessage = MakePacket.spMessage(message: "Entering standard orbit of \(orbit.name)", from: 255)
         if let context = context {
-            let buffer = context.channel.allocator.buffer(bytes: spMessage)
-            _ = context.channel.writeAndFlush(buffer)
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                _ = context.channel.writeAndFlush(buffer)
+            }
         }
 
         //self.connection?.send(data: spMessage)
@@ -1322,8 +1330,10 @@ class Player {
         if let spStats = MakePacket.spStats(player: self) {
             for player in self.universe.players {
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spStats)
-                    context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spStats)
+                        context.channel.writeAndFlush(buffer)
+                    }
                 }
 
                 //player.connection?.send(data: spStats)

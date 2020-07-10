@@ -46,8 +46,10 @@ class Torpedo {
             let spTorpInfo = MakePacket.spTorpInfo(torpedo: self)
             for player in self.universe.players.filter( { $0.status != .free }) {
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spTorpInfo)
-                    _ = context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spTorpInfo)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
                 }
                 //player.connection?.send(data: spTorpInfo)
                 debugPrint("Sending SPTorpInfo")
@@ -129,9 +131,11 @@ class Torpedo {
         let spTorp = MakePacket.spTorp(torpedo: self)
         for player in universe.players.filter( {$0.status != .free} ) {
             if let context = player.context {
-                let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                _ = context.channel.writeAndFlush(buffer)
-                debugPrint("Sending SpTorp to player \(player.slot)")
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: spTorp)
+                    _ = context.channel.writeAndFlush(buffer)
+                    debugPrint("Sending SpTorp to player \(player.slot)")
+                }
             } else {
                 debugPrint("failed to send SpTorp to player \(player.slot)")
             }
@@ -180,8 +184,10 @@ class Torpedo {
             let spTorp = MakePacket.spTorp(torpedo: self)
             for player in universe.players.filter( {$0.status != .free} ) {
                 if let context = player.context {
-                    let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                    _ = context.channel.writeAndFlush(buffer)
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: spTorp)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
                     debugPrint("Sending SpTorp to player \(player.slot)")
                 } else {
                     debugPrint("failed to send SpTorp to player \(player.slot)")
@@ -196,9 +202,11 @@ class Torpedo {
                 let spTorp = MakePacket.spTorp(torpedo: self)
                 for player in universe.players.filter( {$0.status != .free} ) {
                     if let context = player.context {
-                        let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                        _ = context.channel.writeAndFlush(buffer)
-                        debugPrint("Sending SpTorp to player \(player.slot)")
+                        context.eventLoop.execute {
+                            let buffer = context.channel.allocator.buffer(bytes: spTorp)
+                            _ = context.channel.writeAndFlush(buffer)
+                            debugPrint("Sending SpTorp to player \(player.slot)")
+                        }
                     } else {
                         debugPrint("failed to send SpTorp to player \(player.slot)")
                     }
