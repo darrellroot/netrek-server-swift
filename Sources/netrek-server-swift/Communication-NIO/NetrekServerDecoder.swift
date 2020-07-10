@@ -642,6 +642,14 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             }
             debugPrint("CP_PLANET not implemented on this server")
             player.sendMessage(message: "CP_PLANET not implemented on this server")
+            
+        case 42: //CP_PING
+            let number = Int(data[1])
+            let pingme = Int(data[2])
+            let pad1 = Int(data[3])
+            let sent = Int(data.subdata(in: 4 ..< 8).to(type: UInt32.self).byteSwapped)
+            let received = Int(data.subdata(in: 8 ..< 12).to(type: UInt32.self).byteSwapped)
+            debugPrint("Received CP_PING pingme \(pingme) sent \(sent) received \(received)")
 
         case 43: //CP_S_REQ 43  Short request
             let request = Int(data[1])
