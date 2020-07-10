@@ -88,7 +88,10 @@ class Universe {
         
         //timer = Timer.scheduledTimer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
 
-        timer = Timer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
+        //timer = Timer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / updatesPerSecond, repeats: true) {_ in
+            self.timerFired()
+        }
         timer?.tolerance = 0.3 / updatesPerSecond
         debugPrint("Timer initialized")
         if let timer = timer {

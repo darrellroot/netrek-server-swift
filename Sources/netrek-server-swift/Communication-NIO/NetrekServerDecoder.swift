@@ -127,7 +127,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                            context.channel.writeAndFlush(buffer)
+                            _ = context.channel.writeAndFlush(buffer)
                         }
                     }
                     //player.connection?.send(data: spMessage)
@@ -144,7 +144,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                            context.channel.writeAndFlush(buffer)
+                            _ = context.channel.writeAndFlush(buffer)
                         }
                         //player.connection?.send(data: spMessage)
                     }
@@ -160,7 +160,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                        context.channel.writeAndFlush(buffer)
+                        _ = context.channel.writeAndFlush(buffer)
                     }
                 }
                 //player.connection?.send(data: spMessage)
@@ -694,14 +694,6 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             }
             //messageString = NetrekMath.sanitizeString(messageString)
             debugPrint("Received CP_FEATURE 60 type \(featureType) arg1 \(arg1) arg2 \(arg2) name \(nameString)")
-            
-        case 31: //CP_UPDATES 31
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
-            let microseconds = Int(data.subdata(in: 4 ..< 8).to(type: UInt32.self).byteSwapped)
-            //TODO we do nothing with CP_UPDATES
-            debugPrint("Received CP_UPDATES 31 microseconds \(microseconds)")
             
         default:
             debugPrint("Default case: Received packet type \(packetType) length \(packetLength)\n")
