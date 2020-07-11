@@ -415,6 +415,21 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 debugPrint("\(#file) \(#function) error unexpected CP_BEAM state \(state)")
             }
 
+        case 19: //CP_CLOAK 19
+            let state = Int(data[1])
+            let pad1 = Int(data[2])
+            let pad2 = Int(data[3])
+            debugPrint("Received CP_CLOAK 19 state \(state)")
+            guard let player = universe.player(context: context) else {
+                debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
+                return .continue
+            }
+            if state == 1 {
+                player.activateCloak(true)
+            } else {
+                player.activateCloak(false)
+            }
+
         case 20: //CP_DET_TORPS 20
             let pad1 = Int(data[1])
             let pad2 = Int(data[2])
