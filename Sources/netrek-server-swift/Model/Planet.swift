@@ -26,6 +26,17 @@ class Planet {
     var team: Team
     var homeworld: Bool
     var armies = Int.random(in: 4 ..< 14)
+    var seen: [Team:Bool] = [:]
+    
+    var info: UInt8 {
+        var returnVal: UInt8 = 0
+        for team in Team.allCases {
+            if seen[team]! == true {
+                returnVal += UInt8(team.rawValue)
+            }
+        }
+        return returnVal
+    }
     
     init(planetID: Int, positionX: Double, positionY: Double, name: String, team: Team, homeworld: Bool = false) {
         self.planetID = planetID
@@ -34,6 +45,11 @@ class Planet {
         self.name = name
         self.team = team
         self.homeworld = homeworld
+        
+        for team in Team.allCases {
+            seen[team] = false
+        }
+        seen[self.team] = true
         
         if homeworld {
             self.fuel = true

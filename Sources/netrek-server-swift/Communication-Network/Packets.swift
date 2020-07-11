@@ -318,7 +318,7 @@ struct SP_PLANET {
     var type: UInt8 = 15
     var planetNum: UInt8
     var owner: UInt8
-    var info: UInt8 = 0 //TODO: What is this?
+    var info: UInt8 = 0
     var flags: UInt16
     var pad2: UInt16 = 0
     var armies: UInt32
@@ -339,6 +339,7 @@ struct SP_PLANET {
             flags += PlanetFlags.repair.rawValue
         }
         self.flags = flags.byteSwapped
+        self.info = planet.info
         
     }
     var size: Int {

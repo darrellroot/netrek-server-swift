@@ -108,7 +108,9 @@ class Player {
     }
     var orbit: Planet? = nil {
         didSet {
-            if self.orbit == nil {
+            if let orbit = self.orbit {
+                orbit.seen[self.team] = true
+            } else {
                 self.bomb = false
             }
         }
