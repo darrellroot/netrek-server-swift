@@ -232,7 +232,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
-            player.sendMessage(message: "CP_QUIT not implemented on this server")
+            player.sendMessage(message: "Goodbye!  Report issues to feedback@networkmom.net")
+            player.reset()
+            _ = context.close()
 
         case 8: //CP_LOGIN 8  TODO NOT ENCRYPTED
             let query = Int(data[1])
@@ -524,7 +526,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             debugPrint("CP_BYE not implemented on this server")
-            player.sendMessage(message: "CP_BYE not implemented on this server")
+            player.sendMessage(message: "Goodbye!  Report issues to feedback@networkmom.net")
+            player.reset()
+            _ = context.close()
             
         case 30: //CP_DOCKPERM 30
             let state = Int(data[1])
