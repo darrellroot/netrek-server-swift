@@ -657,8 +657,8 @@ class Player {
             return
         }
         self.sendMessage(message: "Initiating orbital bombardment of planet \(planet.name)")
+        self.shieldsUp = false
         self.bomb = true
-        
         
         for player in universe.players.filter({$0.status == .alive && $0.team == planet.team}) {
             player.sendMessage(message: "Distress call from \(planet.name): We are being bombed!",from: 255)
@@ -805,7 +805,7 @@ class Player {
             self.sendMessage(message: "Engines still overheated!")
             return
         }
-        guard speed >= 0 && speed <= 12 else {
+        guard speed >= 0 && speed <= 100 else {
             debugPrint("\(#file) \(#function) received invalid speed \(speed)")
             return
         }
