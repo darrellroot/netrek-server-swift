@@ -24,6 +24,8 @@ class Laser {
     var status = LaserStatus.free
     var positionX: Double = 0.0
     var positionY: Double = 0.0
+    var targetPositionX: Double = 0.0
+    var targetPositionY: Double = 0.0
     var target: Int? = nil
     var universe: Universe
     weak var player: Player? = nil // set by parent after initialization
@@ -96,6 +98,8 @@ class Laser {
             //shooter.connection?.send(data: spMessage)
         } else {
             self.status = .miss
+            self.targetPositionX = self.positionX + cos(direction) * myRange
+            self.targetPositionY = self.positionY - sin(direction) * myRange
             shooter.sendMessage(message: "Laser missed")
             //let spMessage = MakePacket.spMessage(message: "Laser missed", from: 255)
             //shooter.connection?.send(data: spMessage)

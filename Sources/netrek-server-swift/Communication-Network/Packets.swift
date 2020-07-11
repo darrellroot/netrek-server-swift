@@ -154,8 +154,8 @@ struct SP_LASER {
         self.laserID = UInt8(laser.laserID)
         self.status = laser.status.rawValue
         self.direction = NetrekMath.directionRadian2Netrek(laser.direction)
-        self.positionX = UInt32(laser.positionX).byteSwapped
-        self.positionY = UInt32(laser.positionY).byteSwapped
+        self.positionX = UInt32(laser.targetPositionX).byteSwapped
+        self.positionY = UInt32(laser.targetPositionY).byteSwapped
         if let target = laser.target {
             self.target = UInt32(target).byteSwapped
         } else {
