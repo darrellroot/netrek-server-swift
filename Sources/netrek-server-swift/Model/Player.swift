@@ -510,7 +510,7 @@ class Player {
         
         do {
             debugPrint("sending SP MOTD")
-            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.1-alpha feedback@networkmom.net")
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.2-alpha feedback@networkmom.net")
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
                 _ =  context.channel.writeAndFlush(buffer)
