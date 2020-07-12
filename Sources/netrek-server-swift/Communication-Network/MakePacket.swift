@@ -98,7 +98,6 @@ class MakePacket {
         let data = Data(bytes: &packet, count: packet.size)
         return data
     }
-    
 
     // SP_MOTD 11
     static func spMotd(motd: String) -> Data {

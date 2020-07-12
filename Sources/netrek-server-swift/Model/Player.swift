@@ -203,6 +203,68 @@ class Player {
         }
     }
     
+    var flags: UInt32 {
+        var flags: UInt32 = 0
+        if self.shieldsUp {
+            flags += PlayerStatus.shield.rawValue
+        }
+        if self.repair {
+            flags += PlayerStatus.repair.rawValue
+        }
+        if self.bomb {
+            flags += PlayerStatus.bomb.rawValue
+        }
+        if self.orbit != nil {
+            flags += PlayerStatus.orbit.rawValue
+        }
+        if self.cloak {
+            flags += PlayerStatus.cloak.rawValue
+        }
+        if self.weaponsOverheated {
+            flags += PlayerStatus.weaponTemp.rawValue
+        }
+        if self.enginesOverheated {
+            flags += PlayerStatus.engineTemp.rawValue
+        }
+        switch self.transporter {
+        case .beamup:
+            flags += PlayerStatus.beamup.rawValue
+        case .beamdown:
+            flags += PlayerStatus.beamdown.rawValue
+        case .off:
+            break
+        }
+        if self.selfDestruct {
+            flags += PlayerStatus.selfDestruct.rawValue
+        }
+        switch self.alertCondition {
+        case .green:
+            flags += PlayerStatus.greenAlert.rawValue
+        case .yellow:
+            flags += PlayerStatus.yellowAlert.rawValue
+        case .red:
+            flags += PlayerStatus.redAlert.rawValue
+        }
+        if self.playerLock != nil {
+            flags += PlayerStatus.playerLock.rawValue
+        }
+        if self.planetLock != nil {
+            flags += PlayerStatus.planetLock.rawValue
+        }
+        switch self.tractorMode {
+        case .tractor:
+            flags += PlayerStatus.tractor.rawValue
+        case .pressor:
+            flags += PlayerStatus.pressor.rawValue
+        case .off:
+            break
+        }
+        
+        
+        return flags
+
+    }
+    
     init(slot: Int, universe: Universe) {
         self.slot = slot
         self.status = .free

@@ -251,8 +251,8 @@ struct SP_YOU {
         self.fuel = UInt32(player.fuel).byteSwapped
         
         //TODO flags
-        var flags: UInt32 = 0
-        if player.shieldsUp { flags += 0x0001 }
+        self.flags = player.flags.byteSwapped
+        /*if player.shieldsUp { flags += 0x0001 }
         if player.repair { flags += 0x0002 }
         if player.bomb { flags += 0x0004 }
         if player.orbit != nil { flags += 0x008 }
@@ -286,6 +286,7 @@ struct SP_YOU {
         if player.tractor != nil && player.tractorMode == .pressor { flags += 0x800000 }
         debugPrint("SP_YOU flags \(flags)")
         self.flags = flags.byteSwapped
+         */
         // copilot 0x10000 not implemented
         // robot 0x40000 not implemented
         // dock 0x80000 not implemented
@@ -407,15 +408,15 @@ struct SP_FLAGS {
     
     init(player: Player) {
         self.playerID = UInt8(player.slot)
-        var flags: UInt32 = 0
+        /*var flags: UInt32 = 0
         if player.shieldsUp {
             flags += PlayerStatus.shield.rawValue
         }
         if player.cloak {
             flags += PlayerStatus.cloak.rawValue
-        }
+        }*/
         self.tractor = UInt8(player.tractor?.slot ?? 0)
-        self.flags = flags.byteSwapped
+        self.flags = player.flags.byteSwapped
     }
     var size: Int {
         return 8
