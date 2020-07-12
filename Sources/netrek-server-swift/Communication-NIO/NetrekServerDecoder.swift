@@ -472,8 +472,18 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
-            debugPrint("CP_Refit not implemented on this server")
-            player.sendMessage(message: "CP_REFIT not implemented on this server")
+            debugPrint("CP_REFIT ship \(ship)")
+            var newShipOptional: ShipType? = nil
+            for shipType in ShipType.allCases {
+                if shipType.rawValue == ship {
+                    newShipOptional = shipType
+                }
+            }
+            guard let newShip = newShipOptional else {
+                player.sendMessage(message: "CP_REFIT error invalid ship type \(ship)")
+                return .continue
+            }
+            player.receivedCpRefit(ship: newShip)
 
         case 24: // CP_TRACTOR 24
             let state = Int(data[1])

@@ -36,10 +36,12 @@ class Player {
             return min(Int(2.0 * kills), self.ship.maxArmies)
         }
     }
+    var plasmaEquipped = false
     
     var tractor: Player? = nil // player number of tractor target
     var tractorMode = TractorMode.off
-    
+    var refitting = false //important to reset back to false
+        
     var damage = 0.0
     var shield = 100.0
     var fuel = 10000 {
@@ -417,8 +419,14 @@ class Player {
         self.armies = 0
         self.tractor = nil
         self.fuel = ship.maxFuel
+        self.refitting = false
         self.etmp = 0
         self.wtmp = 0
+        if self.ship == .starbase {
+            self.plasmaEquipped = true
+        } else {
+            self.plasmaEquipped = false
+        }
         //self.whydead
         self.whodead = 0
         self.shieldsUp = false
@@ -447,6 +455,7 @@ class Player {
         //self.connection = nil
         self.user = nil
         self.team = .independent
+        self.refitting = false
         newShip(ship: .cruiser)
         self.status = .free
         let spPStatus = MakePacket.spPStatus(player: self)
@@ -788,7 +797,55 @@ class Player {
             }
         }
     }
+    func receivedCpRefit(ship: ShipType) {
+        guard let homeworld = universe.homeworld[self.team] else {
+            self.sendMessage(message: "Unexpected server error: I cannot identify your homeworld")
+            return
+        }
+        guard let orbit = self.orbit, orbit === homeworld else {
+            self.sendMessage(message: "You must be orbiting your homeworld to change ships")
+            return
+        }
+        guard self.armies == 0 else {
+            self.sendMessage(message: "You must beam your armies down before being transported to your new ship")
+            return
+        }
+        guard self.shield >= self.ship.maxShield * 0.75, self.damage <= self.ship.maxDamage * 0.25, self.fuel >= self.ship.maxFuel * 3 / 4 else {
+            self.sendMessage(message: "Central command refuses to accept a ship in this condition!")
+            return
+        }
+        if ship == .starbase {
+            guard nil == universe.players.first(where: { $0.team == self.team && $0.status == .alive && $0.ship == .starbase}) else {
+                self.sendMessage(message: "Your team already has a starbase!")
+                return
+            }
+            guard self.kills >= 2.0 else {
+                self.sendMessage(message: "You must have 2 kills to be reassigned to a starbase")
+                return
+            }
+        }
+        self.sendMessage(message: "You are being transported to your new vessel")
+        self.ship = ship
+        self.fuel = self.ship.maxFuel
+        self.damage = 0
+        self.shield = ship.maxShield
+        self.etmp = 0
+        self.wtmp = 0
+        
+        if self.kills >= 2.0 || self.ship == .starbase {
+            self.plasmaEquipped = true
+        } else {
+            self.plasmaEquipped = false
+        }
+        self.refitting = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.refitting = false
+            self.sendMessage(message: "Oh no!  Not you!")
+        }
+        
+    }
     func receivedCpOutfit(team: Team, ship: ShipType) {
+        
         guard team == universe.team1 || team == universe.team2 else {
             
             //let data1 = MakePacket.spMessage(message: "I cannot allow that.  Pick another team or ship", from: 255)
@@ -820,6 +877,17 @@ class Player {
             }
 
             //connection?.send(data: data2)
+            return
+        }
+        guard ship != .starbase else {
+            self.sendMessage(message: "You need at least 2 kills then refit at your homeworld to launch a starbase")
+            let data2 = MakePacket.spPickOk(false)
+            if let context = context {
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data2)
+                    _ = context.channel.writeAndFlush(buffer)
+                }
+            }
             return
         }
         guard let homeworld = universe.homeworld[team] else {
