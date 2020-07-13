@@ -319,6 +319,7 @@ enum ShipType: Int, CaseIterable {
             return 3.0 + variation
         }
     }
+    
     var torpDamage: Double {
         switch self {
             
@@ -353,6 +354,60 @@ enum ShipType: Int, CaseIterable {
             return 10 * self.torpDamage
         }
     }
+    var plasmaDamage: Double {
+        switch self {
+        case .scout:
+            return 1
+        case .destroyer:
+            return 75
+        case .cruiser:
+            return 100
+        case .battleship:
+            return 130
+        case .assault:
+            return 1
+        case .starbase:
+            return 150
+        }
+    }
+    var plasmaCost: Double {
+        switch self {
+        case .scout:
+            return 20 * self.plasmaDamage
+        case .destroyer:
+            return 30 * self.plasmaDamage
+        case .cruiser:
+            return 30 * self.plasmaDamage
+        case .battleship:
+            return 30 * self.plasmaDamage
+        case .assault:
+            return 20 * self.plasmaDamage
+        case .starbase:
+            return 25 * self.plasmaDamage
+        }
+    }
+    var plasmaSpeed: Double {
+        return 15
+    }
+    var plasmaFuse: Double {
+        let variation = Double.random(in: 0.0 ..< 2.0)
+        switch self {
+            
+        case .scout:
+            return 1.6 + variation
+        case .destroyer:
+            return 3.0 + variation
+        case .cruiser:
+            return 3.3 + variation
+        case .battleship:
+            return 3.5 + variation
+        case .assault:
+            return 3.0 + variation
+        case .starbase:
+            return 2.5 + variation
+        }
+    }
+
     var cloakCost: Int {
         switch self {
             

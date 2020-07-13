@@ -98,6 +98,19 @@ class MakePacket {
         let data = Data(bytes: &packet, count: packet.size)
         return data
     }
+    //SP_PLASMA_INFO 8
+    static func spPlasmaInfo(plasma: Plasma) -> Data {
+        var packet = SP_PLASMA_INFO(team: plasma.team, status: plasma.state, number: plasma.number)
+        let data = Data(bytes: &packet, count: packet.size)
+        return data
+    }
+
+    //SP_PLASMA 9
+    static func spPlasma(plasma: Plasma) -> Data {
+        var packet = SP_PLASMA(direction: UInt8(plasma.directionNetrek), plasmaNum: plasma.number, positionX: Int(plasma.positionX), positionY: Int(plasma.positionY))
+        let data = Data(bytes: &packet, count: packet.size)
+        return data
+    }
 
     // SP_MOTD 11
     static func spMotd(motd: String) -> Data {

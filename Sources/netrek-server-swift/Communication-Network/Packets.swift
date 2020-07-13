@@ -167,6 +167,79 @@ struct SP_LASER {
     }
 }
 
+//most of this is SP_TORP_INFO copied
+// SP_PLASMA_INFO 8 {
+struct SP_PLASMA_INFO {
+    var type: UInt8 = 8
+    var war: UInt8 //mask of teams plasma is hostile to
+    var status: UInt8 // new status of plasma, TFREE, TDET, etc
+    var pad1: UInt8 = 0
+    var plasmaNumber: UInt16
+    var pad2: UInt16 = 0
+    
+    var size: Int {
+        return 8
+    }
+    
+    init(team: Team, status: TorpedoState, number: Int) {
+        switch team {
+            
+        case .independent:
+            self.war = UInt8(Team.federation.rawValue + Team.roman.rawValue + Team.kazari.rawValue + Team.orion.rawValue)
+        case .federation:
+            self.war = UInt8(Team.roman.rawValue + Team.kazari.rawValue + Team.orion.rawValue)
+
+        case .roman:
+            self.war = UInt8(Team.federation.rawValue + Team.kazari.rawValue + Team.orion.rawValue)
+
+        case .kazari:
+            self.war = UInt8(Team.federation.rawValue + Team.roman.rawValue + Team.orion.rawValue)
+
+        case .orion:
+            self.war = UInt8(Team.federation.rawValue + Team.roman.rawValue + Team.kazari.rawValue )
+
+        case .ogg:
+            self.war = UInt8(Team.federation.rawValue + Team.roman.rawValue + Team.kazari.rawValue + Team.orion.rawValue)
+        }
+        switch status {
+            
+        case .free:
+            self.status = 0
+        case .alive:
+            self.status = 1
+        case .explode:
+            self.status = 2
+        }
+        self.plasmaNumber = UInt16(number).byteSwapped
+    }
+}
+// SP_PLASMA 6
+struct SP_PLASMA {
+    var type: UInt8 = 9
+    var direction: UInt8
+    var plasmaNum: UInt16
+    var positionX: UInt32
+    var positionY: UInt32
+    
+    init(direction: UInt8, plasmaNum: Int, positionX: Int, positionY: Int) {
+        self.direction = direction
+        self.plasmaNum = UInt16(plasmaNum).byteSwapped
+        if positionX >= 0 {
+            self.positionX = UInt32(positionX).byteSwapped
+        } else {
+            self.positionX = 0
+        }
+        if positionY >= 0 {
+            self.positionY = UInt32(positionY).byteSwapped
+        } else {
+            self.positionY = 0
+        }
+    }
+    var size: Int {
+        return 12
+    }
+}
+
 // SP_MOTD 11
 struct SP_MOTD {
     var type: UInt8 = 11

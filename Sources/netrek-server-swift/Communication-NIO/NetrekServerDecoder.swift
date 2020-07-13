@@ -210,7 +210,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 debugPrint("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
-            player.sendMessage(message: "Plasma torpedoes not implemented on this server")
+            player.firePlasma(direction: NetrekMath.directionNetrek2Radian(direction))
+            //player.sendMessage(message: "Plasma torpedoes not implemented on this server")
             
         case 6: //CP_TORP 6
             let direction = data[1]

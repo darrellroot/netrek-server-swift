@@ -80,6 +80,7 @@ class Player {
     var whodead = 0
     
     var torpedoes: [Torpedo] = []
+    var plasma: Plasma! = nil
     var lastTorpedoFired = Date()
     var lastLaserFired = Date()
     
@@ -278,6 +279,7 @@ class Player {
             self.torpedoes.append(Torpedo(universe: self.universe, player: self, number: self.slot * 8 + count))
         }
         self.laser.player = self
+        self.plasma = Plasma(universe: self.universe, player: self, number: self.slot)
     }
     
     public func explode(attacker: Player? = nil, planet: Planet? = nil) {
@@ -571,6 +573,33 @@ class Player {
         self.wtmp += Int(self.ship.torpCost) / 10
         torpedo.fire(player: self, direction: direction)
     }
+    func firePlasma(direction: Double) {
+        guard self.plasmaEquipped else {
+            self.sendMessage(message: "This ship is not equipped with Plasma")
+            return
+        }
+        guard self.weaponsOverheated == false else {
+            self.sendMessage(message: "Weapons overheated!")
+            return
+        }
+        guard self.cloak == false else {
+            self.sendMessage(message: "Cannot fire while cloaked")
+            return
+        }
+        guard plasma.state == .free else {
+            self.sendMessage(message: "You may only fire one plasma at a time")
+            return
+        }
+        guard self.fuel >= Int(self.ship.plasmaCost) else {
+            self.sendMessage(message: "You do not have enough fuel to fire a plasma")
+            return
+        }
+        self.repair = false
+        self.fuel -= Int(self.ship.plasmaCost)
+        self.wtmp += Int(self.ship.plasmaCost) / 10
+        plasma.fire(player: self, direction: self.direction)
+    }
+
     deinit {
         debugPrint("Player \(slot) deinit")
     }
@@ -832,17 +861,23 @@ class Player {
         self.etmp = 0
         self.wtmp = 0
         
-        if self.kills >= 2.0 || self.ship == .starbase {
-            self.plasmaEquipped = true
-        } else {
+        switch self.ship {
+        case .scout, .assault:
             self.plasmaEquipped = false
+        case .starbase:
+            self.plasmaEquipped = true
+        case .destroyer,.cruiser,.battleship:
+            if self.kills >= 0.0 {
+                self.plasmaEquipped = true
+            } else {
+                self.plasmaEquipped = false
+            }
         }
         self.refitting = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             self.refitting = false
             self.sendMessage(message: "Oh no!  Not you!")
         }
-        
     }
     func receivedCpOutfit(team: Team, ship: ShipType) {
         
@@ -1462,6 +1497,7 @@ class Player {
         for torpedo in self.torpedoes {
             torpedo.shortTimerFired()
         }
+        plasma.shortTimerFired()
     }
     
     func sendSpStats() {
