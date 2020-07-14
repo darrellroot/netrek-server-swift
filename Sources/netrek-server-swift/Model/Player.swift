@@ -872,7 +872,7 @@ class Player: Thing {
         case .starbase:
             self.plasmaEquipped = true
         case .destroyer,.cruiser,.battleship:
-            if self.kills >= 0.0 {
+            if self.kills >= 2.0 {
                 self.plasmaEquipped = true
             } else {
                 self.plasmaEquipped = false

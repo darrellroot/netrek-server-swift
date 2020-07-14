@@ -42,6 +42,7 @@ guard let localAddress = channel.localAddress else {
 
 print("Server started and listening on \(localAddress)")
 
+let metaserver = Metaserver(universe: universe)
 /*let nioQueue = DispatchQueue(label: "swift-nio")
 
 nioQueue.async {
