@@ -57,8 +57,8 @@ final class MetaserverChannelHandler: ChannelInboundHandler {
         var returnValue: String = header
         for player in universe.players.filter( {$0.status != .free}) {
             let user = player.user ?? fakeUser
-            let name = user.name.padding(toLength: 17, withPad: " ", startingAt: 0)
-            let login = user.userinfo.padding(toLength: 9, withPad: " ", startingAt: 0)
+            let name = user.name.padding(toLength: 16, withPad: " ", startingAt: 0)
+            let login = user.userinfo.padding(toLength: 10, withPad: " ", startingAt: 0)
             let ship = player.ship.description
             let hostname = "redacted".padding(toLength: 15, withPad: " ", startingAt: 0)
             let line = "  \(player.team.letter)\(player.slot.hex): Ensign     \(name) \(login) \(hostname)           \(ship)\n"
