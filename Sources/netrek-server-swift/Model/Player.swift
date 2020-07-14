@@ -283,7 +283,7 @@ class Player: Thing {
     }
     
     public func explode(attacker: Player? = nil, planet: Planet? = nil) {
-        for player in universe.players {
+        for player in universe.players.filter({$0.status == .alive}) {
             guard player !== self else {
                 continue
             }

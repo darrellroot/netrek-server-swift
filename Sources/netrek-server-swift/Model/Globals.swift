@@ -10,7 +10,7 @@ import Foundation
 
 struct Globals {
     //TODO set the name of this server for registering on metaserfver
-    static let myname = "changeme.networkmom.net"
+    static let myname = "network.networkmom.net"
     
     static let PORT = 2592
     //static let NAME_LEN = 16
