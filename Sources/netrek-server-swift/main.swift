@@ -32,17 +32,19 @@ defer {
     try! group.syncShutdownGracefully()
 }
 
-let channel = try { () -> Channel in
+let netrekChannel = try { () -> Channel in
     return try bootstrap.bind(host: "::", port: 2592).wait()
 }()
 
-guard let localAddress = channel.localAddress else {
+guard let localAddress = netrekChannel.localAddress else {
     fatalError("Address unable to bind")
 }
 
 print("Server started and listening on \(localAddress)")
 
-let metaserver = Metaserver(universe: universe)
+//let metaserver = Metaserver(universe: universe)
+
+
 /*let nioQueue = DispatchQueue(label: "swift-nio")
 
 nioQueue.async {

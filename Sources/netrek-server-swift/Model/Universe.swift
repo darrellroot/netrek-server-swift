@@ -28,7 +28,7 @@ class Universe {
     var users: [User] = []
         
     var gameState: GameState = .intramural
-    
+    var metaserver: MetaserverUDP? = nil
     //var connectionsById: [Int: ServerConnection] = [:]
     
     init() {
@@ -96,6 +96,12 @@ class Universe {
         debugPrint("Timer initialized")
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
+        }
+        self.metaserver = MetaserverUDP(universe: self)
+        if let metaserver = self.metaserver {
+            metaserver.sendReport(ip: "161.35.226.186", port: 3521)
+        } else {
+            debugPrint("Error: unable to send to metaserver")
         }
     }
     
@@ -178,6 +184,15 @@ class Universe {
                 if player.status != .free {
                     player.minuteTimerFired()
                 }
+            }
+        }
+        if timerCount % 1200 == 0 {
+            if let metaserver = self.metaserver {
+                metaserver.sendReport(ip: "69.164.215.96", port: 3521)
+                metaserver.sendReport(ip: "63.170.91.110", port: 3521)
+
+            } else {
+                debugPrint("Error: unable to send to metaserver")
             }
         }
     }

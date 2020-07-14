@@ -4,7 +4,7 @@
 //
 //  Created by Darrell Root on 7/13/20.
 //
-
+/* close but does not work, sending metaserver udp updates is superior
 import Foundation
 import NIO
 
@@ -37,7 +37,7 @@ class Metaserver {
         print("Metaserver started and listening on \(localAddress)")
 
     }
-}
+}*/
 
 /*private final class MetaHandler: ChannelInboundHandler {
     public typealias InboundIn = ByteBuffer

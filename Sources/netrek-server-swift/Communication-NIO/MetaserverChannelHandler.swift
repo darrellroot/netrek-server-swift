@@ -4,7 +4,8 @@
 //
 //  Created by Darrell Root on 7/7/20.
 //
-
+/*  Close but does not work
+     sending UDP metaserver packets is superior to listening
 import Foundation
 import NIO
 
@@ -88,3 +89,4 @@ No one playing.
     }
 
 }
+ */
