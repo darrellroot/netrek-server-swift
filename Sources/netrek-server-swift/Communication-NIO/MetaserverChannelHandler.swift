@@ -44,6 +44,13 @@ final class MetaserverChannelHandler: ChannelInboundHandler {
         context.close(promise: nil)
     }
     func makeReport() -> String {
+        guard universe.players.filter({ $0.status != .free}).count > 0 else {
+            let returnval = """
+
+No one playing.
+"""
+            return returnval
+        }
         let fakeUser = User(name: "unknown", password: "", userinfo: "unknown")
         let header = """
 <>=======================================================================<>
