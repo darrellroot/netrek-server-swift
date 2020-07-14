@@ -14,7 +14,7 @@ enum PlanetFlags: UInt16 {
     case agri = 0x040
 }
 
-class Planet {
+class Planet: Thing {
     
     var positionX: Double
     var positionY: Double

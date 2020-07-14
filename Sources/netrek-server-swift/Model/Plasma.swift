@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Plasma {
+class Plasma: Thing {
     let explosionDistance = 350.0 //triggers plasma explosion
     let damageDistance = 2000.0 //plasma damage range
     let number: Int
@@ -22,8 +22,8 @@ class Plasma {
             }
         }
     }
+    weak var target: Player? = nil
 
-        
     var directionNetrek: Int {
         // 0 - 255
         // inclusive, 0 is straight up, 64 straight right
@@ -54,9 +54,9 @@ class Plasma {
     weak var player: Player?
     var positionX: Double = 0
     var positionY: Double = 0
-    
-    var vectorX: Double = 0
-    var vectorY: Double = 0
+    var speed: Double = 15
+    //var vectorX: Double = 0
+    //var vectorY: Double = 0
     
     var expiration = Date()
     let universe: Universe
@@ -72,9 +72,40 @@ class Plasma {
         self.state = .free
         self.positionX = 0
         self.positionY = 0
-        self.vectorX = 0
-        self.vectorY = 0
+        self.speed = 15.0
+        self.direction = 0.0
+        //self.vectorX = 0
+        //self.vectorY = 0
+    }
+    
+    func identifyTarget() -> Player? {
+        var bestTarget: Player? = nil
+        var bestTargetAngle: Double? = nil //absolute value of angle diff
         
+        let plasmaRange: Double
+        guard let shooter = self.player else {
+            return nil
+        }
+        plasmaRange = shooter.ship.plasmaFuse * shooter.ship.plasmaSpeed * 10 * Globals.WARP1
+        for possibleTarget in universe.players {
+            guard possibleTarget.team != shooter.team else {
+                continue
+            }
+            guard NetrekMath.distance(shooter,possibleTarget) <= plasmaRange else {
+                continue
+            }
+            let possibleTargetAngle = abs(NetrekMath.angle(origin: shooter, target: possibleTarget))
+            if bestTarget == nil || bestTargetAngle == nil {
+                bestTarget = possibleTarget
+                bestTargetAngle = possibleTargetAngle
+            } else {
+                if possibleTargetAngle < bestTargetAngle! {
+                    bestTarget = possibleTarget
+                    bestTargetAngle = possibleTargetAngle
+                }
+            }
+        }
+        return bestTarget
     }
     
     func fire(player: Player, direction: Double) {
@@ -85,6 +116,19 @@ class Plasma {
         self.state = .alive
         self.damage = player.ship.plasmaDamage
         
+        self.target = identifyTarget()
+        
+        if let target = self.target {
+            var targetString: String
+            if let user = target.user {
+                targetString = user.name
+            } else {
+                targetString = target.team.letter + String(target.slot)
+            }
+            self.player?.sendMessage(message: "Plasma targeted on \(targetString)")
+        } else {
+            self.player?.sendMessage(message: "Firing plasma. Unable to identify target")
+        }
         //let torpRadian = NetrekMath.directionNetrek2Radian(direction)
         
         //let shipRadian = NetrekMath.directionNetrek2Radian(player.directionNetrek)
@@ -99,15 +143,29 @@ class Plasma {
             plasmaVectorX = plasmaVectorX * 20 / plasmaMagnitude
             plasmaVectorY = plasmaVectorY * 20 / plasmaMagnitude
         }
-        self.vectorX = plasmaVectorX
-        self.vectorY = plasmaVectorY
-        
+        //self.vectorX = plasmaVectorX
+        //self.vectorY = plasmaVectorY
+        self.speed = plasmaMagnitude
         expiration = Date(timeIntervalSinceNow: player.ship.plasmaFuse)
+    }
+    func updateDirection() {
+        guard let target = target else {
+            return
+        }
+        let targetAngle = NetrekMath.angle(origin: self, target: target)
+        let angleDiff = NetrekMath.angleDiff(self.direction,targetAngle)
+        if angleDiff > 0 {
+            self.direction += Double.pi / 128
+        }
+        if angleDiff < 0 {
+            self.direction -= Double.pi / 128
+        }
     }
     
     func updatePosition() {
-        self.positionX += self.vectorX
-        self.positionY += self.vectorY
+        self.updateDirection()
+        self.positionX += self.speed * Globals.WARP1 * cos(self.direction)
+        self.positionY -= self.speed * Globals.WARP1 * sin(self.direction)
         if self.state == .alive {
             if self.positionX <= 0 || self.positionX >= Globals.GalaxyWidth || self.positionY <= 0 || self.positionY >= Globals.GalaxyWidth {
                 self.explode()
@@ -149,7 +207,9 @@ class Plasma {
         self.state = .explode
         self.expiration = Date()
         for player in universe.players {
-            guard player.team != self.team && player.status == .alive else {
+            //plasma explosions affect friendly players too!
+            //guard player.team != self.team && player.status == .alive else {
+            guard player.status == .alive else {
                 continue
             }
             //efficient check to see if we are close

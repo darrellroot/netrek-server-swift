@@ -13,7 +13,7 @@ enum TorpedoState {
     case alive
     case explode
 }
-class Torpedo {
+class Torpedo: Thing {
     let explosionDistance = 350.0 //triggers torp explosion
     let damageDistance = 2000.0 //torp damage range
     let number: Int

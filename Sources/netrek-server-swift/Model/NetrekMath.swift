@@ -29,6 +29,45 @@ class NetrekMath {
             return answer + 2.0 * Double.pi
         }
     }
+    static func distance(_ player1: Player,_ player2: Player) -> Double {
+        return sqrt((player1.positionX - player2.positionX) * (player1.positionX - player2.positionX) + (player1.positionY - player2.positionY) * (player1.positionY - player2.positionY))
+    }
+    static func angle(origin: Thing, target: Thing) -> Double {
+        //returns value in radians between 0 and 2*Pi
+        var angle = atan2(-1 * (target.positionY - origin.positionY), target.positionX - origin.positionX)
+        if angle < 0 {
+            angle = angle + Double.pi * 2
+        }
+        return angle
+    }
+    static func angleDiff(_ angle1: Double, _ angle2: Double) -> Double {
+        //returns diff between two angles, including dealing with 2*pi case
+        // inputs must be between 0 and 2*Pi
+        //TODO incorporate tests.  somewhat tested in default-mac-app
+        var angle: Double
+        switch angle2 - angle1 {
+        case 0:
+            angle = 0.0
+        case 0 ..< Double.pi:
+            angle = angle2 - angle1
+        case -Double.pi ..< 0:
+            angle = angle2 - angle1
+        case Double.pi...:
+            angle = -(Double.pi - (angle2 - (angle1 + Double.pi)))
+        case ...(-Double.pi):
+            angle = (Double.pi * 2 - angle1) + angle2
+        default:
+            // should not get here
+            angle = 0.0
+        }
+        if angle <= -Double.pi {
+            angle += 2 * Double.pi
+        }
+        if angle > Double.pi {
+            angle -= Double.pi
+        }
+        return angle
+    }
     static func directionNetrek2Radian(_ directionNetrek: Int) -> Double {
         var error = false
         var directionNetrek = directionNetrek

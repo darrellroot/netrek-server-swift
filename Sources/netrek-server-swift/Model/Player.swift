@@ -9,7 +9,7 @@
 import Foundation
 import NIO
 
-class Player {
+class Player: Thing {
     static let orbitRadius = 800.0
     static let orbitRange = 900.0 // for entering orbit
     static let detDist = 1700.0 // for detonating enemy torp
@@ -96,16 +96,16 @@ class Player {
     var bomb = false
     var weaponsOverheated = false {
         didSet {
-            if weaponsOverheated {
+            if weaponsOverheated && !oldValue {
                 self.sendMessage(message: "Weapons overheated!")
             }
         }
     }
     var enginesOverheated = false {
         didSet {
-            if enginesOverheated {
+            if enginesOverheated && !oldValue {
                 self.helmSpeed = 1
-                self.sendMessage(message: "Weapons overheated!")
+                self.sendMessage(message: "Engines overheated!")
             }
         }
     }
@@ -597,7 +597,12 @@ class Player {
         self.repair = false
         self.fuel -= Int(self.ship.plasmaCost)
         self.wtmp += Int(self.ship.plasmaCost) / 10
-        plasma.fire(player: self, direction: self.direction)
+        //only starbases can fire plasma in any direction
+        if self.ship == .starbase {
+            plasma.fire(player: self, direction: direction)
+        } else {
+            plasma.fire(player: self, direction: self.direction)
+        }
     }
 
     deinit {
