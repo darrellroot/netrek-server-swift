@@ -83,6 +83,9 @@ class MetaserverUDP {
             returnValue += "n\n" // gamefull
         }
         returnValue += "Swift-IPv6\n" // comment
+        
+        /* The detailed user list was not picked up by the metaserver successfully.  Rather than debug I chose not to share this information
+         
         for player in universe.players.filter({$0.status != .free}) {
             returnValue += "\(player.slot.hex)\n"
             returnValue += "\(player.team.letter)\n"
@@ -97,7 +100,7 @@ class MetaserverUDP {
                 returnValue += "unknownInfo\n"
             }
             returnValue += "redacted\n" // user host
-        }
+        }*/
         debugPrint(returnValue)
         return returnValue
     }

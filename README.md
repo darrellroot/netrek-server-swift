@@ -8,6 +8,7 @@ This does not use any Apple-specific frameworks.  It is developed on MacOS but i
 # How to build / run:
 * git clone https://github.com/darrellroot/netrek-server-swift.git
 * cd netrek-server-swift
+* Change "myname" in Globals.swift to be your server name
 * swift build
 * ./.build/x86_64-unknown-linux-gnu/debug/netrek-server-swift
 
