@@ -10,8 +10,8 @@ import NIO
 
 class MetaserverUDP {
     //this class pushes data to the metaserver over udp:3521 periodically
-    //let metaserver = "metaserver1.netrek.org"
-    let metaserver = "netrek.networkmom.net"
+    let metaserver = "metaserver1.netrek.org"
+    let domainName: String
     let port = 3521
     let universe: Universe
     let remoteAddress: SocketAddress
@@ -19,6 +19,11 @@ class MetaserverUDP {
     //let bootstrap: DatagramBootstrap
     let channel: Channel?
     init?(universe: Universe) {
+        guard let domainName = netrekOptions.domainName else {
+            debugPrint("\(#file) \(#function) Error: metaserver registration code activated without specifying domainName on CLI.  Try --help")
+            return nil
+        }
+        self.domainName = domainName
         self.universe = universe
         guard let remoteAddress = try? SocketAddress.makeAddressResolvingHost(metaserver, port: port) else {
             debugPrint("\(#file) \(#function) failed to resolve host \(metaserver)")
@@ -61,7 +66,7 @@ class MetaserverUDP {
     func makeReport() -> String {
         var returnValue = ""
         returnValue += "b\n"  // version
-        returnValue += "\(Globals.myname)\n" //netrek server DNS name
+        returnValue += "\(domainName)\n" //netrek server DNS name
         returnValue += "B\n"  // type
         returnValue += "2592\n" // netrek server port
         returnValue += "0\n"
