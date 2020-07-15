@@ -10,8 +10,10 @@ import Foundation
 
 struct Globals {
     //TODO set the name of this server for registering on metaserfver
-    static let myname = "netrek.networkmom.net"
-    
+    static var myname: String {
+        return Host.current().localizedName ?? "unknown"
+        "netrek.networkmom.net"
+    }
     static let PORT = 2592
     //static let NAME_LEN = 16
     static let WARP1 = 20.0 // netrek units moved per 0.1 second at warp 1

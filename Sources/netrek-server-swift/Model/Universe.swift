@@ -12,6 +12,7 @@ import NIO
 
 class Universe {
     
+
     let updatesPerSecond = 10.0
     var timer: Timer?
     var timerCount = 0
@@ -22,17 +23,20 @@ class Universe {
     static let MAXPLAYERS = 32
     var homeworld: [Team:Planet] = [:]
     
-    var team1 = Team.federation
-    var team2 = Team.roman
+    //var team1 = Team.federation
+    //var team2 = Team.roman
     
     var users: [User] = []
+    var robotController = RobotController()
         
     var gameState: GameState = .intramural
+        
     var metaserver: MetaserverUDP? = nil
     //var connectionsById: [Int: ServerConnection] = [:]
     
     init() {
         debugPrint("Universe.init")
+        
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let player = Player(slot: slotnum, universe: self)
             self.players.append(player)
@@ -58,7 +62,7 @@ class Universe {
             Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
             Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
             Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
-            Planet(planetID: 20, positionX: 80000, positionY: 80000, name: "Kazari", team: .kazari, homeworld: true),
+            Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
             Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
             Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
             Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
@@ -77,7 +81,7 @@ class Universe {
             Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
             Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
             Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
-            Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Herculis", team: .orion, homeworld: false),
+            Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
             
         ]
         
@@ -97,11 +101,15 @@ class Universe {
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
         }
-        self.metaserver = MetaserverUDP(universe: self)
-        if let metaserver = self.metaserver {
-            metaserver.sendReport(ip: "161.35.226.186", port: 3521)
+        if netrekOptions.domainName != nil {
+            self.metaserver = MetaserverUDP(universe: self)
+            if let metaserver = self.metaserver {
+                metaserver.sendReport(ip: "161.35.226.186", port: 3521)
+            } else {
+                debugPrint("Error: unable to send to metaserver")
+            }
         } else {
-            debugPrint("Error: unable to send to metaserver")
+            debugPrint("No metaserver specified on CLI: skipping metaserver reports")
         }
     }
     
@@ -178,6 +186,7 @@ class Universe {
                     player.secondTimerFired()
                 }
             }
+            robotController.secondTimerFired()
         }
         if timerCount % 600 == 0 {
             for player in self.players {

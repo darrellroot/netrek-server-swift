@@ -199,24 +199,28 @@ class MakePacket {
     
     //SP_MASK 19
     static func spMask(universe: Universe) -> Data {
-        let team1 = universe.team1
-        let team2 = universe.team2
-        var totalTeam1 = 0
-        var totalTeam2 = 0
+        var playerCount: [Team:Int] = [:]
+        for team in Team.allCases {
+            playerCount[team] = 0
+        }
+        
         var mask = 0
+        //count human players
         for player in universe.players {
-            if player.status == .alive && player.team == team1 {
-                totalTeam1 += 1
-            }
-            if player.status == .alive && player.team == team2 {
-                totalTeam2 += 1
+            if player.status != .free && player.context != nil {
+                playerCount[player.team]! += 1
             }
         }
-        if totalTeam1 <= totalTeam2 {
-            mask += team1.rawValue
+        var minimumTeamSize = 16
+        for team in [Team.federation,.roman,.kazari,.orion] {
+            if playerCount[team]! < minimumTeamSize {
+                minimumTeamSize = playerCount[team]!
+            }
         }
-        if totalTeam2 <= totalTeam1 {
-            mask += team2.rawValue
+        for team in [Team.federation,.roman,.kazari,.orion] {
+            if playerCount[team]! <= minimumTeamSize {
+                mask += team.rawValue
+            }
         }
         var packet = SP_MASK(mask: UInt8(mask))
         let data = Data(bytes: &packet, count: packet.size)

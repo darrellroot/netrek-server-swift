@@ -24,6 +24,7 @@ class Player: Thing {
     var remoteAddress: SocketAddress? = nil
 
     var user: User? = nil
+    var robot: Robot? = nil
     var team: Team
     var armies = 0
     var maxArmies: Int {
@@ -456,6 +457,7 @@ class Player: Thing {
         self.remoteAddress = nil
         //self.connection = nil
         self.user = nil
+        self.robot = nil
         self.team = .independent
         self.refitting = false
         newShip(ship: .cruiser)
@@ -607,6 +609,10 @@ class Player: Thing {
 
     deinit {
         debugPrint("Player \(slot) deinit")
+    }
+    func robotConnected(robot: Robot) {
+        self.robot = robot
+        self.status = .outfit
     }
     func connected(context: ChannelHandlerContext) {
         self.context = context
@@ -884,9 +890,9 @@ class Player: Thing {
             self.sendMessage(message: "Oh no!  Not you!")
         }
     }
-    func receivedCpOutfit(team: Team, ship: ShipType) {
+    func receivedCpOutfit(team: Team, ship: ShipType) -> Bool {
         
-        guard team == universe.team1 || team == universe.team2 else {
+        /*guard team == universe.team1 || team == universe.team2 else {
             
             //let data1 = MakePacket.spMessage(message: "I cannot allow that.  Pick another team or ship", from: 255)
             self.sendMessage(message: "I cannot allow that.  Pick another team or ship")
@@ -901,8 +907,8 @@ class Player: Thing {
             }
 
             //connection?.send(data: data2)
-            return
-        }
+            return false
+        }*/
         guard self.status == .outfit || self.status == .dead else {
             //let data = MakePacket.spMessage(message: "Outfiting ship not available in state \(self.status.rawValue)", from: 255)
             self.sendMessage(message: "Outfiting ship not available in state \(self.status.rawValue)")
@@ -917,7 +923,7 @@ class Player: Thing {
             }
 
             //connection?.send(data: data2)
-            return
+            return false
         }
         guard ship != .starbase else {
             self.sendMessage(message: "You need at least 2 kills then refit at your homeworld to launch a starbase")
@@ -928,7 +934,7 @@ class Player: Thing {
                     _ = context.channel.writeAndFlush(buffer)
                 }
             }
-            return
+            return false
         }
         guard let homeworld = universe.homeworld[team] else {
             debugPrint("\(#file) \(#function) error unable to identify homeworld for team \(team)")
@@ -946,7 +952,7 @@ class Player: Thing {
 
             //connection?.send(data: data2)
 
-            return
+            return false
         }
         self.team = team
         self.newShip(ship: ship)
@@ -964,7 +970,7 @@ class Player: Thing {
             }
         }
 
-
+        return true
         //connection?.send(data: data2)
     }
     func receivedCpSpeed(speed: Int) {
@@ -1526,6 +1532,8 @@ class Player: Thing {
     
     func secondTimerFired() {
         //execute one time per second
+        self.robot?.secondTimerFired()
+        
         if planetLock != nil {
             self.planetLockDirection()
         }
