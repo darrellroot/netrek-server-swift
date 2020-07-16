@@ -324,6 +324,7 @@ class Player: Thing {
         if self.damage >= self.ship.maxDamage {
             self.status = .explode
             self.whydead = whyDead
+            self.whodead = attacker?.slot ?? 0
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 self.explode(attacker: attacker, planet: planet)
             }
@@ -398,6 +399,7 @@ class Player: Thing {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 self.status = .dead
+                let spPStatus = MakePacket.spPStatus(player: self)
                 for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
                     if let context = player.context {
                         context.eventLoop.execute {
