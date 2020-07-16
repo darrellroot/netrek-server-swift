@@ -397,7 +397,7 @@ class Player: Thing {
                 }
                 //player.connection?.send(data: spPStatus)
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.status = .dead
                 let spPStatus = MakePacket.spPStatus(player: self)
                 for player in self.universe.activePlayers {
@@ -411,6 +411,21 @@ class Player: Thing {
                     //player.connection?.send(data: spPStatus)
                 }
             }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.status = .outfit
+                let spPStatus = MakePacket.spPStatus(player: self)
+                for player in self.universe.activePlayers {
+                    if let context = player.context {
+                        context.eventLoop.execute {
+                            let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                            _ = context.channel.writeAndFlush(buffer)
+                        }
+                    }
+
+                    //player.connection?.send(data: spPStatus)
+                }
+            }
+
         }
     }
     func disconnected() {
