@@ -1573,6 +1573,16 @@ class Player: Thing {
         //execute one time per second
         self.robot?.secondTimerFired()
         
+        let nearestEnemyDistance = self.nearestEnemyDistance()
+        
+        switch nearestEnemyDistance {
+        case -Double.infinity..<Globals.GalaxyWidth / 10:
+            self.alertCondition = .red
+        case (Globals.GalaxyWidth / 10)..<(Globals.GalaxyWidth / 7):
+            self.alertCondition = .yellow
+        default:
+            self.alertCondition = .green
+        }
         if planetLock != nil {
             self.planetLockDirection()
         }
@@ -1696,5 +1706,42 @@ class Player: Thing {
             }
         }
         //connection?.send(data: data)
+    }
+}
+
+extension Player {
+    func nearestEnemy() -> Player? {
+        var nearestEnemy: Player? = nil
+        var nearestDistance = Globals.GalaxyWidth * 2
+        for candidateEnemy in universe.players.filter({$0.status == .alive && $0.team != self.team}) {
+            if let _ = nearestEnemy {
+                let candidateDistance = NetrekMath.distance(candidateEnemy, self)
+                if candidateDistance < nearestDistance {
+                    nearestDistance = candidateDistance
+                    nearestEnemy = candidateEnemy
+                }
+            } else {
+                //first enemy in our algorithm
+                nearestEnemy = candidateEnemy
+            }
+        }
+        return nearestEnemy
+    }
+    func nearestEnemyDistance() -> Double {
+        var nearestEnemy: Player? = nil
+        var nearestDistance = Globals.GalaxyWidth * 2
+        for candidateEnemy in universe.players.filter({$0.status == .alive && $0.team != self.team}) {
+            if let _ = nearestEnemy {
+                let candidateDistance = NetrekMath.distance(candidateEnemy, self)
+                if candidateDistance < nearestDistance {
+                    nearestDistance = candidateDistance
+                    nearestEnemy = candidateEnemy
+                }
+            } else {
+                //first enemy in our algorithm
+                nearestEnemy = candidateEnemy
+            }
+        }
+        return nearestDistance
     }
 }
