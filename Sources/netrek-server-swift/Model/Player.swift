@@ -206,6 +206,9 @@ class Player: Thing {
             }
         }
     }
+    var maxSpeed: Double {
+        return max(0, round((self.ship.maxSpeed * (1 - self.damage / self.ship.maxDamage)+0.49)))
+    }
     
     var flags: UInt32 {
         var flags: UInt32 = 0
@@ -295,11 +298,11 @@ class Player: Thing {
             let damage = self.ship.explosionDamage * (1 - distance / self.ship.explosionRange)
             player.impact(damage: damage, attacker: attacker, planet: planet, whyDead: .explosion)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+        /*DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
             if self.status == .explode {
                 self.status = .dead
             }
-        }
+        }*/
     }
     public func impact(damage: Double, attacker: Player? = nil, planet: Planet? = nil, whyDead: WhyDead) {
         // attacker is either player or planet but not both
@@ -482,7 +485,7 @@ class Player: Thing {
         }
     }
     func enterOrbit() {
-        guard self.speed <= 2.0 else {
+        guard self.speed <= 2.5 else {
             let spMessage = MakePacket.spMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!", from: 255)
             if let context = context {
                 context.eventLoop.execute {
@@ -1256,24 +1259,29 @@ class Player: Thing {
         if playerLock != nil {
             self.playerLockSpeed()
         }
-        guard helmSpeed != speed else {
+        let targetSpeed: Double
+        if helmSpeed > maxSpeed {
+            targetSpeed = maxSpeed
+        } else {
+            targetSpeed = helmSpeed
+        }
+        guard targetSpeed != speed else {
             return
         }
-        guard abs(helmSpeed - speed) > self.ship.acceleration else {
-            self.speed = self.helmSpeed
-            return
-        }
-        if helmSpeed < speed {
+        if targetSpeed < speed {
             self.speed = self.speed - self.ship.acceleration
             if self.speed < 0 {
                 self.speed = 0
             }
+            if self.speed < targetSpeed {
+                self.speed = targetSpeed
+            }
             return
         }
-        if helmSpeed > speed {
+        if targetSpeed > speed {
             self.speed = speed + self.ship.acceleration
-            if self.speed > self.ship.maxSpeed {
-                self.speed = self.ship.maxSpeed
+            if self.speed > targetSpeed {
+                self.speed = targetSpeed
             }
             return
         }
@@ -1563,10 +1571,15 @@ class Player: Thing {
                 self.sendSpFlags(player: player)
             }
         }
+        /*for planet in universe.planets {
+            self.sendSpPlanet(planet: planet)
+        }*/
+    }
+    func sendSpPlanets() {
         for planet in universe.planets {
             self.sendSpPlanet(planet: planet)
         }
-    }
+     }
     func sendSpPlanet(planet: Planet) {
         let data = MakePacket.spPlanet(planet: planet)
         debugPrint("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
@@ -1644,6 +1657,7 @@ class Player: Thing {
             self.sendSpPlayerStatus(player: player)
             self.sendSpFlags(player: player)
             self.sendSpPlayer(player: player)
+            self.sendSpPlanets()
         }
     }
     func sendSpPlayerStatus(player: Player) {

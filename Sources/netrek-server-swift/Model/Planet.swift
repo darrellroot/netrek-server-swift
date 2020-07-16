@@ -16,17 +16,19 @@ enum PlanetFlags: UInt16 {
 
 class Planet: Thing {
     
-    var positionX: Double
-    var positionY: Double
-    var repair = false
-    var fuel = false
-    var agri = false
+    var needsUpdate = false
+    
+    var positionX: Double { didSet { needsUpdate = true } }
+    var positionY: Double { didSet { needsUpdate = true } }
+    var repair = false { didSet { needsUpdate = true } }
+    var fuel = false { didSet { needsUpdate = true } }
+    var agri = false { didSet { needsUpdate = true } }
     var planetID: Int
-    var name: String
-    var team: Team
-    var homeworld: Bool
-    var armies = Int.random(in: 4 ..< 14)
-    var seen: [Team:Bool] = [:]
+    var name: String { didSet { needsUpdate = true } }
+    var team: Team { didSet { needsUpdate = true } }
+    var homeworld: Bool { didSet { needsUpdate = true } }
+    var armies = Int.random(in: 4 ..< 14) { didSet { needsUpdate = true } }
+    var seen: [Team:Bool] = [:] { didSet { needsUpdate = true } }
     
     var info: UInt8 {
         var returnVal: UInt8 = 0

@@ -57,9 +57,10 @@ class RobotController {
         }
         let newRobot = RobotModel1(player: freeSlot,universe: universe) as Robot
         
+        let robotName = "\(newRobot.userinfo)-\(robotId)"
         freeSlot.robotConnected(robot: newRobot)
         
-        freeSlot.receivedCpLogin(name: "Robot\(self.robotId)", password: "", userinfo: newRobot.userinfo)
+        freeSlot.receivedCpLogin(name: robotName, password: "", userinfo: newRobot.userinfo)
         
         //moved to robot logic
         guard freeSlot.receivedCpOutfit(team: team, ship: newRobot.preferredShip) else {

@@ -176,9 +176,27 @@ class Universe {
         }
         return nil
     }
+    func sendPlanetUpdates(_ forceUpdate: Bool = false) {
+        // this is called every 0.1 seconds
+        // it only sends updates for planets with needsUpdate set
+        // but always sends updates if force = true
+        for planet in planets.filter({($0.needsUpdate == true) || forceUpdate}) {
+            debugPrint("Sending SP_PLANETs for \(planet.name)")
+            let data = MakePacket.spPlanet(planet: planet)
+            for player in activePlayers {
+                if let context = player.context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.writeAndFlush(buffer)
+                    }
+                }
+            }
+        }
+    }
     @objc func timerFired() {
         self.timerCount += 1
         //debugPrint("\(#file) \(#function) count \(self.timerCount)")
+        self.sendPlanetUpdates()
         for player in self.players {
             if player.status != .free {
                 player.shortTimerFired()

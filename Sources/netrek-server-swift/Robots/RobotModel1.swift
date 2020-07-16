@@ -27,7 +27,7 @@ class RobotModel1: Robot {
     
     weak var me: Player?
     
-    public let userinfo = "RobotModel1"
+    public let userinfo = "RobotMk2"
     public var preferredShip: ShipType {
         //cruiser twice as likely
         return [ShipType.scout,ShipType.destroyer,ShipType.cruiser,ShipType.cruiser,ShipType.battleship].randomElement()!
@@ -65,12 +65,10 @@ class RobotModel1: Robot {
             guard let nearestEnemy = self.nearestEnemy() else {
                 return
             }
-
             adjustShields(nearestEnemy: nearestEnemy)
             shootLaser(nearestEnemy: nearestEnemy)
             shootTorpedo(nearestEnemy: nearestEnemy)
             switch self.strategy {
-                
             case .refuel:
                 strategyRefuel()
             case .repair:
@@ -93,6 +91,9 @@ class RobotModel1: Robot {
         } else {
             if me.shieldsUp {
                 me.receivedCpShield(up: false)
+                if me.orbit != nil && self.strategy == .repair {
+                    me.receivedRepair(true)
+                }
             }
         }
     }
@@ -107,16 +108,24 @@ class RobotModel1: Robot {
             me.fireLaser(direction: enemyDirectionNetrek)
         }
     }
+    private func predictLocation(enemy: Player,time: Double) -> Location {
+        let positionX = enemy.positionX + enemy.speed * Globals.WARP1 * 10 * cos(enemy.direction)
+        let positionY = enemy.positionY - enemy.speed * Globals.WARP1 * 10 * sin(enemy.direction)
+        return Location(positionX: positionX, positionY: positionY)
+    }
     private func shootTorpedo(nearestEnemy: Player) {
         guard let me = me else {
             return
         }
         let enemyDistance = NetrekMath.distance(me,nearestEnemy)
+        let timeToTarget = enemyDistance / (Globals.WARP1 * 10 * Double(me.ship.torpSpeed))
+        let predictedEnemyLocation = predictLocation(enemy: nearestEnemy,time: timeToTarget)
+        let predictedDistance = NetrekMath.distance(me,predictedEnemyLocation)
         //TODO adjust to torpedo range
-        if enemyDistance < Laser.baseRange {
-            let enemyDirectionRadian = NetrekMath.angle(origin: me, target: nearestEnemy)
-            let variance = Double.random(in: -0.3 ..< 0.3)
-            me.fireTorpedo(direction: enemyDirectionRadian + variance)
+        if predictedDistance < Laser.baseRange * 1.5 {
+            let predictedDirectionRadian = NetrekMath.angle(origin: me, target: predictedEnemyLocation)
+            let variance = Double.random(in: -0.2 ..< 0.2)
+            me.fireTorpedo(direction: predictedDirectionRadian + variance)
         }
     }
     private func strategyDogfight(nearestEnemy: Player) {
@@ -144,11 +153,10 @@ class RobotModel1: Robot {
         guard let me = me else {
             return
         }
-        if let planet = me.orbit, planet.repair {
-            return
-        }
         if let planet = me.orbit {
-            me.receivedRepair(true)
+            if !me.repair {
+                me.receivedRepair(true)
+            }
             return
         }
         if let planet = self.nearestRepairPlanet() {
@@ -186,20 +194,25 @@ class RobotModel1: Robot {
             debugPrint("\(#file) \(#function) Unable to identify myself")
             return
         }
-        if me.damage > me.ship.maxDamage / 2 {
-            self.strategy = .repair
-            return
-        }
-        if me.fuel < me.ship.maxFuel / 3 {
-            self.strategy = .refuel
-            return
-        }
-        if self.strategy == .repair && me.damage < 10 {
-            self.strategy = .dogfight
-        }
-        if self.strategy == .refuel && me.fuel > (me.ship.maxFuel - 500) {
-            self.strategy = .dogfight
+        switch self.strategy {
+            
+        case .refuel:
+            if me.fuel > (me.ship.maxFuel - 500) {
+                self.strategy = .dogfight
+            }
+        case .repair:
+            if me.damage < 10 {
+                self.strategy = .dogfight
+            }
+        case .dogfight:
+            if me.damage > me.ship.maxDamage / 2 {
+                self.strategy = .repair
+                return
+            }
+            if me.fuel < me.ship.maxFuel / 3 {
+                self.strategy = .refuel
+                return
+            }
         }
     }
-    
 }
