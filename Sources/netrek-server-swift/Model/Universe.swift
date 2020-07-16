@@ -191,6 +191,7 @@ class Universe {
                     }
                 }
             }
+            planet.needsUpdate = false
         }
     }
     @objc func timerFired() {
