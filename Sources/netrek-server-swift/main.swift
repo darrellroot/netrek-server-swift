@@ -11,11 +11,12 @@ import NIO
 
 print("Initializing server")
 
+let netrekOptions = NetrekOptions.parseOrExit()
+
 let universe = Universe()
 //let server = Server(port: 2592, universe: universe)
 //try! server.start()
 
-let netrekOptions = NetrekOptions.parseOrExit()
 let netrekChannelHandler = NetrekChannelHandler(universe: universe)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
 let bootstrap = ServerBootstrap(group: group)
