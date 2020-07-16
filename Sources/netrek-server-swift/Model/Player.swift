@@ -1571,9 +1571,6 @@ class Player: Thing {
                 self.sendSpFlags(player: player)
             }
         }
-        /*for planet in universe.planets {
-            self.sendSpPlanet(planet: planet)
-        }*/
     }
     func sendSpPlanets() {
         for planet in universe.planets {
