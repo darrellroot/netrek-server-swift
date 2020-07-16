@@ -9,18 +9,29 @@ import Foundation
 
 class RobotModel1: Robot {
     
-    enum Strategy {
+    enum Strategy: String {
         case refuel
         case repair
         case dogfight
     }
     
-    var strategy: Strategy = .dogfight
+    var strategy: Strategy = .dogfight {
+        didSet {
+            if strategy != oldValue, let me = me, let user = me.user {
+                for player in universe.humanPlayers.filter({$0.team == me.team}) {
+                    player.sendMessage(message: "\(me.team.letter)\(me.slot.hex) \(user.name) I need to \(self.strategy.rawValue)")
+                }
+            }
+        }
+    }
     
     weak var me: Player?
     
     public let userinfo = "RobotModel1"
-    public let preferredShip = ShipType.cruiser
+    public var preferredShip: ShipType {
+        //cruiser twice as likely
+        return [ShipType.scout,ShipType.destroyer,ShipType.cruiser,ShipType.cruiser,ShipType.battleship].randomElement()!
+    }
     
     required init(player: Player, universe: Universe) {
         self.me = player
@@ -50,6 +61,7 @@ class RobotModel1: Robot {
             }
             return
         case .alive:
+            decideStrategy()
             guard let nearestEnemy = self.nearestEnemy() else {
                 return
             }
@@ -111,11 +123,17 @@ class RobotModel1: Robot {
         guard let me = me else {
             return
         }
-        
+        let enemyDistance = NetrekMath.distance(me,nearestEnemy)
+
         //random course toward enemy
-        var directionRadian = NetrekMath.angle(origin: me, target: nearestEnemy)
-        //random evasive 120 degrees each way
-        directionRadian += Double.random(in: Double.pi * -0.3 ..< Double.pi * 0.3)
+        var baseDirectionRadian = NetrekMath.angle(origin: me, target: nearestEnemy)
+        let evasive: Double
+        if enemyDistance < Laser.baseRange * 4 {
+            evasive = Double.random(in: Double.pi * -0.3 ..< Double.pi * 0.3)
+        } else {
+            evasive = Double.random(in: Double.pi * -0.1 ..< Double.pi * 0.1)
+        }
+        let directionRadian = baseDirectionRadian + evasive
         me.receivedDirection(direction: directionRadian)
         //random speed
         var speed = Int(me.ship.maxSpeed / 2 - 1)

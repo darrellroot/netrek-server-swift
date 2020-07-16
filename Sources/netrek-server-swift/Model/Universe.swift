@@ -12,7 +12,6 @@ import NIO
 
 class Universe {
     
-
     let updatesPerSecond = 10.0
     var timer: Timer?
     var timerCount = 0
@@ -24,6 +23,9 @@ class Universe {
     }
     var alivePlayers: [Player] {
         return self.players.filter({$0.status == .alive})
+    }
+    var humanPlayers: [Player] {
+        return self.players.filter({$0.status != .free && $0.context != nil})
     }
     
     var planets: [Planet] = []

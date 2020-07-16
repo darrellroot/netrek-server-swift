@@ -328,13 +328,13 @@ class Player: Thing {
                 attacker.kills = attacker.kills + 1.0 + self.kills / 10.0 + Double(self.armies) / 10.0
                 let victimLabel: String
                 if let user = self.user {
-                    victimLabel = user.name
+                    victimLabel = self.team.letter + self.slot.hex + " " + user.name
                 } else {
                     victimLabel = self.team.letter + self.slot.hex
                 }
                 let attackLabel: String
                 if let attackUser = attacker.user {
-                    attackLabel = attackUser.name
+                    attackLabel = attacker.team.letter + attacker.slot.hex + " " +  attackUser.name
                 } else {
                     attackLabel = attacker.team.letter + attacker.slot.hex
                 }
@@ -345,7 +345,7 @@ class Player: Thing {
             if let planet = planet {
                 let victimLabel: String
                 if let user = self.user {
-                    victimLabel = user.name
+                    victimLabel = self.team.letter + self.slot.hex + " " + user.name
                 } else {
                     victimLabel = self.team.letter + self.slot.hex
                 }
@@ -624,7 +624,7 @@ class Player: Thing {
         
         do {
             debugPrint("sending SP MOTD")
-            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.2-alpha feedback@networkmom.net")
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.3-alpha feedback@networkmom.net")
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
                 _ =  context.channel.writeAndFlush(buffer)
