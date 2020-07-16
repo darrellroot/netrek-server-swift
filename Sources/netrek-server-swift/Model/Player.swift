@@ -438,6 +438,7 @@ class Player: Thing {
         }
         //self.whydead
         self.whodead = 0
+        self.whydead = .none
         self.shieldsUp = false
         self.repair = false
         self.bomb = false
