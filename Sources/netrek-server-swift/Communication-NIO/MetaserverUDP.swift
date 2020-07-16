@@ -70,7 +70,7 @@ class MetaserverUDP {
         returnValue += "B\n"  // type
         returnValue += "2592\n" // netrek server port
         returnValue += "0\n"
-        let playerCount = self.universe.players.filter({$0.status != .free}).count
+        let playerCount = self.universe.players.filter({$0.status != .free && $0.robot == nil}).count
         returnValue += "\(playerCount)\n"
         let freeCount = max(16 - playerCount,0)
         returnValue += "\(freeCount)\n"
