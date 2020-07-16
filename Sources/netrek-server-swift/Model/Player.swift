@@ -85,7 +85,7 @@ class Player: Thing {
     var lastTorpedoFired = Date()
     var lastLaserFired = Date()
     
-    var shieldsUp = false {
+    private(set) var shieldsUp = false {
         didSet {
             if self.shieldsUp == true {
                 self.repair = false
@@ -410,6 +410,9 @@ class Player: Thing {
     }
     func disconnected() {
         debugPrint("player \(slot) disconnected")
+        for player in universe.activePlayers {
+            player.sendMessage(message: "Player \(self.team.letter)\(self.slot.hex) \(self.user?.name ?? "unknown") disconnected")
+        }
         self.reset()
     }
     func newShip(ship: ShipType) {
@@ -988,7 +991,7 @@ class Player: Thing {
         self.helmSpeed = min(Double(speed),self.ship.maxSpeed)
         self.orbit = nil
     }
-    
+    //this direction is in Legacy Netrek Direction
     func receivedCpDirection(netrekDirection: Int) {
         guard self.status == .alive else {
             return
@@ -997,12 +1000,22 @@ class Player: Thing {
             debugPrint("\(#file) \(#function) received invalid direction \(netrekDirection)")
             return
         }
-        self.helmDirection = NetrekMath.directionNetrek2Radian(netrekDirection)
+        self.receivedDirection(direction: NetrekMath.directionNetrek2Radian(netrekDirection))
+    }
+    //this direction is in radians
+    func receivedDirection(direction: Double) {
+        self.helmDirection = direction
         self.orbit = nil
         self.planetLock = nil
     }
     
-    
+    func receivedCpShield(up: Bool) {
+        if up {
+            self.shieldsUp = true
+        } else {
+            self.shieldsUp = false
+        }
+    }
     func receivedCpLogin(name: String, password: String, userinfo: String) {
         guard self.status == .outfit else {
             debugPrint("Error: \(#file) \(#function) slot \(self.slot) state \(self.status) unexpected cpLogin")

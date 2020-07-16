@@ -18,6 +18,14 @@ class Universe {
     var timerCount = 0
         
     var players: [Player] = []
+    
+    var activePlayers: [Player] {
+        return self.players.filter({$0.status != .free})
+    }
+    var alivePlayers: [Player] {
+        return self.players.filter({$0.status == .alive})
+    }
+    
     var planets: [Planet] = []
     //var queue: [Player] = []
     static let MAXPLAYERS = 32

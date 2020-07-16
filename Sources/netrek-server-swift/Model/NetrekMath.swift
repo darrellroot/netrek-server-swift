@@ -29,8 +29,8 @@ class NetrekMath {
             return answer + 2.0 * Double.pi
         }
     }
-    static func distance(_ player1: Player,_ player2: Player) -> Double {
-        return sqrt((player1.positionX - player2.positionX) * (player1.positionX - player2.positionX) + (player1.positionY - player2.positionY) * (player1.positionY - player2.positionY))
+    static func distance(_ thing1: Thing,_ thing2: Thing) -> Double {
+        return sqrt((thing1.positionX - thing2.positionX) * (thing1.positionX - thing2.positionX) + (thing1.positionY - thing2.positionY) * (thing1.positionY - thing2.positionY))
     }
     static func angle(origin: Thing, target: Thing) -> Double {
         //returns value in radians between 0 and 2*Pi

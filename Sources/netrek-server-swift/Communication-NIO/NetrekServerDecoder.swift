@@ -332,9 +332,11 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             if state == 1 {
-                player.shieldsUp = true
+                player.receivedCpShield(up: true)
+                //player.shieldsUp = true
             } else {
-                player.shieldsUp = false
+                player.receivedCpShield(up: false)
+                //player.shieldsUp = false
             }
             
         case 13: //CP_REPAIR

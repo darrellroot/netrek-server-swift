@@ -9,7 +9,7 @@ import Foundation
 
 class RobotController {
     
-    let targetPlayersPerTeam = 2
+    let targetPlayersPerTeam = 4
     var robotId = 0
     
     init() {
@@ -22,10 +22,11 @@ class RobotController {
             humans[team] = 0
             robots[team] = 0
         }
-        for player in universe.players.filter({$0.status != .free}) {
-            if player.robot == nil {
+        for player in universe.players {
+            if player.robot == nil && player.status != .free {
                 humans[player.team]! += 1
-            } else {
+            }
+            if player.robot != nil {
                 robots[player.team]! += 1
             }
         }
@@ -35,7 +36,18 @@ class RobotController {
             }
         }
         //TODO delete extra robots
-        
+        for team in [Team.federation,Team.roman,Team.kazari,Team.orion] {
+            if humans[team]! + robots[team]! > targetPlayersPerTeam && robots[team]! > 0 {
+                deleteRobot(team: team)
+            }
+        }
+    }
+    func deleteRobot(team: Team) {
+        guard let robotToDelete = universe.players.first(where: {$0.status != .free && $0.robot != nil && $0.team == team}) else {
+            debugPrint("\(#file) \(#function) Error: Unable to find \(team) robot to delete")
+            return
+        }
+        robotToDelete.disconnected()
     }
     func addRobot(team: Team) {
         self.robotId += 1
@@ -49,6 +61,7 @@ class RobotController {
         
         freeSlot.receivedCpLogin(name: "Robot\(self.robotId)", password: "", userinfo: newRobot.userinfo)
         
+        //moved to robot logic
         guard freeSlot.receivedCpOutfit(team: team, ship: newRobot.preferredShip) else {
             debugPrint("\(#file) \(#function) Unable to outfit ship")
             return
