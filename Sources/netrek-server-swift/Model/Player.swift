@@ -353,7 +353,7 @@ class Player: Thing {
                 } else {
                     victimLabel = self.team.letter + self.slot.hex
                 }
-                for player in universe.players {
+                for player in universe.activePlayers {
                     player.sendMessage(message: "\(victimLabel) was kill for \(planet.name)")
                 }
             }
@@ -400,7 +400,7 @@ class Player: Thing {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 self.status = .dead
                 let spPStatus = MakePacket.spPStatus(player: self)
-                for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
+                for player in self.universe.activePlayers {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPStatus)
