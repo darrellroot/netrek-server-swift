@@ -42,6 +42,7 @@ class Player: Thing {
     var tractor: Player? = nil // player number of tractor target
     var tractorMode = TractorMode.off
     var refitting = false //important to reset back to false
+    var selfDestructTimer: Int? = nil
         
     var damage = 0.0
     var shield = 100.0
@@ -137,7 +138,7 @@ class Player: Thing {
             }
         }
     }
-    var selfDestruct = false
+    //var selfDestruct = false
     var alertCondition = AlertCondition.green
     var playerLock: Player? = nil
     var planetLock: Planet? = nil
@@ -241,7 +242,7 @@ class Player: Thing {
         case .off:
             break
         }
-        if self.selfDestruct {
+        if self.selfDestructTimer != nil {
             flags += PlayerStatus.selfDestruct.rawValue
         }
         switch self.alertCondition {
@@ -465,7 +466,7 @@ class Player: Thing {
         self.orbit = nil
         self.cloak = false
         self.transporter = .off
-        self.selfDestruct = false
+        self.selfDestructTimer = nil
         self.alertCondition = .green
         self.playerLock = nil
         self.planetLock = nil
@@ -1353,6 +1354,17 @@ class Player: Thing {
             self.repair = false
         }
     }
+    func receivedCpQuit() {
+        if self.selfDestructTimer != nil {
+            self.selfDestructTimer = nil
+            self.sendMessage(message: "Self destruct aborted")
+            return
+        } else {
+            self.selfDestructTimer = 10
+            self.sendMessage(message: "Self destruct in 10 seconds...")
+            return
+        }
+    }
     func receivedRepair(_ newState: Bool) {
         if newState == false {
             self.repair = false
@@ -1570,6 +1582,27 @@ class Player: Thing {
     }
     
     func secondTimerFired() {
+        if var selfDestructTimer = self.selfDestructTimer {
+            selfDestructTimer -= 1
+            self.selfDestructTimer = selfDestructTimer
+            
+            switch selfDestructTimer {
+            
+            case 2,4...:
+                self.sendMessage(message: "Self-destruct in \(selfDestructTimer) seconds...")
+            case 3:
+                self.sendMessage(message: "You notice everyone looking at you")
+            case ..<1:
+                self.sendMessage(message: "You have self-destructed")
+                self.selfDestructTimer = nil
+                self.impact(damage: 999, attacker: self, planet: nil, whyDead: .quit)
+            default:
+                //should not get here
+                debugPrint("\(#file) \(#function) Error: unexpected self destruct value")
+                break
+            }
+        }
+        
         //execute one time per second
         self.robot?.secondTimerFired()
         
