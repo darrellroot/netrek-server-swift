@@ -14,9 +14,11 @@ print("Initializing server")
 
 let netrekOptions = NetrekOptions.parseOrExit()
 
-let universe = Universe()
 LoggingSystem.bootstrap(NetrekLogHandler.init)
 let logger = Logger(label: "net.networkmom.netrek-server-swift")
+
+let universe = Universe()
+
 //let netrekLogHandler = NetrekLogHandler(logDirectory: "/tmp")
 //let server = Server(port: 2592, universe: universe)
 //try! server.start()
