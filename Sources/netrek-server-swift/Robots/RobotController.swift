@@ -44,7 +44,7 @@ class RobotController {
     }
     func deleteRobot(team: Team) {
         guard let robotToDelete = universe.players.first(where: {$0.status != .free && $0.robot != nil && $0.team == team}) else {
-            debugPrint("\(#file) \(#function) Error: Unable to find \(team) robot to delete")
+            logger.error("\(#file) \(#function) Error: Unable to find \(team) robot to delete")
             return
         }
         robotToDelete.disconnected()
@@ -52,7 +52,7 @@ class RobotController {
     func addRobot(team: Team) {
         self.robotId += 1
         guard let freeSlot = universe.players.first(where: {$0.status == .free}) else {
-            debugPrint("\(#file) \(#function) Unable to find free slot")
+            logger.error("\(#file) \(#function) Unable to find free slot")
             return
         }
         let newRobot = RobotModel1(player: freeSlot,universe: universe) as Robot
@@ -64,7 +64,7 @@ class RobotController {
         
         //moved to robot logic
         guard freeSlot.receivedCpOutfit(team: team, ship: newRobot.preferredShip) else {
-            debugPrint("\(#file) \(#function) Unable to outfit ship")
+            logger.error("\(#file) \(#function) Unable to outfit ship")
             return
         }
         

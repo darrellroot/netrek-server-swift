@@ -52,7 +52,7 @@ class Torpedo: Thing {
                     }
                 }
                 //player.connection?.send(data: spTorpInfo)
-                debugPrint("Sending SPTorpInfo")
+                logger.debug("Sending SPTorpInfo")
             }
         }
     }
@@ -143,10 +143,13 @@ class Torpedo: Thing {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spTorp)
                     _ = context.channel.writeAndFlush(buffer)
-                    debugPrint("Sending SpTorp to player \(player.slot)")
+                    logger.debug("Sending SpTorp to player \(player.slot)")
                 }
             } else {
-                debugPrint("failed to send SpTorp to player \(player.slot)")
+                //only an error if player not robot
+                if player.robot == nil {
+                    logger.error("failed to send SpTorp to player \(player.slot)")
+                }
             }
             //player.connection?.send(data: spTorp)
         }
@@ -180,9 +183,9 @@ class Torpedo: Thing {
         case .free:
             return
         case .alive:
-            debugPrint("Torp alive")
+            //logger.trace("Torp alive")
             if Date() > self.expiration {
-                debugPrint("Torp expired")
+                logger.trace("Torp expired")
                 self.state = .free
                 //TODO send update when freeing torps
             }
@@ -197,13 +200,15 @@ class Torpedo: Thing {
                         let buffer = context.channel.allocator.buffer(bytes: spTorp)
                         _ = context.channel.writeAndFlush(buffer)
                     }
-                    debugPrint("Sending SpTorp to player \(player.slot)")
+                    logger.debug("Sending SpTorp to player \(player.slot)")
                 } else {
-                    debugPrint("failed to send SpTorp to player \(player.slot)")
+                    //only an error if player not robot
+                    if player.robot == nil {
+                        logger.error("failed to send SpTorp to player \(player.slot)")
+                    }
                 }
 
                 //player.connection?.send(data: spTorp)
-                //debugPrint("Sending SpTorp")
             }
         case .explode:
             if Date() > self.expiration + 1.0 {
@@ -214,14 +219,16 @@ class Torpedo: Thing {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spTorp)
                             _ = context.channel.writeAndFlush(buffer)
-                            debugPrint("Sending SpTorp to player \(player.slot)")
+                            logger.debug("Sending SpTorp to player \(player.slot)")
                         }
                     } else {
-                        debugPrint("failed to send SpTorp to player \(player.slot)")
+                        //only a failure if player human
+                        if player.robot == nil {
+                            logger.error("failed to send SpTorp to player \(player.slot)")
+                        }
                     }
 
                     //player.connection?.send(data: spTorp)
-                    //debugPrint("Sending SpTorp")
                 }
             }
         }

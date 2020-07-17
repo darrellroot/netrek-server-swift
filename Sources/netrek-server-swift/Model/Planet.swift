@@ -62,7 +62,7 @@ class Planet: Thing {
         if Int.random(in: 0 ..< 4) == 0 {self.agri = true}
     }
     public func pop() {
-        debugPrint("POP-Before planet \(self.name) armies \(armies)")
+        logger.debug("POP-Before planet \(self.name) armies \(armies)")
         //dont pop indi planets
         switch self.armies {
         case 0:
@@ -105,7 +105,7 @@ class Planet: Thing {
                 player.sendMessage(message: "Planet \(self.name) captured by \(player.team.letter)\(player.slot.hex) \(player.user?.name ?? player.team.description)")
             }
             guard let user = player.user else {
-                debugPrint("\(#file) \(#function) unable to identify user for player \(player.slot)")
+                logger.error("\(#file) \(#function) unable to identify user for player \(player.slot)")
                 return
             }
             //statistics only after this point
@@ -126,7 +126,7 @@ class Planet: Thing {
             }
             //statistics only
             guard let user = player.user else {
-                debugPrint("\(#file) \(#function) unable to identify user for player \(player.slot)")
+                logger.error("\(#file) \(#function) unable to identify user for player \(player.slot)")
                 return
             }
             switch universe.gameState {
@@ -142,7 +142,7 @@ class Planet: Thing {
             player.sendMessage(message: "Planet \(self.armies) armies.  Ship \(player.armies) armies.")
             //statistics only
             guard let user = player.user else {
-                debugPrint("\(#file) \(#function) unable to identify user for player \(player.slot)")
+                logger.error("\(#file) \(#function) unable to identify user for player \(player.slot)")
                 return
             }
             switch universe.gameState {
@@ -153,7 +153,7 @@ class Planet: Thing {
             }
             return
         default: // should not get here
-            debugPrint("\(#file) \(#function) unexpected planetary armies \(self.armies)")
+            logger.error("\(#file) \(#function) unexpected planetary armies \(self.armies)")
             return
         }
     }

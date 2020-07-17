@@ -308,7 +308,7 @@ class Player: Thing {
     public func impact(damage: Double, attacker: Player? = nil, planet: Planet? = nil, whyDead: WhyDead) {
         // attacker is either player or planet but not both
         guard damage >= 0 else {
-            debugPrint("\(#file) \(#function) error: damage \(damage)")
+            logger.error("\(#file) \(#function) error: damage \(damage)")
             return
         }
         var remainingDamage = damage
@@ -430,7 +430,7 @@ class Player: Thing {
         }
     }
     func disconnected() {
-        debugPrint("player \(slot) disconnected")
+        logger.info("player \(slot) disconnected")
         for player in universe.activePlayers {
             player.sendMessage(message: "Player \(self.team.letter)\(self.slot.hex) \(self.user?.name ?? "unknown") disconnected")
         }
@@ -477,7 +477,7 @@ class Player: Thing {
         self.helmSpeed = 0
     }
     func reset() {
-        debugPrint("player \(slot) resetting")
+        logger.info("player \(slot) resetting")
         self.context = nil
         self.remoteAddress = nil
         //self.connection = nil
@@ -633,7 +633,7 @@ class Player: Thing {
     }
 
     deinit {
-        debugPrint("Player \(slot) deinit")
+        logger.info("Player \(slot) deinit")
     }
     func robotConnected(robot: Robot) {
         self.robot = robot
@@ -643,9 +643,9 @@ class Player: Thing {
         self.context = context
         self.status = .outfit
         self.remoteAddress = context.remoteAddress
-        
+        logger.info("New connection from \(self.remoteAddress)")
         do {
-            debugPrint("sending SP MOTD")
+            logger.debug("sending SP MOTD")
             let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.3-alpha feedback@networkmom.net")
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -663,7 +663,7 @@ class Player: Thing {
         self.status = .outfit
         
         do {
-            debugPrint("sending SP MOTD")
+            logger.debug("sending SP MOTD")
             let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server")
             connection.send(data: data)
         }
@@ -683,7 +683,7 @@ class Player: Thing {
     }
     func sendSpYou() {
         let data = MakePacket.spYou(player: self)
-        debugPrint("sending SP_YOU")
+        logger.debug("sending SP_YOU")
         if let context = context {
             context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data)
@@ -821,7 +821,7 @@ class Player: Thing {
             return
         }
         guard let planet = universe.planets[safe: planetID], planet.planetID == planetID else {
-            debugPrint("\(#file) \(#function) unable to identify planetID \(planetID)")
+            logger.error("\(#file) \(#function) unable to identify planetID \(planetID)")
             return
         }
         self.planetLock = planet
@@ -962,7 +962,7 @@ class Player: Thing {
             return false
         }
         guard let homeworld = universe.homeworld[team] else {
-            debugPrint("\(#file) \(#function) error unable to identify homeworld for team \(team)")
+            logger.error("\(#file) \(#function) error unable to identify homeworld for team \(team)")
             //let data = MakePacket.spMessage(message: "Unexpected server error, cannot find homeworld", from: 255)
             self.sendMessage(message: "Unexpected server error, cannot find homeworld")
             //connection?.send(data: data)
@@ -1007,7 +1007,7 @@ class Player: Thing {
             return
         }
         guard speed >= 0 && speed <= 100 else {
-            debugPrint("\(#file) \(#function) received invalid speed \(speed)")
+            logger.error("\(#file) \(#function) received invalid speed \(speed)")
             return
         }
         self.helmSpeed = min(Double(speed),self.ship.maxSpeed)
@@ -1019,7 +1019,7 @@ class Player: Thing {
             return
         }
         guard netrekDirection >= 0 && netrekDirection < 256 else {
-            debugPrint("\(#file) \(#function) received invalid direction \(netrekDirection)")
+            logger.error("\(#file) \(#function) received invalid direction \(netrekDirection)")
             return
         }
         self.receivedDirection(direction: NetrekMath.directionNetrek2Radian(netrekDirection))
@@ -1040,7 +1040,7 @@ class Player: Thing {
     }
     func receivedCpLogin(name: String, password: String, userinfo: String) {
         guard self.status == .outfit else {
-            debugPrint("Error: \(#file) \(#function) slot \(self.slot) state \(self.status) unexpected cpLogin")
+            logger.error("Error: \(#file) \(#function) slot \(self.slot) state \(self.status) unexpected cpLogin")
             return
         }
         if name.starts(with: "guest") {
@@ -1051,7 +1051,7 @@ class Player: Thing {
             self.user = user
         } else if let existingUser = universe.users.first(where: {$0.name == name}) {
             guard existingUser.password == password else {
-                debugPrint("Sending SP_LOGIN failure to player \(self.slot)")
+                logger.info("Sending SP_LOGIN failure to player \(self.slot)")
                 //let message = MakePacket.spMessage(message: "Incorrect password for existing user \(name)", from: 255)
                 self.sendMessage(message: "Incorrect password for existing user \(name)")
                 //connection?.send(data: message)
@@ -1075,7 +1075,7 @@ class Player: Thing {
         }
             
         let data = MakePacket.spLogin(success: true)
-        debugPrint("Sending SP_LOGIN success to player \(self.slot)")
+        logger.info("Sending SP_LOGIN success to player \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1094,7 +1094,7 @@ class Player: Thing {
     func sendPlanetLoc() {
         for planet in universe.planets {
             let data = MakePacket.spPlanetLoc(planet: planet)
-            debugPrint("Sending SP_PLANET_LOC for planet \(planet.planetID) to \(self.slot)")
+            logger.debug("Sending SP_PLANET_LOC for planet \(planet.planetID) to \(self.slot)")
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1117,7 +1117,7 @@ class Player: Thing {
         case Double.pi * 3 / 2 ..< Double.pi * 2:
             self.direction = Double.pi + (2 * Double.pi - self.direction)
         default:
-            debugPrint("\(#file) \(#function) unexpected direction \(self.direction)")
+            logger.error("\(#file) \(#function) unexpected direction \(self.direction)")
         }
     }
     func reverseDirectionY() {
@@ -1127,13 +1127,13 @@ class Player: Thing {
         case Double.pi ..< 2 * Double.pi:
             self.direction = Double.pi - (self.direction - Double.pi)
         default:
-            debugPrint("\(#file) \(#function) unexpected direction \(self.direction)")
+            logger.error("\(#file) \(#function) unexpected direction \(self.direction)")
         }
     }
     func updateOrbit() {
         guard let orbit = self.orbit else {
             // should never get here
-            debugPrint("\(#file) \(#function) unexpected orbit error")
+            logger.error("\(#file) \(#function) unexpected orbit error")
             return
         }
         self.orbitRadian -= 0.1
@@ -1184,7 +1184,7 @@ class Player: Thing {
             }
         }
         //connection?.send(data: data)
-        debugPrint("Sending SP_MASK to player \(self.slot)")
+        logger.debug("Sending SP_MASK to player \(self.slot)")
     }
     
     func updateDirection() {
@@ -1198,7 +1198,7 @@ class Player: Thing {
         }
         let maxChange = self.ship.turnSpeed / (self.speed * self.speed)
         
-        debugPrint("maxChange \(maxChange)")
+        logger.trace("maxChange \(maxChange)")
         let helmDiff = self.helmDirection - self.direction
         
         if abs(helmDiff) < maxChange {
@@ -1221,7 +1221,7 @@ class Player: Thing {
             self.direction += maxChange
             return
         }
-        debugPrint("\(#file) \(#function) error helmDirection \(helmDirection) directionNetrek \(directionNetrek)")
+        logger.error("\(#file) \(#function) error helmDirection \(helmDirection) directionNetrek \(directionNetrek)")
     }
     private func playerLockSpeed() {
         //only adjust speed for friendly starbase
@@ -1404,7 +1404,7 @@ class Player: Thing {
         case 90 ..< 100:
             damage = 3
         default:
-            debugPrint("Unexpected bombing result \(random)")
+            logger.error("Unexpected bombing result \(random)")
         }
         if self.ship == .assault {
             damage += 1
@@ -1598,7 +1598,7 @@ class Player: Thing {
                 self.impact(damage: 999, attacker: self, planet: nil, whyDead: .quit)
             default:
                 //should not get here
-                debugPrint("\(#file) \(#function) Error: unexpected self destruct value")
+                logger.error("\(#file) \(#function) Error: unexpected self destruct value")
                 break
             }
         }
@@ -1640,7 +1640,7 @@ class Player: Thing {
      }
     func sendSpPlanet(planet: Planet) {
         let data = MakePacket.spPlanet(planet: planet)
-        debugPrint("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
+        logger.debug("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1652,7 +1652,7 @@ class Player: Thing {
     
     func sendSpHostile(player: Player) {
         let data = MakePacket.spHostile(player: player)
-        debugPrint("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1663,7 +1663,7 @@ class Player: Thing {
     }
     func sendSpPlLogin(player: Player) {
         let data = MakePacket.spPlLogin(player: player)
-        debugPrint("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1674,7 +1674,7 @@ class Player: Thing {
     }
     func sendSpPlayerInfo(player: Player) {
         let data = MakePacket.spPlayerInfo(player: player)
-        debugPrint("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1685,7 +1685,7 @@ class Player: Thing {
     }
     func sendSpKills(player: Player) {
         let data = MakePacket.spKills(player: player)
-        debugPrint("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1696,7 +1696,7 @@ class Player: Thing {
     }
     func sendSpFlags(player: Player) {
         let data = MakePacket.spFlags(player: player)
-        debugPrint("Sending SP_Flags for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_Flags for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1720,7 +1720,7 @@ class Player: Thing {
     }
     func sendSpPlayerStatus(player: Player) {
         let data = MakePacket.spPStatus(player: player)
-        debugPrint("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
@@ -1731,7 +1731,7 @@ class Player: Thing {
     }
     func sendSpPlayer(player: Player) {
         let data = MakePacket.spPlayer(player: player)
-        debugPrint("Sending SP_Player for player \(player.slot) to \(self.slot)")
+        logger.debug("Sending SP_Player for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)

@@ -25,7 +25,7 @@ class Server {
     }
     
     func start() throws {
-        debugPrint("Server starting...")
+        logger.info("Server starting...")
         listener.stateUpdateHandler = self.stateDidChange(to:)
         listener.newConnectionHandler = self.didAccept(nwConnection:)
         listener.start(queue: .main)

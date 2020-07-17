@@ -73,7 +73,7 @@ class NetrekMath {
         var directionNetrek = directionNetrek
         while directionNetrek > 255 {
             if error == false {
-                debugPrint("\(#file) \(#function) error directioNetrek \(directionNetrek)")
+                logger.error("\(#file) \(#function) error directionNetrek \(directionNetrek)")
                 error = true
             }
             directionNetrek = directionNetrek - 256
@@ -81,7 +81,7 @@ class NetrekMath {
         while directionNetrek < 0 {
             directionNetrek = directionNetrek + 256
             if error == false {
-                debugPrint("\(#file) \(#function) error directioNetrek \(directionNetrek)")
+                logger.error("\(#file) \(#function) error directionNetrek \(directionNetrek)")
                 error = true
             }
         }

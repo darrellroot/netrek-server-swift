@@ -21,7 +21,7 @@ final class MetaserverChannelHandler: ChannelInboundHandler {
         let remoteAddress = context.remoteAddress!
         let message = makeReport().data(using: .utf8)!
         let channel = context.channel
-        debugPrint("New metaserver connection from \(remoteAddress)")
+        logger.info("New metaserver connection from \(remoteAddress)")
         let buffer = context.channel.allocator.buffer(bytes: message)
         context.channel.writeAndFlush(buffer)
         context.close(promise: nil)
@@ -29,18 +29,18 @@ final class MetaserverChannelHandler: ChannelInboundHandler {
     public func channelInactive(context: ChannelHandlerContext) {
         let channel = context.channel
         if let remoteAddress = context.remoteAddress {
-            debugPrint("metaserver connection from \(remoteAddress) complete")
+            logger.info("metaserver connection from \(remoteAddress) complete")
         }
     }
     /*public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let id = ObjectIdentifier(context.channel)
         var read = self.unwrapInboundIn(data)
-        debugPrint("\(#file) \(#function)")
+        logger.trace("\(#file) \(#function)")
     }*/
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
-        debugPrint("Error: ",error)
+        logger.error("Error: ",error)
         if let remoteAddress = context.remoteAddress {
-            debugPrint("metaserver error from \(remoteAddress)")
+            logger.error("metaserver error from \(remoteAddress)")
         }
         context.close(promise: nil)
     }

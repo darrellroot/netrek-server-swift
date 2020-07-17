@@ -77,7 +77,7 @@ class Laser {
             }
             
             let playerHalfArc = Laser.zapPlayer / targetRange  // radians
-            debugPrint("Laser arc \(playerHalfArc) targetRange \(targetRange)")
+            logger.trace("Laser arc \(playerHalfArc) targetRange \(targetRange)")
             // 3 cases, 2 of which deal with origin
             if abs(playerDirection - self.direction) < playerHalfArc || (playerDirection - 0) + (Double.pi * 2 - self.direction) < playerHalfArc || (Double.pi * 2 - playerDirection) + (self.direction) < playerHalfArc {
                 // arc is correct, may hit
@@ -120,7 +120,7 @@ class Laser {
             }
             
             let plasmaHalfArc = Laser.zapPlasma / targetRange  // radians
-            debugPrint("Laser arc \(plasmaHalfArc) targetRange \(targetRange)")
+            logger.trace("Laser arc \(plasmaHalfArc) targetRange \(targetRange)")
             // 3 cases, 2 of which deal with origin
             if abs(plasmaDirection - self.direction) < plasmaHalfArc || (plasmaDirection - 0) + (Double.pi * 2 - self.direction) < plasmaHalfArc || (Double.pi * 2 - plasmaDirection) + (self.direction) < plasmaHalfArc {
                 // arc is correct, may hit
@@ -142,7 +142,7 @@ class Laser {
             self.target = closestHit.slot
             self.status = .hit
             let damage = shooter.ship.laserDamage * (1.0 - closestPlayerRange / myRange)
-            debugPrint("Laser myRange \(myRange) closestRange \(closestPlayerRange) damage \(damage)")
+            logger.trace("Laser myRange \(myRange) closestRange \(closestPlayerRange) damage \(damage)")
             closestHit.impact(damage: damage, attacker: self.player, whyDead: .laser)
             //let spMessage = MakePacket.spMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage", from: 255)
             shooter.sendMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage")
@@ -154,7 +154,7 @@ class Laser {
             self.targetPositionY = closestPlasmaHit.positionY
             closestPlasmaHit.explode()
             //let damage = shooter.ship.laserDamage * (1.0 - closestPlayerRange / myRange)
-            //debugPrint("Laser myRange \(myRange) closestRange \(closestPlayerRange) damage \(damage)")
+            //logger.trace("Laser myRange \(myRange) closestRange \(closestPlayerRange) damage \(damage)")
             //closestHit.impact(damage: damage, attacker: self.player, whyDead: .laser)
             //let spMessage = MakePacket.spMessage(message: "Laser hit player \(closestHit.slot) for \(Int(damage)) damage", from: 255)
             shooter.sendMessage(message: "Laser hit plasma \(closestPlasmaHit.number)")

@@ -20,13 +20,13 @@ class MetaserverUDP {
     let channel: Channel?
     init?(universe: Universe) {
         guard let domainName = netrekOptions.domainName else {
-            debugPrint("\(#file) \(#function) Error: metaserver registration code activated without specifying domainName on CLI.  Try --help")
+            logger.error("\(#file) \(#function) Error: metaserver registration code activated without specifying domainName on CLI.  Try --help")
             return nil
         }
         self.domainName = domainName
         self.universe = universe
         guard let remoteAddress = try? SocketAddress.makeAddressResolvingHost(metaserver, port: port) else {
-            debugPrint("\(#file) \(#function) failed to resolve host \(metaserver)")
+            logger.error("Failed to resolve host metaserver")
             return nil
         }
         self.remoteAddress = remoteAddress
@@ -35,14 +35,14 @@ class MetaserverUDP {
             .channelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .bind(host: "0.0.0.0", port: 0)
             .wait() else {
-                debugPrint("\(#file) \(#function) failed to initialize bootstrap")
+                logger.error("\(#file) \(#function) failed to initialize bootstrap")
                 return nil
         }
         self.channel = channel
         
         
         /*guard let channel = try? bootstrap.bind(host: "", port: port).wait() else {
-            debugPrint("\(#file) \(#function) failed to initialize channel")
+            logger.error("\(#file) \(#function) failed to initialize channel")
             return nil
         }
         self.channel = channel*/
@@ -51,11 +51,11 @@ class MetaserverUDP {
     
     func sendReport(ip: String, port: Int) {
         guard let remoteAddress = try? SocketAddress(ipAddress: ip, port: port) else {
-            debugPrint("\(#file) \(#function) Error: unable to resolve ip \(ip)")
+            logger.error("\(#file) \(#function) Error: unable to resolve ip \(ip)")
             return
         }
         guard let channel = channel else {
-            debugPrint("\(#file) \(#function) Error: channel not initialized")
+            logger.error("\(#file) \(#function) Error: channel not initialized")
             return
         }
         let report = makeReport()
@@ -106,7 +106,7 @@ class MetaserverUDP {
             }
             returnValue += "redacted\n" // user host
         }*/
-        debugPrint(returnValue)
+        logger.debug("metaserver report \(returnValue)")
         return returnValue
     }
 }
@@ -117,16 +117,16 @@ class MetaserverUDP {
     
     public func channelActive(context: ChannelHandlerContext) {
         self.context = context
-        debugPrint("\(#file) \(#function)")
+        logger.info("\(#file) \(#function)")
     }
     
     public func sendMessage(string: String, host: String, port: Int) {
         guard let context = self.context else {
-            debugPrint("\(#file) \(#function) Error: context nil")
+            logger.error("\(#file) \(#function) Error: context nil")
             return
         }
         guard let remoteAddress = try? SocketAddress.makeAddressResolvingHost(host, port: port) else {
-            debugPrint("\(#file) \(#function) Error: unable to resolve host \(host)")
+            logger.error("\(#file) \(#function) Error: unable to resolve host \(host)")
             return
         }
         let buffer = context.channel.allocator.buffer(string: string)

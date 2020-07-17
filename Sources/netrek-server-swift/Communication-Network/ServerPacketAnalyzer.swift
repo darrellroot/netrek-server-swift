@@ -29,12 +29,12 @@ class ServerPacketAnalyzer {
     }
     
     func analyze(incomingData: Data, connection: NWConnection) {
-        //debugPrint("incoming data size \(incomingData.count) leftOverData.size \(String(describing: leftOverData?.count))")
+        //logger.trace("incoming data size \(incomingData.count) leftOverData.size \(String(describing: leftOverData?.count))")
         var data = Data()
-        //debugPrint("one data.startIndex \(data.startIndex) data.endIndex \(data.endIndex)")
+        //logger.trace("one data.startIndex \(data.startIndex) data.endIndex \(data.endIndex)")
         
         if leftOverData != nil {
-            //debugPrint("leftoverdata.startIndex \(leftOverData!.startIndex) leftoverdata.endIndex \(leftOverData!.endIndex)")
+            //logger.trace("leftoverdata.startIndex \(leftOverData!.startIndex) leftoverdata.endIndex \(leftOverData!.endIndex)")
             //data.append(leftOverData!)
             var leftOverDataStruct: [UInt8] = []
             for byte in leftOverData! {
@@ -42,48 +42,48 @@ class ServerPacketAnalyzer {
             }
             //let leftOverDataStruct: [UInt8] = leftOverData!
             data = leftOverDataStruct + incomingData
-            //debugPrint("two")
-            //debugPrint("data startIndex \(data.startIndex) endIndex \(data.endIndex)\n")
-            //debugPrint("incomingData startIndex \(incomingData.startIndex) endIndex \(incomingData.endIndex)\n")
+            //logger.trace("two")
+            //logger.trace("data startIndex \(data.startIndex) endIndex \(data.endIndex)\n")
+            //logger.trace("incomingData startIndex \(incomingData.startIndex) endIndex \(incomingData.endIndex)\n")
 
             //data.append(incomingData)
-            //debugPrint("three")
+            //logger.trace("three")
             self.leftOverData = nil
         } else {
-            //debugPrint("four")
+            //logger.trace("four")
             data = incomingData
         }
-        //debugPrint("done copying data")
+        //logger.trace("done copying data")
         repeat {
             guard let packetType: UInt8 = data.first else {
-                debugPrint("PacketAnalyzer.analyze is done, should not have gotten here")
+                logger.error("PacketAnalyzer.analyze is done, should not have gotten here")
                 //appDelegate.reader?.receive()
                 return
             }
             guard let packetLength = PACKET_SIZES[Int(packetType)] else {
-                debugPrint("Warning: PacketAnalyzer.analyze received invalid packet type \(packetType) dumping data")
+                logger.error("Warning: PacketAnalyzer.analyze received invalid packet type \(packetType) dumping data")
                 printData(data, success: false)
                 return
             }
             guard packetLength > 0 else {
-                debugPrint("PacketAnalyzer invalid packet length \(packetLength) type \(packetType)")
+                logger.error("PacketAnalyzer invalid packet length \(packetLength) type \(packetType)")
                 printData(data, success: false)
                 return
             }
             guard data.count >= packetLength else {
-                debugPrint("PacketAnalyzer.analyze: fractional packet expected length \(packetLength) remaining size \(data.count) saving for next round")
+                logger.trace("PacketAnalyzer.analyze: fractional packet expected length \(packetLength) remaining size \(data.count) saving for next round")
                 self.leftOverData = Data()
                 for byte in data {
                     self.leftOverData?.append(byte)
                 }
                 //self.leftOverData!.append(data)
-                //debugPrint("created leftOverData startIndex \(leftOverData?.startIndex) endIndex \(leftOverData?.endIndex)")
-                //debugPrint("from data startIndex \(data.startIndex) endIndex \(data.endIndex)")
+                //logger.trace("created leftOverData startIndex \(leftOverData?.startIndex) endIndex \(leftOverData?.endIndex)")
+                //logger.trace("from data startIndex \(data.startIndex) endIndex \(data.endIndex)")
 
                 return
             }
             let range = (data.startIndex..<data.startIndex + packetLength)
-            //debugPrint("packetAnalyzer.analyze startIndex \(data.startIndex) packetLength \(packetLength) endindex \(data.endIndex) packetType \(packetType)")
+            //logger.trace("packetAnalyzer.analyze startIndex \(data.startIndex) packetLength \(packetLength) endindex \(data.endIndex) packetType \(packetType)")
             let thisPacket = data.subdata(in: range)
             self.analyzeOnePacket(data: thisPacket, connection: connection)
             data.removeFirst(packetLength)
@@ -98,7 +98,7 @@ class ServerPacketAnalyzer {
                 let addString = String(format:"%x ",byte)
                 dumpString += addString
             }
-            debugPrint(dumpString)
+            logger.trace(dumpString)
         }
     }
     private func getMessage(data: Data) -> String? {
@@ -119,25 +119,25 @@ class ServerPacketAnalyzer {
         }
     }
     func analyzeOnePacket(data: Data, connection: NWConnection) {
-        //debugPrint("in analyze one packet")
+        //logger.trace("in analyze one packet")
         guard data.count > 0 else {
-            debugPrint("PacketAnalyer.analyzeOnePacket data length 0")
+            logger.trace("PacketAnalyer.analyzeOnePacket data length 0")
             return
         }
         let packetType: UInt8 = data[0]
-        //debugPrint("in analyze one packet packetType \(packetType)")
+        //logger.trace("in analyze one packet packetType \(packetType)")
         guard let packetLength = PACKET_SIZES[Int(packetType)] else {
-            debugPrint("Warning: PacketAnalyzer.analyzeOnePacket received invalid packet type \(packetType)")
+            logger.trace("Warning: PacketAnalyzer.analyzeOnePacket received invalid packet type \(packetType)")
             printData(data, success: false)
             return
         }
         guard packetLength > 0 else {
-            debugPrint("PacketAnalyzer.analyzeOnePacket invalid packet length \(packetLength) type \(packetType)")
+            logger.error("PacketAnalyzer.analyzeOnePacket invalid packet length \(packetLength) type \(packetType)")
             printData(data, success: false)
             return
         }
         guard packetLength == data.count else {
-            debugPrint("PacketAnalyzer.analyeOnePacket unexpected data length \(data.count) expected \(packetLength) type \(packetType)")
+            logger.error("PacketAnalyzer.analyeOnePacket unexpected data length \(data.count) expected \(packetLength) type \(packetType)")
             printData(data, success: false)
             return
         }
@@ -164,10 +164,10 @@ class ServerPacketAnalyzer {
  
                 //messageString = NetrekMath.sanitizeString(messageString)
             //appDelegate.messageViewController?.gotMessage(messageString)
-                debugPrint(messageString)
+                logger.trace(messageString)
                 //printData(data, success: true)
             } else {
-                debugPrint("PacketAnalyzer unable to decode message type 1")
+                logger.error("PacketAnalyzer unable to decode message type 1")
                 printData(data, success: false)
             }
             //messageString = NetrekMath.sanitizeString(messageString)

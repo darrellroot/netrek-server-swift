@@ -357,7 +357,7 @@ struct SP_YOU {
         }
         if player.tractor != nil && player.tractorMode == .tractor { flags += 0x400000 }
         if player.tractor != nil && player.tractorMode == .pressor { flags += 0x800000 }
-        debugPrint("SP_YOU flags \(flags)")
+        logger.trace("SP_YOU flags \(flags)")
         self.flags = flags.byteSwapped
          */
         // copilot 0x10000 not implemented

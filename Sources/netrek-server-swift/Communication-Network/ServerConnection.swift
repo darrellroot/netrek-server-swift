@@ -27,7 +27,7 @@ class ServerConnection {
         ServerConnection.nextId += 1
         
         universe.addPlayer(connection: self)
-        debugPrint("Connected to \(connection.endpoint)")
+        logger.info("Connected to \(connection.endpoint)")
     }
     var didStopCallback: ((Error?) -> Void)? = nil
     
@@ -54,7 +54,7 @@ class ServerConnection {
     private func setupReceive() {
         connection.receive(minimumIncompleteLength: 1, maximumLength: MTU) { (data, _, isComplete, error) in
             if let data = data, !data.isEmpty {
-                debugPrint("received \(data.count) bytes of data from \(self.connection.endpoint)")
+                logger.trace("received \(data.count) bytes of data from \(self.connection.endpoint)")
                 self.serverPacketAnalyzer.analyze(incomingData: data, connection: self.connection)
                 //let message = String(data: data, encoding: .utf8)
                 //print("connection \(self.id) did receive, data: \(data as NSData) string: \(message ?? "-")")
@@ -75,7 +75,7 @@ class ServerConnection {
                 self.connectionDidFail(error: error)
                 return
             }
-            //debugPrint("connection \(self.connection.endpoint) did send, data: \(data as NSData)")
+            //logger.trace("connection \(self.connection.endpoint) did send, data: \(data as NSData)")
         }))
     }
     

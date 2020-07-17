@@ -16,9 +16,11 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.2.0"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
         .target(name: "netrek-server-swift", dependencies: [
+            .product(name: "Logging",package: "swift-log"),
             .product(name: "NIO", package: "swift-nio"),
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
         ]),

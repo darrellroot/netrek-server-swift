@@ -48,7 +48,7 @@ class RobotModel1: Robot {
             break
         case .outfit:
             guard me.receivedCpOutfit(team: me.team, ship: self.preferredShip) else {
-                debugPrint("\(#file) \(#function) Unable to outfit ship")
+                logger.error("\(#file) \(#function) Unable to outfit ship")
                 return
             }
             return
@@ -56,7 +56,7 @@ class RobotModel1: Robot {
             break
         case .dead:
             guard me.receivedCpOutfit(team: me.team, ship: self.preferredShip) else {
-                debugPrint("\(#file) \(#function) Unable to outfit ship")
+                logger.error("\(#file) \(#function) Unable to outfit ship")
                 return
             }
             return
@@ -191,7 +191,7 @@ class RobotModel1: Robot {
     
     private func decideStrategy() {
         guard let me = self.me else {
-            debugPrint("\(#file) \(#function) Unable to identify myself")
+            logger.error("\(#file) \(#function) Unable to identify myself")
             return
         }
         switch self.strategy {

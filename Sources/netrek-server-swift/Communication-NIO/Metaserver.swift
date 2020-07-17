@@ -48,16 +48,16 @@ class Metaserver {
         self.universe = universe
     }
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        debugPrint("metaserver channel read")
+        logger.trace("metaserver channel read")
         context.flush()
     }
     public func channelReadComplete(context: ChannelHandlerContext) {
-        debugPrint("metaserver channelReadcomplete")
+        logger.info("metaserver channelReadcomplete")
         context.flush()
     }
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
-        debugPrint("metaserver error caught")
-        debugPrint("error: ",error)
+        logger.error("metaserver error caught")
+        logger.error("error: ",error)
         context.close(promise: nil)
     }
 }*/

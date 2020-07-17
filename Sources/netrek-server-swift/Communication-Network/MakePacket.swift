@@ -49,7 +49,7 @@ class MakePacket {
             }
         }
         let data = Data(bytes: &packet, count: message_length + 4)
-        debugPrint("Sending SP_MESSAGE 1 message \(message)")
+        logger.debug("Sending SP_MESSAGE 1 message \(message)")
         return data
     }
 
@@ -133,7 +133,7 @@ class MakePacket {
             }
         }
         let data = Data(bytes: &packet, count: message_length + 4)
-        debugPrint("Sending SP_MOTD 11 motd \(motd)")
+        logger.debug("Sending SP_MOTD 11 motd \(motd)")
         return data
 
     }
@@ -150,7 +150,7 @@ class MakePacket {
         var position = 0
         let myPlayerNum = player.playerNum
         if player.playerNum < 32 {
-            debugPrint("\(#file) \(#function) Unexpected error playerNum < 32 \(player.playerNum)")
+            logger.error("\(#file) \(#function) Unexpected error playerNum < 32 \(player.playerNum)")
             position = 0
         }
         for otherPlayer in universe.players {

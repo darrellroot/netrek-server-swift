@@ -45,7 +45,7 @@ class Universe {
     //var connectionsById: [Int: ServerConnection] = [:]
     
     init() {
-        debugPrint("Universe.init")
+        //logger.info("Universe.init")
         
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let player = Player(slot: slotnum, universe: self)
@@ -107,7 +107,7 @@ class Universe {
             self.timerFired()
         }
         timer?.tolerance = 0.3 / updatesPerSecond
-        debugPrint("Timer initialized")
+        //logger.info("Timer initialized")
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
         }
@@ -119,12 +119,13 @@ class Universe {
                 debugPrint("Error: unable to send to metaserver")
             }
         } else {
+            //cannot log here
             debugPrint("No metaserver specified on CLI: skipping metaserver reports")
         }
     }
     
     deinit {
-        debugPrint("universe.deinit")
+        logger.critical("universe.deinit")
     }
     /*
      SP_PLANET_LOC pnum= 1 x= 10000 y= 60000 name= Rigel
@@ -181,7 +182,7 @@ class Universe {
         // it only sends updates for planets with needsUpdate set
         // but always sends updates if force = true
         for planet in planets.filter({($0.needsUpdate == true) || forceUpdate}) {
-            debugPrint("Sending SP_PLANETs for \(planet.name)")
+            logger.debug("Sending SP_PLANETs for \(planet.name)")
             let data = MakePacket.spPlanet(planet: planet)
             for player in activePlayers {
                 if let context = player.context {
@@ -196,7 +197,7 @@ class Universe {
     }
     @objc func timerFired() {
         self.timerCount += 1
-        //debugPrint("\(#file) \(#function) count \(self.timerCount)")
+        //logger.trace("\(#file) \(#function) count \(self.timerCount)")
         self.sendPlanetUpdates()
         for player in self.players {
             if player.status != .free {
@@ -230,7 +231,7 @@ class Universe {
                 metaserver.sendReport(ip: "63.170.91.110", port: 3521)
 
             } else {
-                debugPrint("Error: unable to send to metaserver")
+                logger.error("Error: unable to send to metaserver")
             }
         }
     }
@@ -240,7 +241,7 @@ class Universe {
                 return player
             }
         }
-        debugPrint("Error: \(#file) \(#function) unable to find player for context \(context)")
+        logger.error("Error: \(#file) \(#function) unable to find player for context \(context)")
         return nil
     }
     func player(remoteAddress: SocketAddress) -> Player? {
@@ -252,7 +253,7 @@ class Universe {
                 return player
             }
         }
-        debugPrint("Error: \(#file) \(#function) unable to find player for connection \(connection)")
+        logger.error("Error: \(#file) \(#function) unable to find player for connection \(connection)")
         return nil
     }*/
     /*func connectionEnded(connection: ServerConnection) {
@@ -276,10 +277,10 @@ class Universe {
     
     /*func send(playerid: Int, data: Data) {
         guard let player = players[safe: playerid] else {
-            debugPrint("Error \(#file) \(#function) no connection for id \(playerid) ")
+            logger.error("Error \(#file) \(#function) no connection for id \(playerid) ")
             return
         }
-        debugPrint("sending \(data.count) bytes to playerid \(playerid)")
+        logger.trace("sending \(data.count) bytes to playerid \(playerid)")
         player.connection?.send(data: data)
     }*/
 }

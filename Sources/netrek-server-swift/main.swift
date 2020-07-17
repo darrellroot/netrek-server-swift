@@ -8,12 +8,16 @@
 
 import Foundation
 import NIO
+import Logging
 
 print("Initializing server")
 
 let netrekOptions = NetrekOptions.parseOrExit()
 
 let universe = Universe()
+LoggingSystem.bootstrap(NetrekLogHandler.init)
+let logger = Logger(label: "net.networkmom.netrek-server-swift")
+//let netrekLogHandler = NetrekLogHandler(logDirectory: "/tmp")
 //let server = Server(port: 2592, universe: universe)
 //try! server.start()
 
@@ -51,7 +55,6 @@ print("Server started and listening on \(localAddress)")
 
 nioQueue.async {
     // This will never unblock as we don't close the ServerChannel.
-    //debugPrint("hi")
     try! channel.closeFuture.wait()
 }*/
 RunLoop.current.run()

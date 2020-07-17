@@ -46,7 +46,7 @@ class Plasma: Thing {
                         _ = context.channel.writeAndFlush(buffer)
                     }
                 }
-                debugPrint("Sending SPlasmaInfo")
+                logger.debug("Sending SPlasmaInfo")
             }
         }
     }
@@ -195,10 +195,13 @@ class Plasma: Thing {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                     _ = context.channel.writeAndFlush(buffer)
-                    debugPrint("Sending SpPlasma to player \(player.slot)")
+                    logger.debug("Sending SpPlasma to player \(player.slot)")
                 }
             } else {
-                debugPrint("failed to send SpPlasma to player \(player.slot)")
+                // only failure if player is human
+                if player.robot == nil {
+                    logger.error("failed to send SpPlasma to player \(player.slot)")
+                }
             }
             //player.connection?.send(data: spTorp)
         }
@@ -234,9 +237,9 @@ class Plasma: Thing {
         case .free:
             return
         case .alive:
-            debugPrint("Plasma alive")
+            logger.trace("Plasma alive")
             if Date() > self.expiration {
-                debugPrint("Plasma expired")
+                logger.trace("Plasma expired")
                 self.state = .free
                 //TODO send update when freeing torps
             }
@@ -251,13 +254,15 @@ class Plasma: Thing {
                         let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                         _ = context.channel.writeAndFlush(buffer)
                     }
-                    debugPrint("Sending SpPlasma to player \(player.slot)")
+                    logger.debug("Sending SpPlasma to player \(player.slot)")
                 } else {
-                    debugPrint("failed to send SpPlasma to player \(player.slot)")
+                    // only a failure if player is human
+                    if player.robot == nil {
+                        logger.error("failed to send SpPlasma to player \(player.slot)")
+                    }
                 }
 
                 //player.connection?.send(data: spTorp)
-                //debugPrint("Sending SpTorp")
             }
         case .explode:
             if Date() > self.expiration + 1.0 {
@@ -268,10 +273,13 @@ class Plasma: Thing {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                             _ = context.channel.writeAndFlush(buffer)
-                            debugPrint("Sending SpPlasma to player \(player.slot)")
+                            logger.debug("Sending SpPlasma to player \(player.slot)")
                         }
                     } else {
-                        debugPrint("failed to send SpPlasma to player \(player.slot)")
+                        // only failure if player is human
+                        if player.robot == nil {
+                            debugPrint("failed to send SpPlasma to player \(player.slot)")
+                        }
                     }
                 }
             }
