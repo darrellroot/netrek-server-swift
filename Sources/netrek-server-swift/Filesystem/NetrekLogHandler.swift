@@ -19,14 +19,25 @@ import Logging
  */
 struct NetrekLogHandler: LogHandler {
     
+    let dateFormatter = DateFormatter()
+    
     var metadata: Logger.Metadata = [:]
     
-    var logLevel: Logger.Level = .debug
+    var logLevel: Logger.Level
     
     var logFile: [Logger.Level: FileHandle] = [:]
 
     let fileManager = FileManager()
     public init(label: String) {
+        if netrekOptions.debug {
+            self.logLevel = .debug
+        } else {
+            self.logLevel = .info
+        }
+        //dateFormatter.dateStyle = .medium
+        //dateFormatter.timeStyle = .medium
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+
         let directory = netrekOptions.directory
         if !fileManager.directoryExists(directory) {
             do {
@@ -55,7 +66,8 @@ struct NetrekLogHandler: LogHandler {
                     message: Logger.Message,
                     metadata: Logger.Metadata?,
                     file: String, function: String, line: UInt) {
-        guard let data = "\(file) \(function) \(line) \(level) \(message)\n".data(using: .utf8) else { return }
+        let date = dateFormatter.string(from: Date())
+        guard let data = "\(date) \(file) \(function) \(line) \(level) \(message)\n".data(using: .utf8) else { return }
         guard let logFile = logFile[level] else { return }
         logFile.seekToEndOfFile()
         logFile.write(data)
