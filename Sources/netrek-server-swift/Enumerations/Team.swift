@@ -13,6 +13,7 @@ import Foundation
 enum Team: Int, CaseIterable {
     
     static let broncoTeams = [Team.federation,Team.roman]
+    static let empireTeams = [Team.federation,Team.roman,Team.kazari,Team.orion]
     
     case independent = 0
     case federation = 1

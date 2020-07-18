@@ -25,7 +25,11 @@ class Planet: Thing {
     var agri = false { didSet { needsUpdate = true } }
     var planetID: Int
     var name: String { didSet { needsUpdate = true } }
-    var team: Team { didSet { needsUpdate = true } }
+    var team: Team {
+        didSet {
+            needsUpdate = true
+        }
+    }
     let initialTeam: Team
     var homeworld: Bool { didSet { needsUpdate = true } }
     var armies = Int.random(in: 4 ..< 14) { didSet { needsUpdate = true } }
@@ -119,6 +123,9 @@ class Planet: Thing {
                 user.tArmies += 1
                 user.tPlanets += 1
             }
+            if netrekOptions.gameStyle == .empire {
+                universe.checkForWin()
+            }
         case 1: //armies, will make indi
             self.team = .independent
             self.armies = 0
@@ -136,6 +143,9 @@ class Planet: Thing {
                 user.intramuralArmies += 1
             case .tmode:
                 user.tArmies += 1
+            }
+            if netrekOptions.gameStyle == .bronco {
+                universe.checkForWin()
             }
             return
         case 2...:

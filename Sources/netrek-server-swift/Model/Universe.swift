@@ -15,7 +15,51 @@ class Universe {
     let updatesPerSecond = 10.0
     var timer: Timer?
     var timerCount = 0
+    
+    static let startPlanets = [
+        Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
+        Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
+        Planet(planetID: 2, positionX: 25000, positionY: 60000, name: "Canopus", team: .federation, homeworld: false),
+        Planet(planetID: 3, positionX: 44000, positionY: 81000, name: "Beta Crucis", team: .federation, homeworld: false),
+        Planet(planetID: 4, positionX: 39000, positionY: 55000, name: "Organia", team: .federation, homeworld: false),
+        Planet(planetID: 5, positionX: 30000, positionY: 90000, name: "Deneb", team: .federation, homeworld: false),
+        Planet(planetID: 6, positionX: 45000, positionY: 66000, name: "Ceti Alpha V", team: .federation, homeworld: false),
+        Planet(planetID: 7, positionX: 11000, positionY: 75000, name: "Altair", team: .federation, homeworld: false),
+        Planet(planetID: 8, positionX: 8000, positionY: 93000, name: "Vega", team: .federation, homeworld: false),
+        Planet(planetID: 9, positionX: 32000, positionY: 74000, name: "Alpha Centauri", team: .federation, homeworld: false),
+        Planet(planetID: 10, positionX: 20000, positionY: 20000, name: "Rome", team: .roman, homeworld: true),
+        Planet(planetID: 11, positionX: 45000, positionY: 7000, name: "Eridani", team: .roman, homeworld: false),
+        Planet(planetID: 12, positionX: 4000, positionY: 12000, name: "Aldeberan", team: .roman, homeworld: false),
+        Planet(planetID: 13, positionX: 42000, positionY: 44000, name: "Regulus", team: .roman, homeworld: false),
+        Planet(planetID: 14, positionX: 13000, positionY: 45000, name: "Capella", team: .roman, homeworld: false),
+        Planet(planetID: 15, positionX: 28000, positionY: 8000, name: "Tauri", team: .roman, homeworld: false),
+        Planet(planetID: 16, positionX: 28000, positionY: 23000, name: "Draconis", team: .roman, homeworld: false),
+        Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
+        Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
+        Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
+        Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
+        Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
+        Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
+        Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
+        Planet(planetID: 24, positionX: 91120, positionY: 9320, name: "Praxis", team: .kazari, homeworld: false),
+        Planet(planetID: 25, positionX: 89960, positionY: 31760, name: "Lyrae", team: .kazari, homeworld: false),
+        Planet(planetID: 26, positionX: 70720, positionY: 26320, name: "Scorpii", team: .kazari, homeworld: false),
+        Planet(planetID: 27, positionX: 83600, positionY: 45400, name: "Mira", team: .kazari, homeworld: false),
+        Planet(planetID: 28, positionX: 54600, positionY: 22600, name: "Cygni", team: .kazari, homeworld: false),
+        Planet(planetID: 29, positionX: 73080, positionY: 6640, name: "Achernar", team: .kazari, homeworld: false),
+        Planet(planetID: 30, positionX: 80000, positionY: 80000, name: "Orion", team: .orion, homeworld: true),
+        Planet(planetID: 31, positionX: 91200, positionY: 56600, name: "Cassiopeia", team: .orion, homeworld: false),
+        Planet(planetID: 32, positionX: 70800, positionY: 54200, name: "El Nath", team: .orion, homeworld: false),
+        Planet(planetID: 33, positionX: 57400, positionY: 62600, name: "Spica", team: .orion, homeworld: false),
+        Planet(planetID: 34, positionX: 72720, positionY: 70880, name: "Procyon", team: .orion, homeworld: false),
+        Planet(planetID: 35, positionX: 61400, positionY: 77000, name: "Polaris", team: .orion, homeworld: false),
+        Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
+        Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
+        Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
+        Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
         
+    ]
+
     var players: [Player] = []
     
     var activePlayers: [Player] {
@@ -28,7 +72,49 @@ class Universe {
         return self.players.filter({$0.status != .free && $0.context != nil})
     }
     
-    var planets: [Planet] = []
+    var planets: [Planet] = [
+        Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
+        Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
+        Planet(planetID: 2, positionX: 25000, positionY: 60000, name: "Canopus", team: .federation, homeworld: false),
+        Planet(planetID: 3, positionX: 44000, positionY: 81000, name: "Beta Crucis", team: .federation, homeworld: false),
+        Planet(planetID: 4, positionX: 39000, positionY: 55000, name: "Organia", team: .federation, homeworld: false),
+        Planet(planetID: 5, positionX: 30000, positionY: 90000, name: "Deneb", team: .federation, homeworld: false),
+        Planet(planetID: 6, positionX: 45000, positionY: 66000, name: "Ceti Alpha V", team: .federation, homeworld: false),
+        Planet(planetID: 7, positionX: 11000, positionY: 75000, name: "Altair", team: .federation, homeworld: false),
+        Planet(planetID: 8, positionX: 8000, positionY: 93000, name: "Vega", team: .federation, homeworld: false),
+        Planet(planetID: 9, positionX: 32000, positionY: 74000, name: "Alpha Centauri", team: .federation, homeworld: false),
+        Planet(planetID: 10, positionX: 20000, positionY: 20000, name: "Rome", team: .roman, homeworld: true),
+        Planet(planetID: 11, positionX: 45000, positionY: 7000, name: "Eridani", team: .roman, homeworld: false),
+        Planet(planetID: 12, positionX: 4000, positionY: 12000, name: "Aldeberan", team: .roman, homeworld: false),
+        Planet(planetID: 13, positionX: 42000, positionY: 44000, name: "Regulus", team: .roman, homeworld: false),
+        Planet(planetID: 14, positionX: 13000, positionY: 45000, name: "Capella", team: .roman, homeworld: false),
+        Planet(planetID: 15, positionX: 28000, positionY: 8000, name: "Tauri", team: .roman, homeworld: false),
+        Planet(planetID: 16, positionX: 28000, positionY: 23000, name: "Draconis", team: .roman, homeworld: false),
+        Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
+        Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
+        Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
+        Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
+        Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
+        Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
+        Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
+        Planet(planetID: 24, positionX: 91120, positionY: 9320, name: "Praxis", team: .kazari, homeworld: false),
+        Planet(planetID: 25, positionX: 89960, positionY: 31760, name: "Lyrae", team: .kazari, homeworld: false),
+        Planet(planetID: 26, positionX: 70720, positionY: 26320, name: "Scorpii", team: .kazari, homeworld: false),
+        Planet(planetID: 27, positionX: 83600, positionY: 45400, name: "Mira", team: .kazari, homeworld: false),
+        Planet(planetID: 28, positionX: 54600, positionY: 22600, name: "Cygni", team: .kazari, homeworld: false),
+        Planet(planetID: 29, positionX: 73080, positionY: 6640, name: "Achernar", team: .kazari, homeworld: false),
+        Planet(planetID: 30, positionX: 80000, positionY: 80000, name: "Orion", team: .orion, homeworld: true),
+        Planet(planetID: 31, positionX: 91200, positionY: 56600, name: "Cassiopeia", team: .orion, homeworld: false),
+        Planet(planetID: 32, positionX: 70800, positionY: 54200, name: "El Nath", team: .orion, homeworld: false),
+        Planet(planetID: 33, positionX: 57400, positionY: 62600, name: "Spica", team: .orion, homeworld: false),
+        Planet(planetID: 34, positionX: 72720, positionY: 70880, name: "Procyon", team: .orion, homeworld: false),
+        Planet(planetID: 35, positionX: 61400, positionY: 77000, name: "Polaris", team: .orion, homeworld: false),
+        Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
+        Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
+        Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
+        Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
+        
+    ]
     //var queue: [Player] = []
     static let MAXPLAYERS = 32
     var homeworld: [Team:Planet] = [:]
@@ -47,49 +133,7 @@ class Universe {
     init() {
         //logger.info("Universe.init")
         
-        planets = [
-            Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
-            Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
-            Planet(planetID: 2, positionX: 25000, positionY: 60000, name: "Canopus", team: .federation, homeworld: false),
-            Planet(planetID: 3, positionX: 44000, positionY: 81000, name: "Beta Crucis", team: .federation, homeworld: false),
-            Planet(planetID: 4, positionX: 39000, positionY: 55000, name: "Organia", team: .federation, homeworld: false),
-            Planet(planetID: 5, positionX: 30000, positionY: 90000, name: "Deneb", team: .federation, homeworld: false),
-            Planet(planetID: 6, positionX: 45000, positionY: 66000, name: "Ceti Alpha V", team: .federation, homeworld: false),
-            Planet(planetID: 7, positionX: 11000, positionY: 75000, name: "Altair", team: .federation, homeworld: false),
-            Planet(planetID: 8, positionX: 8000, positionY: 93000, name: "Vega", team: .federation, homeworld: false),
-            Planet(planetID: 9, positionX: 32000, positionY: 74000, name: "Alpha Centauri", team: .federation, homeworld: false),
-            Planet(planetID: 10, positionX: 20000, positionY: 20000, name: "Rome", team: .roman, homeworld: true),
-            Planet(planetID: 11, positionX: 45000, positionY: 7000, name: "Eridani", team: .roman, homeworld: false),
-            Planet(planetID: 12, positionX: 4000, positionY: 12000, name: "Aldeberan", team: .roman, homeworld: false),
-            Planet(planetID: 13, positionX: 42000, positionY: 44000, name: "Regulus", team: .roman, homeworld: false),
-            Planet(planetID: 14, positionX: 13000, positionY: 45000, name: "Capella", team: .roman, homeworld: false),
-            Planet(planetID: 15, positionX: 28000, positionY: 8000, name: "Tauri", team: .roman, homeworld: false),
-            Planet(planetID: 16, positionX: 28000, positionY: 23000, name: "Draconis", team: .roman, homeworld: false),
-            Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
-            Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
-            Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
-            Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
-            Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
-            Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
-            Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
-            Planet(planetID: 24, positionX: 91120, positionY: 9320, name: "Praxis", team: .kazari, homeworld: false),
-            Planet(planetID: 25, positionX: 89960, positionY: 31760, name: "Lyrae", team: .kazari, homeworld: false),
-            Planet(planetID: 26, positionX: 70720, positionY: 26320, name: "Scorpii", team: .kazari, homeworld: false),
-            Planet(planetID: 27, positionX: 83600, positionY: 45400, name: "Mira", team: .kazari, homeworld: false),
-            Planet(planetID: 28, positionX: 54600, positionY: 22600, name: "Cygni", team: .kazari, homeworld: false),
-            Planet(planetID: 29, positionX: 73080, positionY: 6640, name: "Achernar", team: .kazari, homeworld: false),
-            Planet(planetID: 30, positionX: 80000, positionY: 80000, name: "Orion", team: .orion, homeworld: true),
-            Planet(planetID: 31, positionX: 91200, positionY: 56600, name: "Cassiopeia", team: .orion, homeworld: false),
-            Planet(planetID: 32, positionX: 70800, positionY: 54200, name: "El Nath", team: .orion, homeworld: false),
-            Planet(planetID: 33, positionX: 57400, positionY: 62600, name: "Spica", team: .orion, homeworld: false),
-            Planet(planetID: 34, positionX: 72720, positionY: 70880, name: "Procyon", team: .orion, homeworld: false),
-            Planet(planetID: 35, positionX: 61400, positionY: 77000, name: "Polaris", team: .orion, homeworld: false),
-            Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
-            Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
-            Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
-            Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
-            
-        ]
+        //planets = Universe.startPlanets
         
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let homeworld: Planet?
@@ -249,6 +293,173 @@ class Universe {
             }
         }
     }
+    public func checkForWin() {
+        switch netrekOptions.gameStyle {
+            
+        case .bronco:
+            checkForWinBronco()
+        case .empire:
+            checkForWinEmpire()
+        }
+    }
+    func checkForWinEmpire() {
+        var planetCount: [Team:Int] = [:]
+        for team in Team.allCases {
+            planetCount[team] = 0
+        }
+        for planet in self.planets {
+            planetCount[planet.team]! += 1
+        }
+        let goal = self.planets.count * 3 / 4
+        for team in Team.empireTeams {
+            if planetCount[team]! >= goal {
+                empireWin(winner: team)
+            }
+        }
+    }
+    func checkForWinBronco() {
+        var planetCount: [Team:Int] = [:]
+        for team in Team.allCases {
+            planetCount[team] = 0
+        }
+        for planet in self.planets {
+            planetCount[planet.team]! += 1
+        }
+        for team in Team.broncoTeams {
+            if planetCount[team]! < 1 {
+                broncoLoss(loser: team)
+            }
+        }
+    }
+    func broncoLoss(loser: Team) {
+        let winner = Team.broncoTeams.filter({$0 != loser}).first!
+        for player in humanPlayers {
+            player.sendMessage(message: "\(winner) dominates the galaxy!")
+        }
+        for player in activePlayers.filter({$0.team == loser}) {
+            player.impact(damage: 9999, whyDead: .genocide)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.broncoReset()
+        }
+    }
+    
+    func empireWin(winner: Team) {
+        for player in humanPlayers {
+            player.sendMessage(message: "\(winner) dominates the galaxy!")
+        }
+        for player in activePlayers.filter({$0.team != winner}) {
+            player.impact(damage: 9999, whyDead: .genocide)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.empireReset()
+        }
+    }
+    
+    func empireReset() {
+        self.planets = [
+            Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
+            Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
+            Planet(planetID: 2, positionX: 25000, positionY: 60000, name: "Canopus", team: .federation, homeworld: false),
+            Planet(planetID: 3, positionX: 44000, positionY: 81000, name: "Beta Crucis", team: .federation, homeworld: false),
+            Planet(planetID: 4, positionX: 39000, positionY: 55000, name: "Organia", team: .federation, homeworld: false),
+            Planet(planetID: 5, positionX: 30000, positionY: 90000, name: "Deneb", team: .federation, homeworld: false),
+            Planet(planetID: 6, positionX: 45000, positionY: 66000, name: "Ceti Alpha V", team: .federation, homeworld: false),
+            Planet(planetID: 7, positionX: 11000, positionY: 75000, name: "Altair", team: .federation, homeworld: false),
+            Planet(planetID: 8, positionX: 8000, positionY: 93000, name: "Vega", team: .federation, homeworld: false),
+            Planet(planetID: 9, positionX: 32000, positionY: 74000, name: "Alpha Centauri", team: .federation, homeworld: false),
+            Planet(planetID: 10, positionX: 20000, positionY: 20000, name: "Rome", team: .roman, homeworld: true),
+            Planet(planetID: 11, positionX: 45000, positionY: 7000, name: "Eridani", team: .roman, homeworld: false),
+            Planet(planetID: 12, positionX: 4000, positionY: 12000, name: "Aldeberan", team: .roman, homeworld: false),
+            Planet(planetID: 13, positionX: 42000, positionY: 44000, name: "Regulus", team: .roman, homeworld: false),
+            Planet(planetID: 14, positionX: 13000, positionY: 45000, name: "Capella", team: .roman, homeworld: false),
+            Planet(planetID: 15, positionX: 28000, positionY: 8000, name: "Tauri", team: .roman, homeworld: false),
+            Planet(planetID: 16, positionX: 28000, positionY: 23000, name: "Draconis", team: .roman, homeworld: false),
+            Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
+            Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
+            Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
+            Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
+            Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
+            Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
+            Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
+            Planet(planetID: 24, positionX: 91120, positionY: 9320, name: "Praxis", team: .kazari, homeworld: false),
+            Planet(planetID: 25, positionX: 89960, positionY: 31760, name: "Lyrae", team: .kazari, homeworld: false),
+            Planet(planetID: 26, positionX: 70720, positionY: 26320, name: "Scorpii", team: .kazari, homeworld: false),
+            Planet(planetID: 27, positionX: 83600, positionY: 45400, name: "Mira", team: .kazari, homeworld: false),
+            Planet(planetID: 28, positionX: 54600, positionY: 22600, name: "Cygni", team: .kazari, homeworld: false),
+            Planet(planetID: 29, positionX: 73080, positionY: 6640, name: "Achernar", team: .kazari, homeworld: false),
+            Planet(planetID: 30, positionX: 80000, positionY: 80000, name: "Orion", team: .orion, homeworld: true),
+            Planet(planetID: 31, positionX: 91200, positionY: 56600, name: "Cassiopeia", team: .orion, homeworld: false),
+            Planet(planetID: 32, positionX: 70800, positionY: 54200, name: "El Nath", team: .orion, homeworld: false),
+            Planet(planetID: 33, positionX: 57400, positionY: 62600, name: "Spica", team: .orion, homeworld: false),
+            Planet(planetID: 34, positionX: 72720, positionY: 70880, name: "Procyon", team: .orion, homeworld: false),
+            Planet(planetID: 35, positionX: 61400, positionY: 77000, name: "Polaris", team: .orion, homeworld: false),
+            Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
+            Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
+            Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
+            Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
+            
+        ]
+        for player in activePlayers {
+            player.impact(damage: 9999, whyDead: .genocide)
+        }
+        for player in humanPlayers {
+            player.sendMessage(message: "A new war spreads across the new galaxy!")
+        }
+    }
+    
+    func broncoReset() {
+        self.planets = [
+            Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
+            Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
+            Planet(planetID: 2, positionX: 25000, positionY: 60000, name: "Canopus", team: .federation, homeworld: false),
+            Planet(planetID: 3, positionX: 44000, positionY: 81000, name: "Beta Crucis", team: .federation, homeworld: false),
+            Planet(planetID: 4, positionX: 39000, positionY: 55000, name: "Organia", team: .federation, homeworld: false),
+            Planet(planetID: 5, positionX: 30000, positionY: 90000, name: "Deneb", team: .federation, homeworld: false),
+            Planet(planetID: 6, positionX: 45000, positionY: 66000, name: "Ceti Alpha V", team: .federation, homeworld: false),
+            Planet(planetID: 7, positionX: 11000, positionY: 75000, name: "Altair", team: .federation, homeworld: false),
+            Planet(planetID: 8, positionX: 8000, positionY: 93000, name: "Vega", team: .federation, homeworld: false),
+            Planet(planetID: 9, positionX: 32000, positionY: 74000, name: "Alpha Centauri", team: .federation, homeworld: false),
+            Planet(planetID: 10, positionX: 20000, positionY: 20000, name: "Rome", team: .roman, homeworld: true),
+            Planet(planetID: 11, positionX: 45000, positionY: 7000, name: "Eridani", team: .roman, homeworld: false),
+            Planet(planetID: 12, positionX: 4000, positionY: 12000, name: "Aldeberan", team: .roman, homeworld: false),
+            Planet(planetID: 13, positionX: 42000, positionY: 44000, name: "Regulus", team: .roman, homeworld: false),
+            Planet(planetID: 14, positionX: 13000, positionY: 45000, name: "Capella", team: .roman, homeworld: false),
+            Planet(planetID: 15, positionX: 28000, positionY: 8000, name: "Tauri", team: .roman, homeworld: false),
+            Planet(planetID: 16, positionX: 28000, positionY: 23000, name: "Draconis", team: .roman, homeworld: false),
+            Planet(planetID: 17, positionX: 40000, positionY: 25000, name: "Sirius", team: .roman, homeworld: false),
+            Planet(planetID: 18, positionX: 25000, positionY: 44000, name: "Indi", team: .roman, homeworld: false),
+            Planet(planetID: 19, positionX: 8000, positionY: 29000, name: "Hydrae", team: .roman, homeworld: false),
+            Planet(planetID: 20, positionX: 80000, positionY: 20000, name: "Kazari", team: .kazari, homeworld: true),
+            Planet(planetID: 21, positionX: 70000, positionY: 40000, name: "Pliedes V", team: .kazari, homeworld: false),
+            Planet(planetID: 22, positionX: 60000, positionY: 10000, name: "Andromeda", team: .kazari, homeworld: false),
+            Planet(planetID: 23, positionX: 56400, positionY: 38200, name: "Lalande", team: .kazari, homeworld: false),
+            Planet(planetID: 24, positionX: 91120, positionY: 9320, name: "Praxis", team: .kazari, homeworld: false),
+            Planet(planetID: 25, positionX: 89960, positionY: 31760, name: "Lyrae", team: .kazari, homeworld: false),
+            Planet(planetID: 26, positionX: 70720, positionY: 26320, name: "Scorpii", team: .kazari, homeworld: false),
+            Planet(planetID: 27, positionX: 83600, positionY: 45400, name: "Mira", team: .kazari, homeworld: false),
+            Planet(planetID: 28, positionX: 54600, positionY: 22600, name: "Cygni", team: .kazari, homeworld: false),
+            Planet(planetID: 29, positionX: 73080, positionY: 6640, name: "Achernar", team: .kazari, homeworld: false),
+            Planet(planetID: 30, positionX: 80000, positionY: 80000, name: "Orion", team: .orion, homeworld: true),
+            Planet(planetID: 31, positionX: 91200, positionY: 56600, name: "Cassiopeia", team: .orion, homeworld: false),
+            Planet(planetID: 32, positionX: 70800, positionY: 54200, name: "El Nath", team: .orion, homeworld: false),
+            Planet(planetID: 33, positionX: 57400, positionY: 62600, name: "Spica", team: .orion, homeworld: false),
+            Planet(planetID: 34, positionX: 72720, positionY: 70880, name: "Procyon", team: .orion, homeworld: false),
+            Planet(planetID: 35, positionX: 61400, positionY: 77000, name: "Polaris", team: .orion, homeworld: false),
+            Planet(planetID: 36, positionX: 55600, positionY: 89000, name: "Arcturus", team: .orion, homeworld: false),
+            Planet(planetID: 37, positionX: 91000, positionY: 94000, name: "Ursae Majoris", team: .orion, homeworld: false),
+            Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
+            Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
+            
+        ]
+        for player in activePlayers {
+            player.impact(damage: 9999, whyDead: .genocide)
+        }
+        for player in humanPlayers {
+            player.sendMessage(message: "A new war spreads across the new galaxy!")
+        }
+    }
+    
     func player(context: ChannelHandlerContext) -> Player? {
         for player in self.players {
             if context === player.context {

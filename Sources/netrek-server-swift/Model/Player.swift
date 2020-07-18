@@ -874,11 +874,11 @@ class Player: Thing {
         }
     }
     func receivedCpRefit(ship: ShipType) {
-        guard let homeworld = universe.homeworld[self.team] else {
+        /*guard let homeworld = universe.homeworld[self.team] else {
             self.sendMessage(message: "Unexpected server error: I cannot identify your homeworld")
             return
-        }
-        guard let orbit = self.orbit, orbit === homeworld else {
+        }*/
+        guard let orbit = self.orbit, orbit === self.homeworld else {
             self.sendMessage(message: "You must be orbiting your homeworld to change ships")
             return
         }
@@ -1792,6 +1792,7 @@ extension Player {
             } else {
                 //first enemy in our algorithm
                 nearestEnemy = candidateEnemy
+                nearestDistance = NetrekMath.distance(candidateEnemy, self)
             }
         }
         return nearestEnemy

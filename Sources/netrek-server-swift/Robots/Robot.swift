@@ -57,7 +57,7 @@ extension Robot {
         }
         return nearestPlanet
     }
-    func nearestEnemy() -> Player? {
+    /*func nearestEnemy() -> Player? {
         guard let me = me else {
             return nil
         }
@@ -76,6 +76,6 @@ extension Robot {
             }
         }
         return nearestEnemy
-    }
+    }*/
 
 }

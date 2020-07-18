@@ -62,7 +62,7 @@ class RobotModel1: Robot {
             return
         case .alive:
             decideStrategy()
-            guard let nearestEnemy = self.nearestEnemy() else {
+            guard let nearestEnemy = me.nearestEnemy() else {
                 return
             }
             adjustShields(nearestEnemy: nearestEnemy)
