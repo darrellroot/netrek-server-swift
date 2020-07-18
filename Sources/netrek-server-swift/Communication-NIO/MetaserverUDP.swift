@@ -67,7 +67,12 @@ class MetaserverUDP {
         var returnValue = ""
         returnValue += "b\n"  // version
         returnValue += "\(domainName)\n" //netrek server DNS name
-        returnValue += "B\n"  // type
+        switch netrekOptions.gameStyle {
+        case .bronco:
+            returnValue += "B\n"  // type
+        case .empire:
+            returnValue += "E\n"  // type
+        }
         returnValue += "2592\n" // netrek server port
         returnValue += "0\n"
         let playerCount = self.universe.players.filter({$0.status != .free && $0.robot == nil}).count
@@ -87,7 +92,12 @@ class MetaserverUDP {
         } else {
             returnValue += "n\n" // gamefull
         }
-        returnValue += "Swift-IPv6\n" // comment
+        switch netrekOptions.gameStyle {
+        case .bronco:
+            returnValue += "Swift-IPv6-bronco\n" // comment
+        case .empire:
+            returnValue += "Swift-IPv6\n-empire" // comment
+        }
         
         /* The detailed user list was not picked up by the metaserver successfully.  Rather than debug I chose not to share this information
          
