@@ -64,7 +64,7 @@ extension Robot {
         var nearestEnemy: Player? = nil
         var nearestDistance = Globals.GalaxyWidth * 2
         for candidateEnemy in universe.players.filter({$0.status == .alive && $0.team != me.team}) {
-            if let _ = nearestEnemy {
+            if nearestEnemy == nil {
                 let candidateDistance = NetrekMath.distance(candidateEnemy, me)
                 if candidateDistance < nearestDistance {
                     nearestDistance = candidateDistance

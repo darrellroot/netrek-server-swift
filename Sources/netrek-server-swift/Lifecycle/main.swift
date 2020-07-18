@@ -45,14 +45,13 @@ let netrekChannel = try { () -> Channel in
 }()
 
 guard let localAddress = netrekChannel.localAddress else {
+    logger.critical("Address unable to bind")
     fatalError("Address unable to bind")
 }
-
+logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
 
 //let metaserver = Metaserver(universe: universe)
-
-
 /*let nioQueue = DispatchQueue(label: "swift-nio")
 
 nioQueue.async {

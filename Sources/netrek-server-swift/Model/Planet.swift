@@ -26,6 +26,7 @@ class Planet: Thing {
     var planetID: Int
     var name: String { didSet { needsUpdate = true } }
     var team: Team { didSet { needsUpdate = true } }
+    let initialTeam: Team
     var homeworld: Bool { didSet { needsUpdate = true } }
     var armies = Int.random(in: 4 ..< 14) { didSet { needsUpdate = true } }
     var seen: [Team:Bool] = [:] { didSet { needsUpdate = true } }
@@ -46,6 +47,7 @@ class Planet: Thing {
         self.positionY = positionY
         self.name = name
         self.team = team
+        self.initialTeam = team //used in empire mode when planet is indi
         self.homeworld = homeworld
         
         for team in Team.allCases {

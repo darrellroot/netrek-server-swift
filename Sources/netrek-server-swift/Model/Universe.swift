@@ -47,10 +47,6 @@ class Universe {
     init() {
         //logger.info("Universe.init")
         
-        for slotnum in 0 ..< Universe.MAXPLAYERS {
-            let player = Player(slot: slotnum, universe: self)
-            self.players.append(player)
-        }
         planets = [
             Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
             Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
@@ -93,8 +89,24 @@ class Universe {
             Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
             Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
             
+
         ]
         
+        for slotnum in 0 ..< Universe.MAXPLAYERS {
+            let homeworld: Planet?
+            let planetShuffle = planets.shuffled()
+            let player: Player
+            switch netrekOptions.gameStyle {
+                
+            case .bronco:
+                player = Player(slot: slotnum, universe: self)
+            case .empire:
+                homeworld = planetShuffle[slotnum]
+                player = Player(slot: slotnum, universe: self, homeworld: homeworld)
+            }
+            self.players.append(player)
+        }
+
         homeworld[.federation] = planets.first(where: {$0.name == "Earth"})!
         homeworld[.roman] = planets.first(where: {$0.name == "Rome"})!
         homeworld[.kazari] = planets.first(where: {$0.name == "Kazari"})!

@@ -23,6 +23,10 @@ class Player: Thing {
     var context: ChannelHandlerContext?
     var remoteAddress: SocketAddress? = nil
 
+    //in empire mode each slot has a static homeworld
+    //in bronco mode this is reset when team is chosen
+    var homeworld: Planet
+    
     var user: User? = nil
     var robot: Robot? = nil
     var team: Team
@@ -273,7 +277,14 @@ class Player: Thing {
 
     }
     
-    init(slot: Int, universe: Universe) {
+    init(slot: Int, universe: Universe, homeworld: Planet? = nil) {
+        //homeworld set in init for Empire mode only
+        if let homeworld = homeworld {
+            self.homeworld = homeworld
+        } else {
+            // this should not stand
+            self.homeworld = universe.planets[3]
+        }
         self.slot = slot
         self.status = .free
         self.universe = universe
@@ -916,28 +927,21 @@ class Player: Thing {
         }
     }
     func receivedCpOutfit(team: Team, ship: ShipType) -> Bool {
-        
-        /*guard team == universe.team1 || team == universe.team2 else {
-            
-            //let data1 = MakePacket.spMessage(message: "I cannot allow that.  Pick another team or ship", from: 255)
-            self.sendMessage(message: "I cannot allow that.  Pick another team or ship")
-            //connection?.send(data: data1)
-            
-            let data2 = MakePacket.spPickOk(false)
-            if let context = context {
-                context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.write(buffer)
+        if netrekOptions.gameStyle == .bronco {
+            guard Team.broncoTeams.contains(team) else {
+                self.sendMessage(message: "I cannot allow that.  Pick another team or ship")
+                let data2 = MakePacket.spPickOk(false)
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data2)
+                        _ = context.channel.write(buffer)
+                    }
                 }
+                return false
             }
-
-            //connection?.send(data: data2)
-            return false
-        }*/
+        }
         guard self.status == .outfit || self.status == .dead else {
-            //let data = MakePacket.spMessage(message: "Outfiting ship not available in state \(self.status.rawValue)", from: 255)
             self.sendMessage(message: "Outfiting ship not available in state \(self.status.rawValue)")
-            //connection?.send(data: data)
             
             let data2 = MakePacket.spPickOk(false)
             if let context = context {
@@ -946,8 +950,6 @@ class Player: Thing {
                     _ = context.channel.write(buffer)
                 }
             }
-
-            //connection?.send(data: data2)
             return false
         }
         guard ship != .starbase else {
@@ -961,28 +963,53 @@ class Player: Thing {
             }
             return false
         }
-        guard let homeworld = universe.homeworld[team] else {
-            logger.error("\(#file) \(#function) error unable to identify homeworld for team \(team)")
-            //let data = MakePacket.spMessage(message: "Unexpected server error, cannot find homeworld", from: 255)
-            self.sendMessage(message: "Unexpected server error, cannot find homeworld")
-            //connection?.send(data: data)
+        if netrekOptions.gameStyle == .bronco {
+            guard let homeworld = universe.homeworld[team] else {
+                logger.error("\(#file) \(#function) error unable to identify homeworld for team \(team)")
+                self.sendMessage(message: "Unexpected server error, cannot find homeworld")
 
-            let data2 = MakePacket.spPickOk(false)
-            if let context = context {
-                context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.write(buffer)
+                let data2 = MakePacket.spPickOk(false)
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data2)
+                        _ = context.channel.write(buffer)
+                    }
                 }
+                return false
             }
-
-            //connection?.send(data: data2)
-
-            return false
+            self.homeworld = homeworld
         }
-        self.team = team
+        switch netrekOptions.gameStyle {
+            
+        case .bronco:
+            self.team = team
+        case .empire:
+            switch homeworld.team {
+                
+            case .independent, .ogg:
+                self.team = homeworld.initialTeam
+            case .federation, .roman, .kazari, .orion:
+                self.team = homeworld.team
+            }
+        }
+        self.sendMessage(message: "Launching ship from your homeworld \(homeworld.name). You are on team \(self.team)")
+
         self.newShip(ship: ship)
+        
         self.positionX = homeworld.positionX + Double.random(in: -5000 ..< 5000)
         self.positionY = homeworld.positionY + Double.random(in: -5000 ..< 5000)
+        if self.positionX < 0 {
+            self.positionX = 1
+        }
+        if self.positionX > Globals.GalaxyWidth {
+            self.positionX = Globals.GalaxyWidth - 1
+        }
+        if self.positionY < 0 {
+            self.positionY = 1
+        }
+        if self.positionY > Globals.GalaxyWidth {
+            self.positionY = Globals.GalaxyWidth - 1
+        }
         //let data = MakePacket.spMessage(message: "Admiralty: we expect all sentients to do their duty", from: 255)
         //connection?.send(data: data)
         self.sendMessage(message: "Admiralty: we expect all sentients to do their duty!")
@@ -1082,7 +1109,9 @@ class Player: Thing {
                 _ = context.channel.write(buffer)
             }
         }
-
+        for player in universe.humanPlayers {
+            player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
+        }
         //connection?.send(data: data)
         
         self.sendInitialTransfer()
