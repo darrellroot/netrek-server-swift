@@ -188,7 +188,7 @@ class Universe {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
             }
@@ -224,6 +224,9 @@ class Universe {
                     player.minuteTimerFired()
                 }
             }
+        }
+        for player in self.humanPlayers {
+            player.flush()
         }
         if timerCount % 1200 == 0 {
             if let metaserver = self.metaserver {

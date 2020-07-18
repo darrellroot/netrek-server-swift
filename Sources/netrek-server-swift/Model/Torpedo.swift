@@ -48,7 +48,7 @@ class Torpedo: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spTorpInfo)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
                 //player.connection?.send(data: spTorpInfo)
@@ -142,7 +142,7 @@ class Torpedo: Thing {
             if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                     logger.debug("Sending SpTorp to player \(player.slot)")
                 }
             } else {
@@ -198,7 +198,7 @@ class Torpedo: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                     logger.debug("Sending SpTorp to player \(player.slot)")
                 } else {
@@ -218,7 +218,7 @@ class Torpedo: Thing {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spTorp)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                             logger.debug("Sending SpTorp to player \(player.slot)")
                         }
                     } else {

@@ -128,7 +128,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                         }
                     }
                     //player.connection?.send(data: spMessage)
@@ -145,7 +145,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                         }
                         //player.connection?.send(data: spMessage)
                     }
@@ -161,7 +161,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
                 //player.connection?.send(data: spMessage)

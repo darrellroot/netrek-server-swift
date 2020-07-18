@@ -393,7 +393,7 @@ class Player: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
                 //player.connection?.send(data: spPStatus)
@@ -405,7 +405,7 @@ class Player: Thing {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                         }
                     }
 
@@ -419,7 +419,7 @@ class Player: Thing {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                         }
                     }
 
@@ -496,7 +496,7 @@ class Player: Thing {
             if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
             //player.connection?.send(data: spPStatus)
@@ -509,7 +509,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
 
             }
@@ -527,7 +527,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
 
@@ -540,7 +540,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
 
@@ -649,7 +649,7 @@ class Player: Thing {
             let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.3-alpha feedback@networkmom.net")
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ =  context.channel.writeAndFlush(buffer)
+                _ =  context.channel.write(buffer)
             }
         }
 
@@ -687,7 +687,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
             }
         }
 
@@ -705,7 +705,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
 
@@ -927,7 +927,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
 
@@ -943,7 +943,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
 
@@ -956,7 +956,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
             return false
@@ -971,7 +971,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
 
@@ -991,7 +991,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data2)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
 
@@ -1059,7 +1059,7 @@ class Player: Thing {
                 if let context = context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spLogin)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
 
@@ -1079,7 +1079,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
 
@@ -1098,7 +1098,7 @@ class Player: Thing {
             if let context = context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: data)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
 
@@ -1180,7 +1180,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1522,6 +1522,13 @@ class Player: Thing {
             }
         }
     }
+    func flush() {
+        if let context = self.context {
+            context.eventLoop.execute {
+                context.channel.flush()
+            }
+        }
+    }
     func shortTimerFired() {
         //executed ten times per second
         if universe.gameState == .tmode {
@@ -1569,7 +1576,7 @@ class Player: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spStats)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
 
@@ -1644,7 +1651,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1656,7 +1663,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1667,7 +1674,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1678,7 +1685,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1689,7 +1696,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1700,7 +1707,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1724,7 +1731,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)
@@ -1735,7 +1742,7 @@ class Player: Thing {
         if let context = context {
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.writeAndFlush(buffer)
+                _ = context.channel.write(buffer)
             }
         }
         //connection?.send(data: data)

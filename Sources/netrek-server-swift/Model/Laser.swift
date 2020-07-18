@@ -171,7 +171,7 @@ class Laser {
             if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spLaser)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                 }
             }
             //player.connection?.send(data: spLaser)
@@ -183,7 +183,7 @@ class Laser {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spLaser)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
                 //player.connection?.send(data: spLaser)

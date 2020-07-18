@@ -43,7 +43,7 @@ class Plasma: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spPlasmaInfo)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                 }
                 logger.debug("Sending SPlasmaInfo")
@@ -194,7 +194,7 @@ class Plasma: Thing {
             if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spPlasma)
-                    _ = context.channel.writeAndFlush(buffer)
+                    _ = context.channel.write(buffer)
                     logger.debug("Sending SpPlasma to player \(player.slot)")
                 }
             } else {
@@ -252,7 +252,7 @@ class Plasma: Thing {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spPlasma)
-                        _ = context.channel.writeAndFlush(buffer)
+                        _ = context.channel.write(buffer)
                     }
                     logger.debug("Sending SpPlasma to player \(player.slot)")
                 } else {
@@ -272,7 +272,7 @@ class Plasma: Thing {
                     if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPlasma)
-                            _ = context.channel.writeAndFlush(buffer)
+                            _ = context.channel.write(buffer)
                             logger.debug("Sending SpPlasma to player \(player.slot)")
                         }
                     } else {
