@@ -23,5 +23,5 @@ struct NetrekOptions: ParsableCommand {
     var debug = false
     
     @Flag(help: "Specifies the Netrek Game Style.")
-    var gameStyle = .empire
+    var gameStyle: GameStyle = .empire
 }
