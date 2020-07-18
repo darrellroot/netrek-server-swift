@@ -89,7 +89,6 @@ class Universe {
             Planet(planetID: 38, positionX: 70000, positionY: 93000, name: "Herculis", team: .orion, homeworld: false),
             Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
             
-
         ]
         
         for slotnum in 0 ..< Universe.MAXPLAYERS {
