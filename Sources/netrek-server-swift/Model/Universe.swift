@@ -239,7 +239,7 @@ class Universe {
         }
     }
     func player(context: ChannelHandlerContext) -> Player? {
-        for (slot, player) in self.players.enumerated() {
+        for player in self.players {
             if context === player.context {
                 return player
             }

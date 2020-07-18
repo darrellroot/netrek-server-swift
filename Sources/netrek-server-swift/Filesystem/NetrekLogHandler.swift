@@ -44,7 +44,7 @@ struct NetrekLogHandler: LogHandler {
                 guard fileManager.createFile(atPath: logFileName, contents: nil) else {
                     fatalError("\(#file) \(#function) Unable to create file \(logFileName)")
                 }
-                let thisLogFile = try FileHandle(forWritingAtPath: logFileName)
+                let thisLogFile = FileHandle(forWritingAtPath: logFileName)
                 self.logFile[logLevel] = thisLogFile
             } catch {
                 fatalError("\(#file) \(#function) Unable to delete file \(logFileName) error \(error)")

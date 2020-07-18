@@ -153,7 +153,7 @@ class RobotModel1: Robot {
         guard let me = me else {
             return
         }
-        if let planet = me.orbit {
+        if let planet = me.orbit, planet.team == me.team {
             if !me.repair {
                 me.receivedRepair(true)
             }

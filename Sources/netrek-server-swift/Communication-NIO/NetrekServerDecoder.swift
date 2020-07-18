@@ -86,8 +86,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 1: // CP_MESSAGE
             let group = Int(data[1])
             let indiv = Int(data[2])
-            let pad1 = Int(data[3])
-            let range = (4..<(4 + msg_len))
+            _ = Int(data[3]) // pad1
             let messageData = Data(data[4 ..< 4 + msg_len])
             var messageString = "message_decode_error"
             //            if let messageStringWithNulls = String(data: messageData, encoding: .utf8) {
@@ -172,8 +171,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 2: //CP_SPEED 2
             //SP_PLAYER_INFO
             let speed = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_SPEED 2 speed \(speed)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for context \(context.remoteAddress?.description ?? "unknown")")
@@ -183,8 +182,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 3: //CP_DIRECTION 3
             let direction = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             //universe.updatePlayer(playerID: playerID, kills: kills)
             logger.debug("Received CP_DIRECTION 3 direction \(direction)")
             guard let player = universe.player(context: context) else {
@@ -194,8 +193,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.receivedCpDirection(netrekDirection: direction)
         case 4: //CP_LASER 4
             let direction = data[1]
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_LASER 4 direction \(direction)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -204,8 +203,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.fireLaser(direction: direction)
         case 5: //CP_PLASMA 5
             let direction = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_PLASMA direction \(direction)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -216,8 +215,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             
         case 6: //CP_TORP 6
             let direction = data[1]
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_TORP 6 direction \(direction)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -226,9 +225,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.fireTorpedo(direction: NetrekMath.directionNetrek2Radian(direction))
 
         case 7: //CP_QUIT 7
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Received CP_QUIT 7")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -241,8 +240,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 8: //CP_LOGIN 8  TODO NOT ENCRYPTED
             let query = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             
             let nameRange = (4..<(4 + name_len))
             let nameData = data.subdata(in: nameRange)
@@ -269,7 +268,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 9: // CP_OUTFIT 9
             let teamInt = Int(data[1])
             let shipInt = Int(data[2])
-            let pad1 = Int(data[3])
+            _ = Int(data[3]) //pad1
             logger.debug("Received CP_OUTFIT 9 team \(teamInt) ship \(shipInt)")
             let team: Team
             switch teamInt {
@@ -300,12 +299,12 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error received invalid ship type \(shipInt)")
                 return .continue
             }
-            player.receivedCpOutfit(team: team, ship: ship)
+            _ = player.receivedCpOutfit(team: team, ship: ship)
 
         case 10: // CP_WAR
             let newmask = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_WAR 10 newmask \(newmask)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -314,9 +313,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "On this server, you are always at war")
 
         case 11: // CP_PRACTR
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Received CP_PRACTR")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -326,8 +325,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 12: // CP_SHIELD
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_SHIELD 12 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -343,8 +342,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             
         case 13: //CP_REPAIR
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_REPAIR 13 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -360,8 +359,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             
         case 14: //CP_ORBIT
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_ORBIT 14 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -371,8 +370,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 15: //CP_PLANLOCK 15
             let planetNum = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_PLANLOCK 15 planetNum \(planetNum)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -382,8 +381,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 16: //CP_PLAYLOCK 16
             let playerNum = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Recieved CP_PLAYLOCK 16 playerNum \(playerNum)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -393,8 +392,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 17: //CP_BOMB 17
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_BOMB 17 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -404,8 +403,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 18: //CP_BEAM 18
             let state = Int(data[1]) //state 1 means beamup, 2 means beamdown
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_BEAM 18 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -422,8 +421,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 19: //CP_CLOAK 19
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_CLOAK 19 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -436,9 +435,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             }
 
         case 20: //CP_DET_TORPS 20
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Received CP_DET_TORPS 20")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -447,7 +446,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.receivedDetTorp()
 
         case 21: //CP_DET_MYTORP 21
-            let pad1 = Int(data[1])
+            _ = Int(data[1]) //pad1
             let torpnum = Int(data.subdata(in: (2..<4)).to(type: UInt16.self).byteSwapped)
             logger.debug("Received CP_DET_MYTORP 21 torpnum \(torpnum)")
             guard let player = universe.player(context: context) else {
@@ -458,8 +457,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 22: //CP_COPILOT 22
             let state = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_COPILOT 22 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -470,8 +469,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 23: // CP_REFIT 23
             let ship = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_REFIT 23 ship \(ship)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -493,7 +492,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 24: // CP_TRACTOR 24
             let state = Int(data[1])
             let playerNum = Int(data[2])
-            let pad1 = Int(data[3])
+            _ = Int(data[3]) //pad1
             logger.debug("Received CP_TRACTOR 24 state \(state) playerNum \(playerNum)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -504,7 +503,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 25: // CP_REPRESS 25
             let state = Int(data[1])
             let playerNum = Int(data[2])
-            let pad1 = Int(data[3])
+            _ = Int(data[3]) //pad1
             logger.debug("Received CP_REPRESS 25 state \(state) playerNum \(playerNum)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -513,9 +512,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.receivedCpTractor(state: state, target: playerNum, mode: .pressor)
             
         case 26: // CP_COUP 26
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Recieved CP_COUP 26")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -533,9 +532,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             universe.addPlayer(context: context)
 
         case 28: //CP_OPTIONS 28
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             let flags = Int(data.subdata(in: (4..<8)).to(type: UInt32.self).byteSwapped)
             let keymap = data.subdata(in: 8 ..< 8 + keymap_len)
             logger.debug("Received CP_OPTIONS 28 flags \(flags) plus keymap")
@@ -547,23 +546,24 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_OPTIONS not implemented on this server")
 
         case 29: //CP_BYE 29
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Received CP_BYE 29")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
-            logger.info("CP_BYE received from player \(player.slot) \(context.remoteAddress)")
+            logger.info("CP_BYE received from player \(player.slot) \(context.remoteAddress?.description ?? "unknown")")
             player.sendMessage(message: "Goodbye!  Report issues to feedback@networkmom.net")
+            player.flush()
             player.reset()
             _ = context.close()
             
         case 30: //CP_DOCKPERM 30
             let state = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Recieved CP_DOCKPERM 30 state \(state)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -573,9 +573,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_DOCKPERM not implemented on this server")
 
        case 31: //CP_UPDATES 31
-           let pad1 = Int(data[1])
-           let pad2 = Int(data[2])
-           let pad3 = Int(data[3])
+           _ = Int(data[1]) //pad1
+           _ = Int(data[2]) //pad2
+           _ = Int(data[3]) //pad3
            let microseconds = Int(data.subdata(in: 4 ..< 8).to(type: UInt32.self).byteSwapped)
            //TODO we do nothing with CP_UPDATES
            /*logger.debug("Received CP_UPDATES 31 microseconds \(microseconds)")
@@ -588,8 +588,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 32: //CP_RESETSTATS 32
             let verify = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             logger.debug("Recieved CP_RESETSTATS verify \(verify)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -599,9 +599,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_RESETSTATS not implemented on this server")
 
         case 33: //CP_RESERVED 33
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             let reservedData = data.subdata(in: 4 ..< 4 + reserved_size)
             let reservedResponse = data.subdata(in: 4 + reserved_size ..< 4 + 2 * reserved_size)
             logger.debug("Received CP_RESERVED 33")
@@ -614,8 +614,8 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
 
         case 34: //CP_SCAN 34
             let playerNum = Int(data[1])
-            let pad1 = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[2]) //pad1
+            _ = Int(data[3]) //pad2
             logger.debug("Received CP_SCAN 34 playerNum \(playerNum)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -627,7 +627,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 35: //CP_UDP_REQ 35
             let request = Int(data[1])
             let connmode = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[3]) //pad2
             let port = Int(data.subdata(in: (4..<8)).to(type: UInt32.self).byteSwapped)
             logger.debug("Received CP_UDP_REQ 35 request \(request) connmode \(connmode) port \(port)")
             guard let player = universe.player(context: context) else {
@@ -638,7 +638,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_UDP_REQ not implemented on this server")
 
         case 36: //CP_SEQUENCE 36 UDP only
-            let pad1 = Int(data[1])
+            _ = Int(data[1]) //pad1
             let sequence = Int(data.subdata(in: (2..<4)).to(type: UInt16.self).byteSwapped)
             logger.debug("Received CP_SEQUENCE 36 sequence \(sequence)")
             guard let player = universe.player(context: context) else {
@@ -649,9 +649,9 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_SEQUENCE not implemented on this server")
 
         case 37: //CP_RSA_KEY 37
-            let pad1 = Int(data[1])
-            let pad2 = Int(data[2])
-            let pad3 = Int(data[3])
+            _ = Int(data[1]) //pad1
+            _ = Int(data[2]) //pad2
+            _ = Int(data[3]) //pad3
             let global = data.subdata(in: (4 ..< 4 + key_size))
             let publicKey = data.subdata(in: (4 + key_size ..< 4 + key_size * 2))
             let response = data.subdata(in: 4 + key_size * 2 ..< 4 + key_size * 3)
@@ -680,7 +680,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 42: //CP_PING
             let number = Int(data[1])
             let pingme = Int(data[2])
-            let pad1 = Int(data[3])
+            _ = Int(data[3]) //pad1
             let sent = Int(data.subdata(in: 4 ..< 8).to(type: UInt32.self).byteSwapped)
             let received = Int(data.subdata(in: 8 ..< 12).to(type: UInt32.self).byteSwapped)
             logger.info("Received CP_PING pingme \(pingme) sent \(sent) received \(received)")
@@ -688,7 +688,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
         case 43: //CP_S_REQ 43  Short request
             let request = Int(data[1])
             let version = Int(data[2])
-            let pad2 = Int(data[3])
+            _ = Int(data[3]) //pad2
             logger.debug("Recived CP_SHORT_REQUEST 39 request \(request) version \(version)")
             guard let player = universe.player(context: context) else {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
@@ -698,7 +698,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             player.sendMessage(message: "CP_SHORT_REQUEST not implemented on this server")
 
         case 44: //CP_SHORT_THRESHOLD 44
-            let pad1 = Int(data[1])
+            _ = Int(data[1]) //pad1
             let threshold = Int(data.subdata(in: 2..<4).to(type: UInt16.self).byteSwapped)
             logger.debug("Received CP_SHORT_THRESHOLD threshold \(threshold)")
 

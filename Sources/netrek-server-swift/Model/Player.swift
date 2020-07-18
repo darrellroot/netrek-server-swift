@@ -643,7 +643,7 @@ class Player: Thing {
         self.context = context
         self.status = .outfit
         self.remoteAddress = context.remoteAddress
-        logger.info("New connection from \(self.remoteAddress)")
+        logger.info("New connection from \(self.remoteAddress?.description ?? "unknown")")
         do {
             logger.debug("sending SP MOTD")
             let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.3-alpha feedback@networkmom.net")
@@ -1605,7 +1605,7 @@ class Player: Thing {
                 self.impact(damage: 999, attacker: self, planet: nil, whyDead: .quit)
             default:
                 //should not get here
-                logger.error("\(#file) \(#function) Error: unexpected self destruct value")
+                logger.error("\(#file) \(#function) Error: unexpected self destruct value \(selfDestructTimer)")
                 break
             }
         }
