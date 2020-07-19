@@ -1343,6 +1343,10 @@ class Player: Thing {
             }
         }
         self.fuel += self.ship.recharge - Int(self.speed) * self.ship.warpCost
+        // if we are orbiting a friendly fuel planet, we double recharge
+        if let planet = self.orbit, planet.team == self.team && planet.fuel {
+            self.fuel += self.ship.recharge
+        }
         if self.shieldsUp {
             if fuel < self.ship.shieldCost {
                 let reducedSpeed = Double(Int(self.ship.recharge / self.ship.warpCost) - 2)
@@ -1364,6 +1368,9 @@ class Player: Thing {
     func updateRepair() {
         var repairRate = self.ship.repair
         if self.repair {
+            repairRate *= 2.0
+        }
+        if let planet = self.orbit, planet.team == self.team && planet.repair {
             repairRate *= 2.0
         }
         if self.damage > 0 && self.shieldsUp == false {

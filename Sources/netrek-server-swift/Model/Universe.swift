@@ -224,13 +224,18 @@ class Universe {
      SP_PLANET_LOC pnum= 39 x= 86920 y= 68920 name= Antares
      */
     
-    func firstFreeSlot() -> Int? {
-        for (slotnum,player) in self.players.enumerated() {
+    func randomFreeSlot() -> Int? {
+        let freeSlots = self.players.filter({$0.status == .free})
+        guard let randomFreeSlot = freeSlots.randomElement() else {
+            return nil
+        }
+        return randomFreeSlot.slot
+        /*for (slotnum,player) in self.players.enumerated() {
             if player.status == .free {
                 return slotnum
             }
         }
-        return nil
+        return nil*/
     }
     func sendPlanetUpdates(_ forceUpdate: Bool = false) {
         // this is called every 0.1 seconds
@@ -494,7 +499,7 @@ class Universe {
         }
     }*/
     func addPlayer(context: ChannelHandlerContext) {
-        if let freeSlot = firstFreeSlot() {
+        if let freeSlot = randomFreeSlot() {
             self.players[freeSlot].connected(context: context)
         }
     }
