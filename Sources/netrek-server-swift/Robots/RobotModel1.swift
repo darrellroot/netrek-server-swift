@@ -135,7 +135,7 @@ class RobotModel1: Robot {
         let enemyDistance = NetrekMath.distance(me,nearestEnemy)
 
         //random course toward enemy
-        var baseDirectionRadian = NetrekMath.angle(origin: me, target: nearestEnemy)
+        let baseDirectionRadian = NetrekMath.angle(origin: me, target: nearestEnemy)
         let evasive: Double
         if enemyDistance < Laser.baseRange * 4 {
             evasive = Double.random(in: Double.pi * -0.3 ..< Double.pi * 0.3)
