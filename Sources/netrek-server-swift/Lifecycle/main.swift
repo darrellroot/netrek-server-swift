@@ -60,8 +60,6 @@ let netrekChannel = try { () -> Channel in
     return try bootstrap.bind(host: "::", port: 2592).wait()
 }()
 
-
-
 guard let localAddress = netrekChannel.localAddress else {
     logger.critical("Address unable to bind")
     fatalError("Address unable to bind")
@@ -70,8 +68,8 @@ logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
 
 
-
-
 lifecycle.wait()
+
+//timer is started in separate thread in universe.swift
 //RunLoop.current.run()
 
