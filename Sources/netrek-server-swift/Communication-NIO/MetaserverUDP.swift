@@ -71,7 +71,7 @@ class MetaserverUDP {
         case .bronco:
             returnValue += "B\n"  // type
         case .empire:
-            returnValue += "B\n"  // type
+            returnValue += "E\n"  // type
         }
         returnValue += "2592\n" // netrek server port
         returnValue += "0\n"
