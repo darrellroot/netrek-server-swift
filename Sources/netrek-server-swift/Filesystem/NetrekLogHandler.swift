@@ -67,10 +67,15 @@ struct NetrekLogHandler: LogHandler {
                     metadata: Logger.Metadata?,
                     file: String, function: String, line: UInt) {
         let date = dateFormatter.string(from: Date())
-        guard let data = "\(date) \(file) \(function) \(line) \(level) \(message)\n".data(using: .utf8) else { return }
+        let longMessage = "\(date) \(file) \(function) \(line) \(level) \(message)\n"
+        guard let data = longMessage.data(using: .utf8) else { return }
         guard let logFile = logFile[level] else { return }
         logFile.seekToEndOfFile()
         logFile.write(data)
+        
+        if level == .critical {
+            print(longMessage)
+        }
 
         //debugPrint("\(file) \(function) \(line) \(level) \(message)")
     }

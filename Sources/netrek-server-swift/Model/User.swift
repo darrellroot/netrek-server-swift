@@ -8,7 +8,7 @@
 
 import Foundation
 
-class User {
+class User: Codable {
 
     // user names starting with "guest" should not be saved in permanent storage.  See player.receivedCpLogin()
     static var guestID = 1

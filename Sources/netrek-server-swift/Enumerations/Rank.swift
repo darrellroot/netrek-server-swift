@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Rank {
+enum Rank: Int, Codable {
     case ensign
     case lieutenant
     case ltcmdr

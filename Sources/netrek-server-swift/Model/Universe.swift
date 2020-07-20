@@ -122,7 +122,9 @@ class Universe {
     //var team1 = Team.federation
     //var team2 = Team.roman
     
-    var users: [User] = []
+    //var users: [User] = []
+    var userDatabase = UserDatabase()
+    
     var robotController = RobotController()
         
     var gameState: GameState = .intramural
@@ -296,6 +298,10 @@ class Universe {
             } else {
                 logger.error("Error: unable to send to metaserver")
             }
+        }
+        // save user database once per hour
+        if timerCount % 36000 == 0 {
+            userDatabase.save()
         }
     }
     public func checkForWin() {

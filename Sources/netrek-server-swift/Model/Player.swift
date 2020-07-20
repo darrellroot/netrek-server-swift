@@ -1074,14 +1074,14 @@ class Player: Thing {
             let guestName = "guest\(User.guestID)"
             User.guestID += 1
             let user = User(name: guestName, password: password, userinfo: userinfo)
-            universe.users.append(user)
+            //universe.users.append(user)
             self.user = user
-        } else if let existingUser = universe.users.first(where: {$0.name == name}) {
-            guard existingUser.password == password else {
+        } else {
+            let authenticationResult = universe.userDatabase.authenticate(name: name, password: password, userinfo: userinfo)
+            switch authenticationResult {
+            case .failure:
                 logger.info("Sending SP_LOGIN failure to player \(self.slot)")
-                //let message = MakePacket.spMessage(message: "Incorrect password for existing user \(name)", from: 255)
                 self.sendMessage(message: "Incorrect password for existing user \(name)")
-                //connection?.send(data: message)
                 let spLogin = MakePacket.spLogin(success: false)
                 if let context = context {
                     context.eventLoop.execute {
@@ -1089,34 +1089,25 @@ class Player: Thing {
                         _ = context.channel.write(buffer)
                     }
                 }
-
-                //connection?.send(data: spLogin)
                 return
+            case .success(let user),.newUser(let user):
+                self.user = user
+                let data = MakePacket.spLogin(success: true)
+                logger.info("Sending SP_LOGIN success to player \(self.slot)")
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+                for player in universe.humanPlayers {
+                    player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
+                }
+                self.sendInitialTransfer()
+                self.sendPlanetLoc()
+                self.sendSpMask()
             }
-            self.user = existingUser
-        } else {
-            // create new user
-            let user = User(name: name, password: password, userinfo: userinfo)
-            universe.users.append(user)
-            self.user = user
         }
-            
-        let data = MakePacket.spLogin(success: true)
-        logger.info("Sending SP_LOGIN success to player \(self.slot)")
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        for player in universe.humanPlayers {
-            player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
-        }
-        //connection?.send(data: data)
-        
-        self.sendInitialTransfer()
-        self.sendPlanetLoc()
-        self.sendSpMask()
     }
     
     // sent during initial transfer
