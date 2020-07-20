@@ -24,7 +24,7 @@ class UserDatabase {
             let newUser = User(name: name, password: password, userinfo: userinfo)
             self.users.append(newUser)
             logger.info("Authentication created new user \(name) in user database")
-            self.save()
+            try? self.save()
             return .newUser(newUser)
         }
         // existing user check authentication
@@ -41,7 +41,6 @@ class UserDatabase {
         let data: Data
         do {
             data = try Data(contentsOf: url)
-            logger.critical("Unable to read user database from \(url)")
         } catch {
             logger.critical("Unable to read user database from \(url) error \(error)")
             return
@@ -54,9 +53,11 @@ class UserDatabase {
             logger.critical("Unable to decode user database from \(url) error \(error)")
             return
         }
+        try! self.save()
     }
     
-    public func save() {
+    public func save() throws {
+        print("saving data")
         let encoder = JSONEncoder()
         
         let directory = netrekOptions.directory
@@ -64,7 +65,9 @@ class UserDatabase {
             do {
                 try fileManager.createDirectory(atPath: directory, withIntermediateDirectories: false)
             } catch {
-                fatalError("\(#file) \(#function) Unable to create directory \(directory) error \(error)")
+                logger.critical("\(#file) \(#function) Unable to create directory \(directory) error \(error)")
+                throw error
+                //fatalError("\(#file) \(#function) Unable to create directory \(directory) error \(error)")
             }
         }
         var url = URL(fileURLWithPath: netrekOptions.directory)
@@ -75,7 +78,8 @@ class UserDatabase {
                 try encoded.write(to: url, options: .atomic)
             } catch {
                 logger.critical("Unable to write user database to \(url)")
-                fatalError("\(#file) \(#function) Unable to write user databsae to \(url)")
+                throw error
+                //fatalError("\(#file) \(#function) Unable to write user databsae to \(url)")
             }
         }
         logger.info("Saved user database to url \(url)")

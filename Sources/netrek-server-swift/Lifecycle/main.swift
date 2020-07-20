@@ -9,6 +9,8 @@
 import Foundation
 import NIO
 import Logging
+import Lifecycle
+import LifecycleNIOCompat
 
 print("Initializing server")
 
@@ -17,11 +19,15 @@ let netrekOptions = NetrekOptions.parseOrExit()
 LoggingSystem.bootstrap(NetrekLogHandler.init)
 let logger = Logger(label: "net.networkmom.netrek-server-swift")
 
+let lifecycleConfiguration = ServiceLifecycle.Configuration(logger: logger)
+
+let lifecycle = ServiceLifecycle(configuration: lifecycleConfiguration)
+
 let universe = Universe()
 
-//let netrekLogHandler = NetrekLogHandler(logDirectory: "/tmp")
-//let server = Server(port: 2592, universe: universe)
-//try! server.start()
+lifecycle.registerShutdown(label: "shutdownWarning",.sync(universe.shutdownWarning))
+
+lifecycle.registerShutdown(label: "userDatabase", .sync(universe.userDatabase.save))
 
 let netrekChannelHandler = NetrekChannelHandler(universe: universe)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)
@@ -36,13 +42,25 @@ let bootstrap = ServerBootstrap(group: group)
     .childChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
     .childChannelOption(ChannelOptions.maxMessagesPerRead, value: 16)
     .childChannelOption(ChannelOptions.recvAllocator, value: AdaptiveRecvByteBufferAllocator())
-defer {
-    try! group.syncShutdownGracefully()
+
+
+lifecycle.registerShutdown(label: "eventLoopGroup", .sync(group.syncShutdownGracefully))
+
+lifecycle.start { error in
+    // start completion handler.
+    // if a startup error occurred you can capture it here
+    if let error = error {
+        logger.error("failed starting Netrek-server ☠️: \(error)")
+    } else {
+        logger.info("Netrek-server started successfully 🚀")
+    }
 }
 
 let netrekChannel = try { () -> Channel in
     return try bootstrap.bind(host: "::", port: 2592).wait()
 }()
+
+
 
 guard let localAddress = netrekChannel.localAddress else {
     logger.critical("Address unable to bind")
@@ -51,11 +69,9 @@ guard let localAddress = netrekChannel.localAddress else {
 logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
 
-//let metaserver = Metaserver(universe: universe)
-/*let nioQueue = DispatchQueue(label: "swift-nio")
 
-nioQueue.async {
-    // This will never unblock as we don't close the ServerChannel.
-    try! channel.closeFuture.wait()
-}*/
-RunLoop.current.run()
+
+
+lifecycle.wait()
+//RunLoop.current.run()
+

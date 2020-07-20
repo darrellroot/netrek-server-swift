@@ -13,7 +13,9 @@ import NIO
 class Universe {
     
     let updatesPerSecond = 10.0
-    var timer: Timer?
+    //var timer: Timer?
+    var weakTimer: Timer? = nil
+    
     var timerCount = 0
     
     static let startPlanets = [
@@ -130,13 +132,23 @@ class Universe {
     var gameState: GameState = .intramural
         
     var metaserver: MetaserverUDP? = nil
-    //var connectionsById: [Int: ServerConnection] = [:]
+
+    //https://stackoverflow.com/questions/8304702/how-do-i-create-a-nstimer-on-a-background-thread
+    func scheduleTimerInBackgroundThread(){
+        DispatchQueue.global().async(execute: {
+            //This method schedules timer to current runloop.
+            self.weakTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.timerFired), userInfo: nil, repeats: true)
+            self.weakTimer?.tolerance = 0.03
+            //start runloop manually, otherwise timer won't fire
+            //add timer before run, otherwise runloop find there's nothing to do and exit directly.
+            RunLoop.current.run()
+        })
+    }
     
     init() {
         //logger.info("Universe.init")
         
         //planets = Universe.startPlanets
-        
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let homeworld: Planet?
             let planetShuffle = planets.shuffled()
@@ -160,14 +172,14 @@ class Universe {
         //timer = Timer.scheduledTimer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
 
         //timer = Timer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / updatesPerSecond, repeats: true) {_ in
+        /*timer = Timer.scheduledTimer(withTimeInterval: 1.0 / updatesPerSecond, repeats: true) {_ in
             self.timerFired()
         }
         timer?.tolerance = 0.3 / updatesPerSecond
         //logger.info("Timer initialized")
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
-        }
+        }*/
         if netrekOptions.domainName != nil {
             self.metaserver = MetaserverUDP(universe: self)
             if let metaserver = self.metaserver {
@@ -179,6 +191,8 @@ class Universe {
             //cannot log here
             debugPrint("No metaserver specified on CLI: skipping metaserver reports")
         }
+        logger.info("scheduling timer")
+        scheduleTimerInBackgroundThread()
     }
     
     deinit {
@@ -226,6 +240,12 @@ class Universe {
      SP_PLANET_LOC pnum= 39 x= 86920 y= 68920 name= Antares
      */
     
+    public func shutdownWarning() {
+        logger.info("Sending shutdown warnings")
+        for player in self.activePlayers {
+            player.sendMessage(message: "Alert: Netrek Server shutting down.  Try again in a few minutes.")
+        }
+    }
     func randomFreeSlot() -> Int? {
         let freeSlots = self.players.filter({$0.status == .free})
         guard let randomFreeSlot = freeSlots.randomElement() else {
@@ -260,6 +280,7 @@ class Universe {
     @objc func timerFired() {
         self.timerCount += 1
         //logger.trace("\(#file) \(#function) count \(self.timerCount)")
+        //debugPrint("timer fired")
         self.sendPlanetUpdates()
         for player in self.players {
             if player.status != .free {
@@ -301,7 +322,7 @@ class Universe {
         }
         // save user database once per hour
         if timerCount % 36000 == 0 {
-            userDatabase.save()
+            try? userDatabase.save()
         }
     }
     public func checkForWin() {
