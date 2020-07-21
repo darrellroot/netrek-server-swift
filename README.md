@@ -1,6 +1,7 @@
 # netrek-server-swift
 
-## I am running an operational "Empire Mode" Swift Netrek server at netrek.networkmom.net (IPv4 + IPv6)
+### I am running an operational "Empire Mode" Swift Netrek server at netrek.networkmom.net (IPv4 + IPv6)
+Playing via IPv6 requires an IPv6-capable client, such as my MacOS or iOS clients available for free in the Apple AppStore.
 
 ## July 2020: WARNING: ALPHA.
 
