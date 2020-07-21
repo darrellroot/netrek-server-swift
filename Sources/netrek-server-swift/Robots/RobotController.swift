@@ -9,7 +9,7 @@ import Foundation
 
 class RobotController {
     
-    let targetPlayersPerTeam = 0
+    let targetPlayersPerTeam = 7
     var robotId = 0
     
     init() {
