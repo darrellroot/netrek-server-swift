@@ -1079,6 +1079,20 @@ class Player: Thing {
             let user = User(name: guestName, saveToDatabase: false, userinfo: userinfo)
             //universe.users.append(user)
             self.user = user
+            let data = MakePacket.spLogin(success: true)
+            logger.info("Sending SP_LOGIN success to player \(self.slot)")
+            if let context = context {
+                context.eventLoop.execute {
+                    let buffer = context.channel.allocator.buffer(bytes: data)
+                    _ = context.channel.write(buffer)
+                }
+            }
+            for player in universe.humanPlayers {
+                player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
+            }
+            self.sendInitialTransfer()
+            self.sendPlanetLoc()
+            self.sendSpMask()
         } else {
             let authenticationResult = universe.userDatabase.authenticate(name: name, password: password, userinfo: userinfo)
             switch authenticationResult {
