@@ -3,6 +3,9 @@
 ### I am running an operational "Empire Mode" Swift Netrek server at netrek.networkmom.net (IPv4 + IPv6)
 Playing via IPv6 requires an IPv6-capable client, such as my MacOS or iOS clients available for free in the Apple AppStore.
 
+Early adopter test game: Tuesday 7/21 6PM Pacific.
+Full game: Thursday 7/30 6PM Pacific.
+
 ## This is a new _alpha_ Netrek Server written in Swift!
 This does not use any Apple-specific frameworks.  It is developed on MacOS and runs on Linux.
 
