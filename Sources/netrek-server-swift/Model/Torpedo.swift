@@ -145,11 +145,6 @@ class Torpedo: Thing {
                     _ = context.channel.write(buffer)
                     logger.debug("Sending SpTorp to player \(player.slot)")
                 }
-            } else {
-                //only an error if player not robot
-                if player.robot == nil {
-                    logger.error("failed to send SpTorp to player \(player.slot)")
-                }
             }
             //player.connection?.send(data: spTorp)
         }
@@ -201,11 +196,6 @@ class Torpedo: Thing {
                         _ = context.channel.write(buffer)
                     }
                     logger.debug("Sending SpTorp to player \(player.slot)")
-                } else {
-                    //only an error if player not robot
-                    if player.robot == nil {
-                        logger.error("failed to send SpTorp to player \(player.slot)")
-                    }
                 }
 
                 //player.connection?.send(data: spTorp)
@@ -220,11 +210,6 @@ class Torpedo: Thing {
                             let buffer = context.channel.allocator.buffer(bytes: spTorp)
                             _ = context.channel.write(buffer)
                             logger.debug("Sending SpTorp to player \(player.slot)")
-                        }
-                    } else {
-                        //only a failure if player human
-                        if player.robot == nil {
-                            logger.error("failed to send SpTorp to player \(player.slot)")
                         }
                     }
 

@@ -197,11 +197,6 @@ class Plasma: Thing {
                     _ = context.channel.write(buffer)
                     logger.debug("Sending SpPlasma to player \(player.slot)")
                 }
-            } else {
-                // only failure if player is human
-                if player.robot == nil {
-                    logger.error("failed to send SpPlasma to player \(player.slot)")
-                }
             }
             //player.connection?.send(data: spTorp)
         }
@@ -255,11 +250,6 @@ class Plasma: Thing {
                         _ = context.channel.write(buffer)
                     }
                     logger.debug("Sending SpPlasma to player \(player.slot)")
-                } else {
-                    // only a failure if player is human
-                    if player.robot == nil {
-                        logger.error("failed to send SpPlasma to player \(player.slot)")
-                    }
                 }
 
                 //player.connection?.send(data: spTorp)
@@ -274,11 +264,6 @@ class Plasma: Thing {
                             let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                             _ = context.channel.write(buffer)
                             logger.debug("Sending SpPlasma to player \(player.slot)")
-                        }
-                    } else {
-                        // only failure if player is human
-                        if player.robot == nil {
-                            logger.error("failed to send SpPlasma to player \(player.slot)")
                         }
                     }
                 }
