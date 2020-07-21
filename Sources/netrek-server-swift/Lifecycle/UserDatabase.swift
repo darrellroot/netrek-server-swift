@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Crypto
 
 enum AuthenticationResult {
     case success(User)
@@ -19,16 +20,23 @@ class UserDatabase {
     let fileManager = FileManager()
 
     public func authenticate(name: String, password: String, userinfo: String) -> AuthenticationResult {
+        
+        guard let passwordData = password.data(using: .utf8) else {
+            logger.error("unable to SHA256 password for user \(name)")
+            return .failure
+        }
+        let password256Hash = SHA256.hash(data: passwordData).description
         guard let existingUser = users.first(where: {$0.name == name}) else {
             //create new user
-            let newUser = User(name: name, password: password, userinfo: userinfo)
+            
+            let newUser = User(name: name, password256Hash: password256Hash, userinfo: userinfo)
             self.users.append(newUser)
             logger.info("Authentication created new user \(name) in user database")
             try? self.save()
             return .newUser(newUser)
         }
         // existing user check authentication
-        guard password == existingUser.password else {
+        guard password256Hash == existingUser.password256Hash else {
             logger.info("Authentication failed for user \(name)")
             return .failure
         }

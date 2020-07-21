@@ -1065,15 +1065,18 @@ class Player: Thing {
             self.shieldsUp = false
         }
     }
-    func receivedCpLogin(name: String, password: String, userinfo: String) {
+    func receivedCpLogin(name: String, robot: Bool = false, password: String, userinfo: String) {
         guard self.status == .outfit else {
             logger.error("Error: \(#file) \(#function) slot \(self.slot) state \(self.status) unexpected cpLogin")
             return
         }
-        if name.starts(with: "guest") {
+        if robot {
+            let user = User(name: name, saveToDatabase: false, userinfo: userinfo)
+            self.user = user
+        } else if name.starts(with: "guest") {
             let guestName = "guest\(User.guestID)"
             User.guestID += 1
-            let user = User(name: guestName, password: password, userinfo: userinfo)
+            let user = User(name: guestName, saveToDatabase: false, userinfo: userinfo)
             //universe.users.append(user)
             self.user = user
         } else {
@@ -1100,6 +1103,10 @@ class Player: Thing {
                         _ = context.channel.write(buffer)
                     }
                 }
+                if case AuthenticationResult.newUser = authenticationResult {
+                    self.sendMessage(message: "New user \(name) added to server user database")
+                }
+
                 for player in universe.humanPlayers {
                     player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
                 }
@@ -1626,6 +1633,8 @@ class Player: Thing {
                 self.sendMessage(message: "Self-destruct in \(selfDestructTimer) seconds...")
             case 3:
                 self.sendMessage(message: "You notice everyone looking at you")
+            case 1:
+                self.sendMessage(message: "Self-destruct in \(selfDestructTimer) second...")
             case ..<1:
                 self.sendMessage(message: "You have self-destructed")
                 self.selfDestructTimer = nil

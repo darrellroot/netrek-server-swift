@@ -278,7 +278,7 @@ class Plasma: Thing {
                     } else {
                         // only failure if player is human
                         if player.robot == nil {
-                            debugPrint("failed to send SpPlasma to player \(player.slot)")
+                            logger.error("failed to send SpPlasma to player \(player.slot)")
                         }
                     }
                 }

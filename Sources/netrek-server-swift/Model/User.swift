@@ -7,14 +7,18 @@
 // 
 
 import Foundation
+import Crypto
 
 class User: Codable {
 
     // user names starting with "guest" should not be saved in permanent storage.  See player.receivedCpLogin()
     static var guestID = 1
     
+    var version: Int = 2
+    var saveToDatabase: Bool
     var name: String
-    var password: String
+    //var password: String // version 1
+    var password256Hash: String // SHA256.description added version 2
     var userinfo: String
     var rank: Rank = .ensign
     
@@ -34,9 +38,17 @@ class User: Codable {
     
     var tournamentTicks = 1  //start at 1 to avoid division by zero
     
-    init(name: String, password: String, userinfo: String) {
+    init(name: String, password256Hash: String, userinfo: String) {
         self.name = name
-        self.password = password
+        self.saveToDatabase = true
+        self.password256Hash = password256Hash
+        self.userinfo = userinfo
+    
+    }
+    init(name: String, saveToDatabase: Bool, userinfo: String) {
+        self.name = name
+        self.saveToDatabase = false
+        self.password256Hash = ""
         self.userinfo = userinfo
     }
 }

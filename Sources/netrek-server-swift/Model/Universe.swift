@@ -13,8 +13,8 @@ import NIO
 class Universe {
     
     let updatesPerSecond = 10.0
-    //var timer: Timer?
-    var weakTimer: Timer? = nil
+    var timer: Timer?
+    //var weakTimer: Timer? = nil
     
     var timerCount = 0
     
@@ -134,7 +134,7 @@ class Universe {
     var metaserver: MetaserverUDP? = nil
 
     //https://stackoverflow.com/questions/8304702/how-do-i-create-a-nstimer-on-a-background-thread
-    func scheduleTimerInBackgroundThread(){
+    /*func scheduleTimerInBackgroundThread(){
         DispatchQueue.global().async(execute: {
             //This method schedules timer to current runloop.
             self.weakTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.timerFired), userInfo: nil, repeats: true)
@@ -143,7 +143,7 @@ class Universe {
             //add timer before run, otherwise runloop find there's nothing to do and exit directly.
             RunLoop.current.run()
         })
-    }
+    }*/
     
     init() {
         //logger.info("Universe.init")
@@ -172,27 +172,27 @@ class Universe {
         //timer = Timer.scheduledTimer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
 
         //timer = Timer(timeInterval: 1.0 / updatesPerSecond, target: self, selector: #selector(timerFired), userInfo: nil, repeats: true)
-        /*timer = Timer.scheduledTimer(withTimeInterval: 1.0 / updatesPerSecond, repeats: true) {_ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / updatesPerSecond, repeats: true) {_ in
             self.timerFired()
         }
         timer?.tolerance = 0.3 / updatesPerSecond
-        //logger.info("Timer initialized")
+        logger.info("Timer initialized")
         if let timer = timer {
             RunLoop.current.add(timer, forMode: RunLoop.Mode.common)
-        }*/
+        }
         if netrekOptions.domainName != nil {
             self.metaserver = MetaserverUDP(universe: self)
             if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "161.35.226.186", port: 3521)
             } else {
-                debugPrint("Error: unable to send to metaserver")
+                //cannot log here
+                print("Error: unable to send to metaserver")
             }
         } else {
             //cannot log here
-            debugPrint("No metaserver specified on CLI: skipping metaserver reports")
+            print("No metaserver specified on CLI: skipping metaserver reports")
         }
         logger.info("scheduling timer")
-        scheduleTimerInBackgroundThread()
     }
     
     deinit {
@@ -241,10 +241,15 @@ class Universe {
      */
     
     public func shutdownWarning() {
+        print("sending shutdown warnings")
         logger.info("Sending shutdown warnings")
         for player in self.activePlayers {
             player.sendMessage(message: "Alert: Netrek Server shutting down.  Try again in a few minutes.")
         }
+    }
+    public func shutdownComplete() {
+        print("shutdown complete")
+        exit(0)
     }
     func randomFreeSlot() -> Int? {
         let freeSlots = self.players.filter({$0.status == .free})
@@ -280,7 +285,6 @@ class Universe {
     @objc func timerFired() {
         self.timerCount += 1
         //logger.trace("\(#file) \(#function) count \(self.timerCount)")
-        //debugPrint("timer fired")
         self.sendPlanetUpdates()
         for player in self.players {
             if player.status != .free {

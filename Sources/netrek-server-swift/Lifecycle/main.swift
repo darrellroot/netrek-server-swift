@@ -25,8 +25,13 @@ let lifecycle = ServiceLifecycle(configuration: lifecycleConfiguration)
 
 let universe = Universe()
 
+//first shutdown in file is last executed
+lifecycle.registerShutdown(label: "shutdownComplete",.sync(universe.shutdownComplete))
+
+//second to last shutdown executed
 lifecycle.registerShutdown(label: "shutdownWarning",.sync(universe.shutdownWarning))
 
+//third to last shutdown executed
 lifecycle.registerShutdown(label: "userDatabase", .sync(universe.userDatabase.save))
 
 let netrekChannelHandler = NetrekChannelHandler(universe: universe)
@@ -45,6 +50,7 @@ let bootstrap = ServerBootstrap(group: group)
 
 
 lifecycle.registerShutdown(label: "eventLoopGroup", .sync(group.syncShutdownGracefully))
+
 
 lifecycle.start { error in
     // start completion handler.
@@ -68,8 +74,9 @@ logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
 
 
-lifecycle.wait()
+//lifecycle.wait()
 
 //timer is started in separate thread in universe.swift
-//RunLoop.current.run()
+print("hello")
+RunLoop.current.run()
 

@@ -18,6 +18,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.2.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
         .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "1.0.0-alpha"),
+        .package(url: "https://github.com/apple/swift-crypto", from: "1.0.0"),
     ],
     targets: [
         .target(name: "netrek-server-swift", dependencies: [
@@ -26,6 +27,7 @@ let package = Package(
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
             .product(name: "Lifecycle", package: "swift-service-lifecycle"),
             .product(name: "LifecycleNIOCompat", package: "swift-service-lifecycle"),
+            .product(name: "Crypto", package: "swift-crypto"),
         ]),
     ]
 )
