@@ -72,11 +72,9 @@ guard let localAddress = netrekChannel.localAddress else {
 }
 logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
-print("hello 1")
-
 //lifecycle.wait()
 
 //timer is started in separate thread in universe.swift
-print("hello")
+print("Starting Run Loop")
 RunLoop.current.run()
 
