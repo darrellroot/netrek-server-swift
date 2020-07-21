@@ -104,8 +104,8 @@ class RobotController {
         let robotName = "\(newRobot.userinfo)-\(robotId)"
         freeSlot.robotConnected(robot: newRobot)
         
-        freeSlot.receivedCpLogin(name: robotName, password: "", userinfo: newRobot.userinfo)
-        
+        //freeSlot.receivedCpLogin(name: robotName, password: "", userinfo: newRobot.userinfo)
+        freeSlot.receivedCpLogin(name: robotName, robot: true, password: "", userinfo: newRobot.userinfo)
         let team = Team.federation //ignored in empire mode
         guard freeSlot.receivedCpOutfit(team: team, ship: newRobot.preferredShip) else {
             logger.error("\(#file) \(#function) Unable to outfit ship")
