@@ -11,6 +11,27 @@ import Crypto
 
 class User: Codable {
 
+    enum CodingKeys: String, CodingKey {
+        case version
+        case saveToDatabase
+        case name
+        case password256Hash
+        case userinfo
+        case rank
+        case tKills
+        case tLosses
+        case overallKills
+        case overallLosses
+        case tPlanets
+        case tArmies
+        case sbKills
+        case sbLosses
+        case intramuralArmies
+        case intramuralPlanets
+        case maxKills
+        case sbMaxKills
+        case tournamentTicks
+    }
     // user names starting with "guest" should not be saved in permanent storage.  See player.receivedCpLogin()
     static var guestID = 1
     
@@ -51,4 +72,27 @@ class User: Codable {
         self.password256Hash = ""
         self.userinfo = userinfo
     }
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        version = 2
+        saveToDatabase = try values.decode(Bool.self, forKey: .saveToDatabase)
+        name = try values.decode(String.self, forKey: .name)
+        password256Hash = try values.decode(String.self, forKey: .password256Hash)
+        userinfo = try values.decode(String.self, forKey: .userinfo)
+        rank = try values.decode(Rank.self, forKey: .rank)
+        tKills = try values.decode(Int.self, forKey: .tKills)
+        tLosses = try values.decode(Int.self, forKey: .tLosses)
+        overallKills = try values.decode(Int.self, forKey: .overallKills)
+        overallLosses = try values.decode(Int.self, forKey: .overallLosses)
+        tPlanets = try values.decode(Int.self, forKey: .tPlanets)
+        tArmies = try values.decode(Int.self, forKey: .tArmies)
+        sbKills = try values.decode(Int.self, forKey: .sbKills)
+        intramuralArmies = try values.decode(Int.self, forKey: .intramuralArmies)
+        intramuralPlanets = try values.decode(Int.self, forKey: .intramuralPlanets)
+        maxKills = try values.decode(Double.self, forKey: .maxKills)
+        sbMaxKills = try values.decode(Double.self, forKey: .sbMaxKills)
+        tournamentTicks = try values.decode(Int.self, forKey: .tournamentTicks)
+        
+    }
+
 }
