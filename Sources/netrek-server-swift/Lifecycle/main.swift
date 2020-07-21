@@ -25,7 +25,7 @@ let lifecycle = ServiceLifecycle(configuration: lifecycleConfiguration)
 
 let universe = Universe()
 
-//first shutdown in file is last executed
+//first shutdown in file is last executed on macos
 lifecycle.registerShutdown(label: "shutdownComplete",.sync(universe.shutdownComplete))
 
 //second to last shutdown executed
@@ -72,7 +72,7 @@ guard let localAddress = netrekChannel.localAddress else {
 }
 logger.info("Server started and listening on \(localAddress)")
 print("Server started and listening on \(localAddress)")
-
+print("hello 1")
 
 //lifecycle.wait()
 
