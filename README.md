@@ -1,5 +1,7 @@
 # netrek-server-swift
 
+## I am running an operational "Empire Mode" Swift Netrek server at netrek.networkmom.net (IPv4 + IPv6)
+
 ## July 2020: WARNING: ALPHA.
 
 ## This is a new experimental Netrek Server written in Swift!
