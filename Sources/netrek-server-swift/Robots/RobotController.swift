@@ -76,10 +76,11 @@ class RobotController {
     
     // this is used in empire mode
     func deleteRobot() {
-        let robotPlayers = universe.players.filter({$0.status != .free && $0.robot != nil})
-        if let randomRobot = robotPlayers.randomElement() {
-            randomRobot.disconnected()
+        guard let robotToDelete = universe.players.first(where: {$0.status != .free && $0.robot != nil }) else {
+            logger.error("\(#file) \(#function) Error: Unable to find robot to delete")
+            return
         }
+        robotToDelete.disconnected()
     }
     
     // this is used in bronco mode
