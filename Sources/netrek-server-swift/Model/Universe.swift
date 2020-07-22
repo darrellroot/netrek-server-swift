@@ -530,8 +530,9 @@ class Universe {
         }
     }*/
     func addPlayer(context: ChannelHandlerContext) {
-        if let freeSlot = randomFreeSlot() {
-            self.players[freeSlot].connected(context: context)
+        //if let freeSlot = randomFreeSlot() {
+        if let player = self.players.first(where: {$0.status == .free}) {
+            player.connected(context: context)
         }
     }
 

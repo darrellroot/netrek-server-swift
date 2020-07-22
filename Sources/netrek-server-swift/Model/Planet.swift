@@ -14,7 +14,7 @@ enum PlanetFlags: UInt16 {
     case agri = 0x040
 }
 
-class Planet: Thing {
+class Planet: Thing, Equatable {
     
     var needsUpdate = false
     
@@ -45,6 +45,7 @@ class Planet: Thing {
         return returnVal
     }
     
+    
     init(planetID: Int, positionX: Double, positionY: Double, name: String, team: Team, homeworld: Bool = false) {
         self.planetID = planetID
         self.positionX = positionX
@@ -67,8 +68,22 @@ class Planet: Thing {
         if Int.random(in: 0 ..< 3) == 0 { self.repair = true }
         if Int.random(in: 0 ..< 4) == 0 {self.agri = true}
     }
+    
+    static func == (lhs: Planet, rhs: Planet) -> Bool {
+        if (lhs.name == rhs.name && lhs.positionX == rhs.positionX && lhs.planetID == rhs.planetID) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     public func pop() {
         logger.debug("POP-Before planet \(self.name) armies \(armies)")
+        // dont pop if no humans playing
+        guard let _ = universe.players.first(where: {$0.context != nil && $0.status != .free}) else {
+            return
+        }
+        
         //dont pop indi planets
         switch self.armies {
         case 0:

@@ -656,10 +656,30 @@ class Player: Thing {
         logger.info("Player \(slot) deinit")
     }
     func robotConnected(robot: Robot) {
+        if netrekOptions.gameStyle == .empire {
+            self.homeworld = getRandomHomeworld()
+        }
         self.robot = robot
         self.status = .outfit
     }
+    func getRandomHomeworld() -> Planet {
+        var usedPlanets: [Planet] = []
+        for player in universe.players {
+            usedPlanets.append(player.homeworld)
+        }
+        let candidatePlanets = universe.planets.shuffled()
+        for candidatePlanet in candidatePlanets {
+            if !usedPlanets.contains(candidatePlanet) {
+                return candidatePlanet
+            }
+        }
+        //should not get here
+        return universe.planets.randomElement()!
+    }
     func connected(context: ChannelHandlerContext) {
+        if netrekOptions.gameStyle == .empire {
+            self.homeworld = getRandomHomeworld()
+        }
         self.context = context
         self.status = .outfit
         self.remoteAddress = context.remoteAddress
@@ -1222,8 +1242,6 @@ class Player: Thing {
             reverseDirectionY()
             self.helmDirection = self.direction
         }
-        
-        
     }
     func sendSpMask() {
         let data = MakePacket.spMask(universe: universe)
@@ -1246,7 +1264,9 @@ class Player: Thing {
             self.direction = self.helmDirection
             return
         }
-        let maxChange = self.ship.turnSpeed / (self.speed * self.speed)
+        //let maxChange = self.ship.turnSpeed / (self.speed * self.speed)
+        
+        let maxChange = self.ship.turnSpeed / Double(Int(1) << Int(self.speed))
         
         logger.trace("maxChange \(maxChange)")
         let helmDiff = self.helmDirection - self.direction

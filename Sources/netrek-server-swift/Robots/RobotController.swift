@@ -94,8 +94,7 @@ class RobotController {
     // this is used in empire mode
     func addRobot() {
         self.robotId += 1
-        let freeSlots = universe.players.filter({$0.status == .free})
-        guard let freeSlot = freeSlots.randomElement() else {
+        guard let freeSlot = universe.players.last(where: {$0.status == .free}) else {
             logger.error("\(#file) \(#function) Unable to find free slot")
             return
         }
@@ -116,7 +115,7 @@ class RobotController {
     // this is used in bronco mode
     func addRobot(team: Team) {
         self.robotId += 1
-        guard let freeSlot = universe.players.first(where: {$0.status == .free}) else {
+        guard let freeSlot = universe.players.last(where: {$0.status == .free}) else {
             logger.error("\(#file) \(#function) Unable to find free slot")
             return
         }
