@@ -27,7 +27,6 @@ class Torpedo: Thing {
             }
         }
     }
-
         
     var directionNetrek: Int {
         // 0 - 255
@@ -61,8 +60,7 @@ class Torpedo: Thing {
     var positionX: Double = 0
     var positionY: Double = 0
     
-    var vectorX: Double = 0
-    var vectorY: Double = 0
+    var speed: Double = 15
     
     var expiration = Date()
     let universe: Universe
@@ -78,9 +76,7 @@ class Torpedo: Thing {
         self.state = .free
         self.positionX = 0
         self.positionY = 0
-        self.vectorX = 0
-        self.vectorY = 0
-        
+        self.speed = 15
     }
     
     func fire(player: Player, direction: Double) {
@@ -90,30 +86,25 @@ class Torpedo: Thing {
         self.team = player.team
         self.state = .alive
         self.damage = player.ship.torpDamage
-        
-        //let torpRadian = NetrekMath.directionNetrek2Radian(direction)
-        
-        //let shipRadian = NetrekMath.directionNetrek2Radian(player.directionNetrek)
+                
         var torpVectorX = Double(player.ship.torpSpeed) * Globals.WARP1 * cos(self.direction) + player.speed * Globals.WARP1 * cos(player.direction)
         var torpVectorY = -1 * Double(player.ship.torpSpeed) * Globals.WARP1
             * sin(self.direction) + -1 * player.speed * Globals.WARP1 * sin(player.direction)
         
-        let torpMagnitude = sqrt(torpVectorX * torpVectorX + torpVectorY * torpVectorY) / Globals.WARP1
+        var torpSpeed = sqrt(torpVectorX * torpVectorX + torpVectorY * torpVectorY) / Globals.WARP1
         
         //Max torp speed is warp 20
-        if torpMagnitude > 20 {
-            torpVectorX = torpVectorX * 20 / torpMagnitude
-            torpVectorY = torpVectorY * 20 / torpMagnitude
+        if torpSpeed > 20 {
+            torpSpeed = 20
         }
-        self.vectorX = torpVectorX
-        self.vectorY = torpVectorY
+        self.speed = torpSpeed
         
         expiration = Date(timeIntervalSinceNow: player.ship.torpFuse)
     }
     
     func updatePosition() {
-        self.positionX += self.vectorX
-        self.positionY += self.vectorY
+        self.positionX += cos(self.direction) * self.speed * Globals.WARP1
+        self.positionY -= sin(self.direction) * self.speed * Globals.WARP1
         if self.state == .alive {
             if self.positionX <= 0 || self.positionX >= Globals.GalaxyWidth || self.positionY <= 0 || self.positionY >= Globals.GalaxyWidth {
                 self.explode()
@@ -166,8 +157,11 @@ class Torpedo: Thing {
             }
             let ratio = Double(1 - (distanceSquared) / Double(damageDistance * damageDistance))
             player.impact(damage: ratio * Double(damage), attacker: self.player, whyDead: .torpedo)
-            debugPrint("distance \(sqrt(distanceSquared)) damage \(ratio * Double(damage))")
         }
+    }
+    func wobble() {
+        let wobble = Double.random(in: -(Double.pi / 90) ..< (Double.pi / 90))
+        self.direction += wobble
     }
     func shortTimerFired() {
         switch self.state {
@@ -181,6 +175,7 @@ class Torpedo: Thing {
                 self.state = .free
                 //TODO send update when freeing torps
             }
+            self.wobble()
             self.updatePosition()
             if self.checkForHit() {
                 self.explode()

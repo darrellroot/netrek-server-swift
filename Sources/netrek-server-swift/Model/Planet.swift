@@ -108,7 +108,7 @@ class Planet: Thing {
             self.armies += 1
             player.kills += 0.25
             for player in universe.players.filter ({ $0.status != .free }) {
-                player.sendMessage(message: "Planet \(self.name) captured by \(player.team.letter)\(player.slot.hex) \(player.user?.name ?? player.team.description)")
+                player.sendMessage(message: "Planet \(self.name) captured by \(player.team.letter)\(player.slot) \(player.user?.name ?? player.team.description)")
             }
             guard let user = player.user else {
                 logger.error("\(#file) \(#function) unable to identify user for player \(player.slot)")
@@ -131,7 +131,7 @@ class Planet: Thing {
             self.armies = 0
             player.kills += 0.02
             for player in universe.players.filter ({ $0.status != .free }) {
-                player.sendMessage(message: "Planet \(self.name) destroyed by \(player.team.letter)\(player.slot.hex) \(player.user?.name ?? player.team.description)")
+                player.sendMessage(message: "Planet \(self.name) destroyed by \(player.team.letter)\(player.slot) \(player.user?.name ?? player.team.description)")
             }
             //statistics only
             guard let user = player.user else {

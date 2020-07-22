@@ -24,7 +24,7 @@ final class NetrekChannelHandler: ChannelInboundHandler {
     public func channelInactive(context: ChannelHandlerContext) {
         //let channel = context.channel
         if let remoteAddress = context.remoteAddress, let player = universe.player(remoteAddress: remoteAddress) {
-            logger.info("Player \(player.team.letter)\(player.slot.hex) \(player.user?.name ?? "unknown") from \(remoteAddress.description) disconnected")
+            logger.info("Player \(player.team.letter)\(player.slot) \(player.user?.name ?? "unknown") from \(remoteAddress.description) disconnected")
             player.disconnected()
         }
     }
@@ -36,7 +36,7 @@ final class NetrekChannelHandler: ChannelInboundHandler {
     public func errorCaught(context: ChannelHandlerContext, error: Error) {
         logger.error("Error: \(error)")
         if let remoteAddress = context.remoteAddress, let player = universe.player(remoteAddress: remoteAddress) {
-            logger.error("Player \(player.team.letter)\(player.slot.hex) \(player.user?.name ?? "unknown") from \(remoteAddress.description) channel error")
+            logger.error("Player \(player.team.letter)\(player.slot) \(player.user?.name ?? "unknown") from \(remoteAddress.description) channel error")
             player.disconnected()
         } else {
             logger.error("Unable to disconnect player for context \(context)")

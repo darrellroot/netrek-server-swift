@@ -344,18 +344,27 @@ class Player: Thing {
                 attacker.kills = attacker.kills + 1.0 + self.kills / 10.0 + Double(self.armies) / 10.0
                 let victimLabel: String
                 if let user = self.user {
-                    victimLabel = self.team.letter + self.slot.hex + " " + user.name
+                    victimLabel = self.team.letter + String(self.slot) + " " + user.name
                 } else {
-                    victimLabel = self.team.letter + self.slot.hex
+                    victimLabel = self.team.letter + String(self.slot)
+                }
+                let armiesLabel: String
+                switch self.armies {
+                case 2...:
+                    armiesLabel = "+\(self.armies) armies"
+                case 1:
+                    armiesLabel = "+1 army"
+                default:
+                    armiesLabel = ""
                 }
                 let attackLabel: String
                 if let attackUser = attacker.user {
-                    attackLabel = attacker.team.letter + attacker.slot.hex + " " +  attackUser.name
+                    attackLabel = attacker.team.letter + String(attacker.slot) + " " +  attackUser.name
                 } else {
                     attackLabel = attacker.team.letter + attacker.slot.hex
                 }
                 for player in universe.players {
-                    player.sendMessage(message: "\(victimLabel) was kill \(attacker.kills) for \(attackLabel)")
+                    player.sendMessage(message: "\(victimLabel)\(armiesLabel) was kill \(attacker.kills) for \(attackLabel)")
                 }
             }
             if let planet = planet {
@@ -1417,6 +1426,10 @@ class Player: Thing {
         if newState == false {
             self.repair = false
         } else {
+            if enginesOverheated {
+                self.sendMessage(message: "Sorry can't repair with melted engines while moving")
+                return
+            }
             self.repair = true
             self.helmSpeed = 0.0
             self.shieldsUp = false

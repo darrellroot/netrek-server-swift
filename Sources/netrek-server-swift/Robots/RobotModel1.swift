@@ -19,7 +19,7 @@ class RobotModel1: Robot {
         didSet {
             if strategy != oldValue, let me = me, let user = me.user {
                 for player in universe.humanPlayers.filter({$0.team == me.team}) {
-                    player.sendMessage(message: "\(me.team.letter)\(me.slot.hex) \(user.name) I need to \(self.strategy.rawValue)")
+                    player.sendMessage(message: "\(me.team.letter)\(me.slot) \(user.name) I need to \(self.strategy.rawValue)")
                 }
             }
         }
