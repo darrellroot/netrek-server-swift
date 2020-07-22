@@ -164,12 +164,9 @@ class Torpedo: Thing {
             guard distanceSquared < damageDistance * damageDistance else {
                 continue
             }
-            if distanceSquared <= damageDistance * damageDistance {
-                player.impact(damage: self.damage, attacker: self.player, whyDead: .torpedo)
-            } else {
-                let ratio = Double(1 - (distanceSquared * distanceSquared) / Double(damageDistance * damageDistance))
-                player.impact(damage: ratio * Double(damage), attacker: self.player, whyDead: .torpedo)
-            }
+            let ratio = Double(1 - (distanceSquared) / Double(damageDistance * damageDistance))
+            player.impact(damage: ratio * Double(damage), attacker: self.player, whyDead: .torpedo)
+            debugPrint("distance \(sqrt(distanceSquared)) damage \(ratio * Double(damage))")
         }
     }
     func shortTimerFired() {

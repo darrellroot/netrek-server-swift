@@ -218,12 +218,9 @@ class Plasma: Thing {
             guard distanceSquared < damageDistance * damageDistance else {
                 continue
             }
-            if distanceSquared <= damageDistance * damageDistance {
-                player.impact(damage: self.damage, attacker: self.player, whyDead: .plasma)
-            } else {
-                let ratio = Double(1 - (distanceSquared * distanceSquared) / Double(damageDistance * damageDistance))
-                player.impact(damage: ratio * Double(damage), attacker: self.player, whyDead: .plasma)
-            }
+            let ratio = Double(1 - (distanceSquared) / Double(damageDistance * damageDistance))
+            player.impact(damage: ratio * Double(damage), attacker: self.player, whyDead: .plasma)
+            debugPrint("distance \(sqrt(distanceSquared)) damage \(ratio * Double(damage))")
         }
     }
     func shortTimerFired() {
