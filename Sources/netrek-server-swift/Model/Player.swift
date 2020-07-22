@@ -452,7 +452,7 @@ class Player: Thing {
     func disconnected() {
         logger.info("player \(slot) disconnected")
         for player in universe.activePlayers {
-            player.sendMessage(message: "Player \(self.team.letter)\(self.slot.hex) \(self.user?.name ?? "unknown") disconnected")
+            player.sendMessage(message: "Player \(self.team.letter)\(self.slot) \(self.user?.name ?? "unknown") disconnected")
         }
         self.reset()
     }
