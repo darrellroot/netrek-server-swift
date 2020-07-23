@@ -29,7 +29,7 @@ let package = Package(
             .product(name: "Lifecycle", package: "swift-service-lifecycle"),
             .product(name: "LifecycleNIOCompat", package: "swift-service-lifecycle"),
             .product(name: "Crypto", package: "swift-crypto"),
-            .product(name: "Backtrace", package: "Backtrace"),
+            .product(name: "Backtrace", package: "swift-backtrace"),
         ]),
     ]
 )
