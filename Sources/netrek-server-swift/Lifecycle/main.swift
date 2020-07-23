@@ -11,6 +11,7 @@ import NIO
 import Logging
 import Lifecycle
 import LifecycleNIOCompat
+import Backtrace
 
 print("Initializing server")
 
@@ -24,6 +25,8 @@ let lifecycleConfiguration = ServiceLifecycle.Configuration(logger: logger)
 let lifecycle = ServiceLifecycle(configuration: lifecycleConfiguration)
 
 let universe = Universe()
+
+Backtrace.install()
 
 //first shutdown in file is last executed on macos
 lifecycle.registerShutdown(label: "shutdownComplete",.sync(universe.shutdownComplete))
