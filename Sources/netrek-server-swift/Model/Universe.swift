@@ -12,7 +12,7 @@ import NIO
 
 class Universe {
     
-    let updatesPerSecond = 10.0
+    let updatesPerSecond = 20.0
     var timer: Timer?
     //var weakTimer: Timer? = nil
     
@@ -297,6 +297,7 @@ class Universe {
                 planet.pop()
             }
         }
+        //once per second actions
         if timerCount % Int(self.updatesPerSecond) == 0 {
             for player in self.players {
                 if player.status != .free {
@@ -305,6 +306,7 @@ class Universe {
             }
             robotController.secondTimerFired()
         }
+        //once per minute actions
         if timerCount % 60 * Int(self.updatesPerSecond) == 0 {
             for player in self.players {
                 if player.status != .free {
@@ -312,6 +314,7 @@ class Universe {
                 }
             }
         }
+        //send a packet every tick
         for player in self.humanPlayers {
             player.flush()
         }
