@@ -291,6 +291,7 @@ class Universe {
                 player.shortTimerFired()
             }
         }
+        
         //pop a planet every half second if we have at least one player
         if timerCount % (Int(updatesPerSecond) / 2) == 0 && players.filter({ $0.status != .free}).count > 0 {
             if let planet = planets.randomElement() {

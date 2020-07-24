@@ -16,7 +16,11 @@ class Player: Thing {
     static let planetRange = 1500.0 //range at which planet can attack player
     static let tractorCost = 20
     static let tractorHeat = 5
-    var slot: Int
+    var slot: Int {
+        didSet {
+            self.needSpPlayerInfo = true
+        }
+    }
     //var state: PlayerState
     let universe: Universe
     //var connection: ServerConnection?
@@ -29,7 +33,14 @@ class Player: Thing {
     
     var user: User? = nil
     var robot: Robot? = nil
-    var team: Team
+    var needSpPlayerInfo = true
+    var needSpHostile = true
+    var team: Team {
+        didSet {
+            self.needSpHostile = true
+            self.needSpPlayerInfo = true
+        }
+    }
     var armies = 0
     var maxArmies: Int {
         //return min(4,self.ship.maxArmies)
@@ -147,9 +158,15 @@ class Player: Thing {
     var playerLock: Player? = nil
     var planetLock: Planet? = nil
     
-    var ship: ShipType = .cruiser
+    var ship: ShipType = .cruiser {
+        didSet {
+            self.needSpPlayerInfo = true
+        }
+    }
+    var needSpKills = true
     var kills: Double = 0.0 {
         didSet {
+            self.needSpKills = true
             if let user = self.user {
                 switch self.ship {
                 case .starbase:
@@ -164,7 +181,12 @@ class Player: Thing {
             }
         }
     }
-    var status: SlotStatus = .free
+    var needSpPlayerStatus = true
+    var status: SlotStatus = .free {
+        didSet {
+            self.needSpPlayerStatus = true
+        }
+    }
     
     var positionX: Double = -10000
     var positionY: Double = -10000 // reminder Y=0 is top of the map, Y = 10000 is bottom of map
@@ -408,7 +430,7 @@ class Player: Thing {
                 }
             }
             
-            let spPStatus = MakePacket.spPStatus(player: self)
+            let spPStatus = MakePacket.spPlayerStatus(player: self)
             for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
                 if let context = player.context {
                     context.eventLoop.execute {
@@ -420,11 +442,11 @@ class Player: Thing {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.status = .dead
-                let spPStatus = MakePacket.spPStatus(player: self)
+                let spPlayerStatus = MakePacket.spPlayerStatus(player: self)
                 for player in self.universe.activePlayers {
                     if let context = player.context {
                         context.eventLoop.execute {
-                            let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                            let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
                             _ = context.channel.write(buffer)
                         }
                     }
@@ -434,11 +456,11 @@ class Player: Thing {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 self.status = .outfit
-                let spPStatus = MakePacket.spPStatus(player: self)
+                let spPlayerStatus = MakePacket.spPlayerStatus(player: self)
                 for player in self.universe.activePlayers {
                     if let context = player.context {
                         context.eventLoop.execute {
-                            let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                            let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
                             _ = context.channel.write(buffer)
                         }
                     }
@@ -507,7 +529,7 @@ class Player: Thing {
         self.refitting = false
         newShip(ship: .cruiser)
         self.status = .free
-        let spPStatus = MakePacket.spPStatus(player: self)
+        let spPlayerStatus = MakePacket.spPlayerStatus(player: self)
 
         for torpedo in self.torpedoes {
             torpedo.reset()
@@ -515,7 +537,7 @@ class Player: Thing {
         for player in universe.players.filter ({ $0.status != .free}) {
             if let context = player.context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                    let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
                     _ = context.channel.write(buffer)
                 }
             }
@@ -1712,13 +1734,84 @@ class Player: Thing {
         if playerLock != nil {
             self.playerLockDirection()
         }
+        //send my SpPlLogin to all players if needed
+        if let user = self.user, user.needSpPlLogin {
+            let data = MakePacket.spPlLogin(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_PL_LOGIN for player \(self.slot) to \(player.slot)")
+                if let context = player.context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            user.needSpPlLogin = false
+        }
+        // send my SpHostile to all players if needed
+        if self.needSpHostile {
+            let data = MakePacket.spHostile(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_HOSTILE for player \(self.slot) to \(player.slot)")
+                if let context = player.context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            self.needSpHostile = false
+        }
+        // send my spPlayerInfo if needed
+        if self.needSpPlayerInfo {
+            let data = MakePacket.spPlayerInfo(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_PLAYER_INFO 2 for player \(self.slot) to \(player.slot)")
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            self.needSpPlayerInfo = false
+        }
+        // send spKills if needed
+        if self.needSpKills {
+            let data = MakePacket.spKills(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_KILLS_2 for player \(self.slot) to \(player.slot)")
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            self.needSpKills = false
+        }
+        // send spPlayerStatus if needed
+        if self.needSpPlayerStatus {
+            let data = MakePacket.spPlayerStatus(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_PStatus for player \(self.slot) to \(player.slot)")
+                if let context = context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            self.needSpPlayerStatus = false
+        }
         for player in universe.players {
             if player.status == .alive || player.status == .explode {
-                self.sendSpPlLogin(player: player)
-                self.sendSpHostile(player: player)
-                self.sendSpPlayerInfo(player: player)
-                self.sendSpKills(player: player)
-                self.sendSpPlayerStatus(player: player)
+                //self.sendSpPlLogin(player: player)
+                //self.sendSpHostile(player: player)
+                //self.sendSpPlayerInfo(player: player)
+                //self.sendSpKills(player: player)
+                //self.sendSpPlayerStatus(player: player)
+                //flags are complex to determine if they are required to send, so send every second.  8 bytes per player per player
                 self.sendSpFlags(player: player)
             }
         }
@@ -1741,6 +1834,7 @@ class Player: Thing {
     }
     
     func sendSpHostile(player: Player) {
+        player.needSpHostile = false
         let data = MakePacket.spHostile(player: player)
         logger.debug("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
         if let context = context {
@@ -1809,7 +1903,7 @@ class Player: Thing {
         }
     }
     func sendSpPlayerStatus(player: Player) {
-        let data = MakePacket.spPStatus(player: player)
+        let data = MakePacket.spPlayerStatus(player: player)
         logger.debug("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
         if let context = context {
             context.eventLoop.execute {

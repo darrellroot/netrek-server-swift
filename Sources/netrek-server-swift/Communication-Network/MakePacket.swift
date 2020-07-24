@@ -228,8 +228,8 @@ class MakePacket {
     }
     
     //SP_PSTATUS 20
-    static func spPStatus(player: Player) -> Data {
-        var packet = SP_PSTATUS(playerNum: UInt8(player.slot), status: UInt8(player.status.rawValue))
+    static func spPlayerStatus(player: Player) -> Data {
+        var packet = SP_PLAYER_STATUS(playerNum: UInt8(player.slot), status: UInt8(player.status.rawValue))
         let data = Data(bytes: &packet, count: packet.size)
         return data
     }

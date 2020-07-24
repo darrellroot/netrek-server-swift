@@ -507,7 +507,7 @@ struct SP_MASK {
     }
 }
 
-struct SP_PSTATUS {
+struct SP_PLAYER_STATUS {
     var type: UInt8 = 20
     var playerNum: UInt8
     var status: UInt8

@@ -37,10 +37,19 @@ class User: Codable {
     
     var version: Int = 2
     var saveToDatabase: Bool
-    var name: String
+    var needSpPlLogin = true
+    var name: String {
+        didSet {
+            self.needSpPlLogin = true
+        }
+    }
     //var password: String // version 1
     var password256Hash: String // SHA256.description added version 2
-    var userinfo: String
+    var userinfo: String {
+        didSet {
+            self.needSpPlLogin = true
+        }
+    }
     var rank: Rank = .ensign
     
     //the entries below are long-term stats
