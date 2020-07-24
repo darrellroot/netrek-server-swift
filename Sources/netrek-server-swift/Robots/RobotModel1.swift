@@ -109,8 +109,8 @@ class RobotModel1: Robot {
         }
     }
     private func predictLocation(enemy: Player,time: Double) -> Location {
-        let positionX = enemy.positionX + enemy.speed * Globals.WARP1 * 10 * cos(enemy.direction)
-        let positionY = enemy.positionY - enemy.speed * Globals.WARP1 * 10 * sin(enemy.direction)
+        let positionX = enemy.positionX + enemy.speed * Globals.WARP1 * cos(enemy.direction)
+        let positionY = enemy.positionY - enemy.speed * Globals.WARP1 * sin(enemy.direction)
         return Location(positionX: positionX, positionY: positionY)
     }
     private func shootTorpedo(nearestEnemy: Player) {
@@ -118,7 +118,7 @@ class RobotModel1: Robot {
             return
         }
         let enemyDistance = NetrekMath.distance(me,nearestEnemy)
-        let timeToTarget = enemyDistance / (Globals.WARP1 * 10 * Double(me.ship.torpSpeed))
+        let timeToTarget = enemyDistance / (Globals.WARP1 * Double(me.ship.torpSpeed))
         let predictedEnemyLocation = predictLocation(enemy: nearestEnemy,time: timeToTarget)
         let predictedDistance = NetrekMath.distance(me,predictedEnemyLocation)
         //TODO adjust to torpedo range

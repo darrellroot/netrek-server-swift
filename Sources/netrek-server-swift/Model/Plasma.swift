@@ -86,7 +86,7 @@ class Plasma: Thing {
         guard let shooter = self.player else {
             return nil
         }
-        plasmaRange = shooter.ship.plasmaFuse * shooter.ship.plasmaSpeed * 10 * Globals.WARP1
+        plasmaRange = shooter.ship.plasmaFuse * shooter.ship.plasmaSpeed * Globals.WARP1
         for possibleTarget in universe.players {
             guard possibleTarget.team != shooter.team else {
                 continue
@@ -164,8 +164,8 @@ class Plasma: Thing {
     
     func updatePosition() {
         self.updateDirection()
-        self.positionX += self.speed * Globals.WARP1 * cos(self.direction)
-        self.positionY -= self.speed * Globals.WARP1 * sin(self.direction)
+        self.positionX += self.speed * Globals.WARP1 * cos(self.direction) / universe.updatesPerSecond
+        self.positionY -= self.speed * Globals.WARP1 * sin(self.direction) / universe.updatesPerSecond
         if self.state == .alive {
             if self.positionX <= 0 || self.positionX >= Globals.GalaxyWidth || self.positionY <= 0 || self.positionY >= Globals.GalaxyWidth {
                 self.explode()

@@ -72,21 +72,21 @@ enum ShipType: Int, CaseIterable {
         }
     }
     var acceleration: Double {
-        //change in speed per 0.1sec tick
+        //change in speed per second
         switch self {
             
         case .scout:
-            return 0.2
+            return 2
         case .destroyer:
-            return 0.2
+            return 2
         case .cruiser:
-            return 0.15
+            return 1.5
         case .battleship:
-            return 0.08
+            return 0.8
         case .assault:
-            return 0.1
+            return 1
         case .starbase:
-            return 0.1
+            return 1
         }
     }
     var maxSpeed: Double {
@@ -107,54 +107,55 @@ enum ShipType: Int, CaseIterable {
         }
     }
     var warpCost: Int {
-        //fuel used per 0.1sec per warp speed
+        //fuel used per second per warp speed
         switch self {
             
         case .scout:
-            return 2
+            return 20
         case .destroyer:
-            return 3
+            return 30
         case .cruiser:
-            return 4
+            return 40
         case .battleship:
-            return 6
+            return 60
         case .assault:
-            return 3
+            return 30
         case .starbase:
-            return 10
+            return 100
         }
     }
     var recharge: Int {
-        // fuel recharged per 0.1sec
+        // fuel recharged per second
         // this must be larger than warpcost
         switch self {
             
         case .scout:
-            return 16
+            return 160
         case .destroyer:
-            return 22
+            return 220
         case .cruiser:
-            return 24
+            return 240
         case .battleship:
-            return 28
+            return 280
         case .assault:
-            return 20
+            return 200
         case .starbase:
-            return 70
+            return 700
         }
     }
     var detCost: Int {
         return 100
     }
     var shieldCost: Int {
+        // shield cost per second
         switch self {
             
         case .scout, .destroyer, .cruiser, .battleship:
-            return 2
+            return 20
         case .assault:
-            return 3
+            return 30
         case .starbase:
-            return 6
+            return 60
         }
     }
     var maxArmies: Int {
@@ -409,20 +410,21 @@ enum ShipType: Int, CaseIterable {
     }
 
     var cloakCost: Int {
+        // cloak cost per second
         switch self {
             
         case .scout:
-            return 17
+            return 170
         case .destroyer:
-            return 21
+            return 210
         case .cruiser:
-            return 26
+            return 260
         case .battleship:
-            return 30
+            return 300
         case .assault:
-            return 17
+            return 170
         case .starbase:
-            return 75
+            return 750
         }
     }
     var maxDamage: Double {
@@ -443,20 +445,21 @@ enum ShipType: Int, CaseIterable {
         }
     }
     var repair: Double {
+        // repair rate per second
         switch self {
             
         case .scout:
-            return 0.08
+            return 0.8
         case .destroyer:
-            return 0.1
+            return 1
         case .cruiser:
-            return 0.112
+            return 1.12
         case .battleship:
-            return 0.125
+            return 1.25
         case .assault:
-            return 0.120
+            return 1.20
         case .starbase:
-            return 0.140
+            return 1.40
         }
     }
     var laserRecharge: Double {

@@ -1206,7 +1206,7 @@ class Player: Thing {
             logger.error("\(#file) \(#function) unexpected orbit error")
             return
         }
-        self.orbitRadian -= 0.1
+        self.orbitRadian -= 0.5 / universe.updatesPerSecond
         self.positionX = orbit.positionX + cos(self.orbitRadian) * Player.orbitRadius
         self.positionY = orbit.positionY - sin(self.orbitRadian) * Player.orbitRadius
         self.direction = self.orbitRadian - (Double.pi / 2)
@@ -1218,8 +1218,8 @@ class Player: Thing {
         }
         self.etmp += Int(self.speed)
         
-        positionX += Globals.WARP1 * Double(self.speed) * cos(direction)
-        positionY -= Globals.WARP1 * Double(self.speed) * sin(direction)
+        positionX += Globals.WARP1 * Double(self.speed) * cos(direction) / universe.updatesPerSecond
+        positionY -= Globals.WARP1 * Double(self.speed) * sin(direction) / universe.updatesPerSecond
         
         if positionX < 0  {
             positionX = -positionX
@@ -1266,7 +1266,7 @@ class Player: Thing {
         }
         //let maxChange = self.ship.turnSpeed / (self.speed * self.speed)
         
-        let maxChange = self.ship.turnSpeed / Double(Int(1) << Int(self.speed))
+        let maxChange = self.ship.turnSpeed * 10 / (Double(Int(1) << Int(self.speed)) * universe.updatesPerSecond)
         
         logger.trace("maxChange \(maxChange)")
         let helmDiff = self.helmDirection - self.direction
@@ -1358,7 +1358,7 @@ class Player: Thing {
             return
         }
         if targetSpeed < speed {
-            self.speed = self.speed - self.ship.acceleration
+            self.speed = self.speed - (self.ship.acceleration / universe.updatesPerSecond)
             if self.speed < 0 {
                 self.speed = 0
             }
@@ -1368,7 +1368,7 @@ class Player: Thing {
             return
         }
         if targetSpeed > speed {
-            self.speed = speed + self.ship.acceleration
+            self.speed = speed + (self.ship.acceleration / universe.updatesPerSecond)
             if self.speed > targetSpeed {
                 self.speed = targetSpeed
             }
@@ -1383,23 +1383,23 @@ class Player: Thing {
                 self.helmSpeed = reducedSpeed
             }
         }
-        self.fuel += self.ship.recharge - Int(self.speed) * self.ship.warpCost
+        self.fuel += (self.ship.recharge / Int(universe.updatesPerSecond)) - Int(self.speed) * (self.ship.warpCost / Int(universe.updatesPerSecond))
         // if we are orbiting a friendly fuel planet, we double recharge
         if let planet = self.orbit, planet.team == self.team && planet.fuel {
-            self.fuel += self.ship.recharge
+            self.fuel += self.ship.recharge / Int(universe.updatesPerSecond)
         }
         if self.shieldsUp {
-            if fuel < self.ship.shieldCost {
+            if fuel < self.ship.shieldCost / Int(universe.updatesPerSecond) {
                 let reducedSpeed = Double(Int(self.ship.recharge / self.ship.warpCost) - 2)
                 if reducedSpeed < self.speed {
                     self.speed = reducedSpeed
                     self.helmSpeed = reducedSpeed
                 }
             }
-            self.fuel -= self.ship.shieldCost
+            self.fuel -= (self.ship.shieldCost / Int(universe.updatesPerSecond))
         }
         if self.cloak {
-            if fuel < self.ship.cloakCost {
+            if fuel < self.ship.cloakCost / Int(universe.updatesPerSecond) {
                 self.cloak = false
                 self.sendMessage(message: "Cloak failed due to fuel shortage")
             }
@@ -1407,7 +1407,7 @@ class Player: Thing {
         }
     }
     func updateRepair() {
-        var repairRate = self.ship.repair
+        var repairRate = self.ship.repair / universe.updatesPerSecond
         if self.repair {
             repairRate *= 2.0
         }
@@ -1581,7 +1581,7 @@ class Player: Thing {
         self.orbit = nil
         target.orbit = nil
         
-        let halfTractorForce = Globals.WARP1 * self.ship.tractorStrength
+        let halfTractorForce = Globals.WARP1 * self.ship.tractorStrength / universe.updatesPerSecond
         var myVectorDirection = atan2((target.positionY - self.positionY) * -1, target.positionX - self.positionX)
         if self.tractorMode == .pressor {
             myVectorDirection = myVectorDirection * -1

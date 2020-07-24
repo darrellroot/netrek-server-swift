@@ -292,12 +292,12 @@ class Universe {
             }
         }
         //pop a planet every half second if we have at least one player
-        if timerCount % 5 == 0 && players.filter({ $0.status != .free}).count > 0 {
+        if timerCount % (Int(updatesPerSecond) / 2) == 0 && players.filter({ $0.status != .free}).count > 0 {
             if let planet = planets.randomElement() {
                 planet.pop()
             }
         }
-        if timerCount % 10 == 0 {
+        if timerCount % Int(self.updatesPerSecond) == 0 {
             for player in self.players {
                 if player.status != .free {
                     player.secondTimerFired()
@@ -305,7 +305,7 @@ class Universe {
             }
             robotController.secondTimerFired()
         }
-        if timerCount % 600 == 0 {
+        if timerCount % 60 * Int(self.updatesPerSecond) == 0 {
             for player in self.players {
                 if player.status != .free {
                     player.minuteTimerFired()
@@ -315,7 +315,8 @@ class Universe {
         for player in self.humanPlayers {
             player.flush()
         }
-        if timerCount % 1200 == 0 {
+        //metaserver update every 2 minutes
+        if timerCount % 120 * Int(self.updatesPerSecond) == 0 {
             if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "69.164.215.96", port: 3521)
                 metaserver.sendReport(ip: "63.170.91.110", port: 3521)
@@ -325,7 +326,7 @@ class Universe {
             }
         }
         // save user database once per hour
-        if timerCount % 36000 == 0 {
+        if timerCount % 3600 * Int(self.updatesPerSecond) == 0 {
             try? userDatabase.save()
         }
     }

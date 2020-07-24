@@ -11,7 +11,7 @@ import Foundation
 struct Globals {
     static let PORT = 2592
     //static let NAME_LEN = 16
-    static let WARP1 = 20.0 // netrek units moved per 0.1 second at warp 1
+    static let WARP1 = 200.0 // netrek units moved per second at warp 1
     static let GalaxyWidth = 100000.0
 }
 let PACKET_SIZES: [Int: Int] =

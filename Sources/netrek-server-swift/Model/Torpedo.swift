@@ -87,8 +87,8 @@ class Torpedo: Thing {
         self.state = .alive
         self.damage = player.ship.torpDamage
                 
-        var torpVectorX = Double(player.ship.torpSpeed) * Globals.WARP1 * cos(self.direction) + player.speed * Globals.WARP1 * cos(player.direction)
-        var torpVectorY = -1 * Double(player.ship.torpSpeed) * Globals.WARP1
+        let torpVectorX = Double(player.ship.torpSpeed) * Globals.WARP1 * cos(self.direction) + player.speed * Globals.WARP1 * cos(player.direction)
+        let torpVectorY = -1 * Double(player.ship.torpSpeed) * Globals.WARP1
             * sin(self.direction) + -1 * player.speed * Globals.WARP1 * sin(player.direction)
         
         var torpSpeed = sqrt(torpVectorX * torpVectorX + torpVectorY * torpVectorY) / Globals.WARP1
@@ -103,8 +103,8 @@ class Torpedo: Thing {
     }
     
     func updatePosition() {
-        self.positionX += cos(self.direction) * self.speed * Globals.WARP1
-        self.positionY -= sin(self.direction) * self.speed * Globals.WARP1
+        self.positionX += cos(self.direction) * self.speed * Globals.WARP1 / universe.updatesPerSecond
+        self.positionY -= sin(self.direction) * self.speed * Globals.WARP1 / universe.updatesPerSecond
         if self.state == .alive {
             if self.positionX <= 0 || self.positionX >= Globals.GalaxyWidth || self.positionY <= 0 || self.positionY >= Globals.GalaxyWidth {
                 self.explode()
