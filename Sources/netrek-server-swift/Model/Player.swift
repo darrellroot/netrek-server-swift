@@ -1767,7 +1767,7 @@ class Player: Thing {
             let data = MakePacket.spPlayerInfo(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_PLAYER_INFO 2 for player \(self.slot) to \(player.slot)")
-                if let context = context {
+                if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: data)
                         _ = context.channel.write(buffer)
@@ -1781,7 +1781,7 @@ class Player: Thing {
             let data = MakePacket.spKills(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_KILLS_2 for player \(self.slot) to \(player.slot)")
-                if let context = context {
+                if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: data)
                         _ = context.channel.write(buffer)
@@ -1795,7 +1795,7 @@ class Player: Thing {
             let data = MakePacket.spPlayerStatus(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_PStatus for player \(self.slot) to \(player.slot)")
-                if let context = context {
+                if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: data)
                         _ = context.channel.write(buffer)
