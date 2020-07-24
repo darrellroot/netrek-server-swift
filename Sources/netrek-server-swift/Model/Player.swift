@@ -1659,11 +1659,15 @@ class Player: Thing {
             self.updateDirection()
             self.updatePosition()
             self.updateTractor()
+            // send spKills if needed
+            self.sendSpKills()
+            // send spPlayerStatus if needed
+            self.sendSpPlayerStatus()
         }
         sendSpYou()
         for player in universe.players {
             if player.status == .alive || player.status == .explode {
-                self.sendSpPlayer(player: player)
+                self.getSpPlayer(player: player)
             }
         }
         for torpedo in self.torpedoes {
@@ -1734,21 +1738,35 @@ class Player: Thing {
         if playerLock != nil {
             self.playerLockDirection()
         }
-        //send my SpPlLogin to all players if needed
-        if let user = self.user, user.needSpPlLogin {
-            let data = MakePacket.spPlLogin(player: self)
-            for player in universe.humanPlayers {
-                logger.debug("Sending SP_PL_LOGIN for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
-                    context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
-                    }
-                }
-            }
-            user.needSpPlLogin = false
-        }
+        self.sendSpPlLogin()
         // send my SpHostile to all players if needed
+        self.sendSpHostile()
+        // send my spPlayerInfo if needed
+        self.sendSpPlayerInfo()
+        for player in universe.players {
+            if player.status == .alive || player.status == .explode {
+                self.getSpFlags(player: player)
+            }
+        }
+    }
+    func getSpPlanets() {
+        for planet in universe.planets {
+            self.getSpPlanet(planet: planet)
+        }
+     }
+    func getSpPlanet(planet: Planet) {
+        let data = MakePacket.spPlanet(planet: planet)
+        logger.debug("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
+        if let context = context {
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                _ = context.channel.write(buffer)
+            }
+        }
+        //connection?.send(data: data)
+    }
+    
+    func sendSpHostile() {
         if self.needSpHostile {
             let data = MakePacket.spHostile(player: self)
             for player in universe.humanPlayers {
@@ -1762,7 +1780,48 @@ class Player: Thing {
             }
             self.needSpHostile = false
         }
-        // send my spPlayerInfo if needed
+    }
+    func getSpHostile(player: Player) {
+        player.needSpHostile = false
+        let data = MakePacket.spHostile(player: player)
+        logger.debug("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
+        if let context = context {
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                _ = context.channel.write(buffer)
+            }
+        }
+        //connection?.send(data: data)
+    }
+    //send my playerLogin to others
+    func sendSpPlLogin() {
+        if let user = self.user, user.needSpPlLogin {
+            let data = MakePacket.spPlLogin(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_PL_LOGIN for player \(self.slot) to \(player.slot)")
+                if let context = player.context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            user.needSpPlLogin = false
+        }
+    }
+    //send other player login to me during initial update
+    func getSpPlLogin(player: Player) {
+        let data = MakePacket.spPlLogin(player: player)
+        logger.debug("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
+        if let context = context {
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                _ = context.channel.write(buffer)
+            }
+        }
+        //connection?.send(data: data)
+    }
+    func sendSpPlayerInfo() {
         if self.needSpPlayerInfo {
             let data = MakePacket.spPlayerInfo(player: self)
             for player in universe.humanPlayers {
@@ -1776,7 +1835,19 @@ class Player: Thing {
             }
             self.needSpPlayerInfo = false
         }
-        // send spKills if needed
+    }
+    func getSpPlayerInfo(player: Player) {
+        let data = MakePacket.spPlayerInfo(player: player)
+        logger.debug("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
+        if let context = context {
+            context.eventLoop.execute {
+                let buffer = context.channel.allocator.buffer(bytes: data)
+                _ = context.channel.write(buffer)
+            }
+        }
+        //connection?.send(data: data)
+    }
+    func sendSpKills() {
         if self.needSpKills {
             let data = MakePacket.spKills(player: self)
             for player in universe.humanPlayers {
@@ -1790,84 +1861,8 @@ class Player: Thing {
             }
             self.needSpKills = false
         }
-        // send spPlayerStatus if needed
-        if self.needSpPlayerStatus {
-            let data = MakePacket.spPlayerStatus(player: self)
-            for player in universe.humanPlayers {
-                logger.debug("Sending SP_PStatus for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
-                    context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
-                    }
-                }
-            }
-            self.needSpPlayerStatus = false
-        }
-        for player in universe.players {
-            if player.status == .alive || player.status == .explode {
-                //self.sendSpPlLogin(player: player)
-                //self.sendSpHostile(player: player)
-                //self.sendSpPlayerInfo(player: player)
-                //self.sendSpKills(player: player)
-                //self.sendSpPlayerStatus(player: player)
-                //flags are complex to determine if they are required to send, so send every second.  8 bytes per player per player
-                self.sendSpFlags(player: player)
-            }
-        }
     }
-    func sendSpPlanets() {
-        for planet in universe.planets {
-            self.sendSpPlanet(planet: planet)
-        }
-     }
-    func sendSpPlanet(planet: Planet) {
-        let data = MakePacket.spPlanet(planet: planet)
-        logger.debug("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        //connection?.send(data: data)
-    }
-    
-    func sendSpHostile(player: Player) {
-        player.needSpHostile = false
-        let data = MakePacket.spHostile(player: player)
-        logger.debug("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        //connection?.send(data: data)
-    }
-    func sendSpPlLogin(player: Player) {
-        let data = MakePacket.spPlLogin(player: player)
-        logger.debug("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        //connection?.send(data: data)
-    }
-    func sendSpPlayerInfo(player: Player) {
-        let data = MakePacket.spPlayerInfo(player: player)
-        logger.debug("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        //connection?.send(data: data)
-    }
-    func sendSpKills(player: Player) {
+    func getSpKills(player: Player) {
         let data = MakePacket.spKills(player: player)
         logger.debug("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
         if let context = context {
@@ -1878,7 +1873,7 @@ class Player: Thing {
         }
         //connection?.send(data: data)
     }
-    func sendSpFlags(player: Player) {
+    func getSpFlags(player: Player) {
         let data = MakePacket.spFlags(player: player)
         logger.debug("Sending SP_Flags for player \(player.slot) to \(self.slot)")
         if let context = context {
@@ -1892,17 +1887,32 @@ class Player: Thing {
     // full transfer sent after CP_LOGIN
     func sendInitialTransfer() {
         for player in self.universe.players {
-            self.sendSpPlLogin(player: player)
-            self.sendSpHostile(player: player)
-            self.sendSpPlayerInfo(player: player)
-            self.sendSpKills(player: player)
-            self.sendSpPlayerStatus(player: player)
-            self.sendSpFlags(player: player)
-            self.sendSpPlayer(player: player)
-            self.sendSpPlanets()
+            self.getSpPlLogin(player: player)
+            self.getSpHostile(player: player)
+            self.getSpPlayerInfo(player: player)
+            self.getSpKills(player: player)
+            self.getSpPlayerStatus(player: player)
+            self.getSpFlags(player: player)
+            self.getSpPlayer(player: player)
+            self.getSpPlanets()
         }
     }
-    func sendSpPlayerStatus(player: Player) {
+    func sendSpPlayerStatus() {
+        if self.needSpPlayerStatus {
+            let data = MakePacket.spPlayerStatus(player: self)
+            for player in universe.humanPlayers {
+                logger.debug("Sending SP_PStatus for player \(self.slot) to \(player.slot)")
+                if let context = player.context {
+                    context.eventLoop.execute {
+                        let buffer = context.channel.allocator.buffer(bytes: data)
+                        _ = context.channel.write(buffer)
+                    }
+                }
+            }
+            self.needSpPlayerStatus = false
+        }
+    }
+    func getSpPlayerStatus(player: Player) {
         let data = MakePacket.spPlayerStatus(player: player)
         logger.debug("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
         if let context = context {
@@ -1913,7 +1923,7 @@ class Player: Thing {
         }
         //connection?.send(data: data)
     }
-    func sendSpPlayer(player: Player) {
+    func getSpPlayer(player: Player) {
         let data = MakePacket.spPlayer(player: player)
         logger.debug("Sending SP_Player for player \(player.slot) to \(self.slot)")
         if let context = context {
