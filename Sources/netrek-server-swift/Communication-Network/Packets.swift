@@ -154,8 +154,16 @@ struct SP_LASER {
         self.laserID = UInt8(laser.laserID)
         self.status = laser.status.rawValue
         self.direction = NetrekMath.directionRadian2Netrek(laser.direction)
-        self.positionX = UInt32(laser.targetPositionX).byteSwapped
-        self.positionY = UInt32(laser.targetPositionY).byteSwapped
+        if laser.targetPositionX < 0 {
+            self.positionX = 0
+        } else {
+            self.positionX = UInt32(laser.targetPositionX).byteSwapped
+        }
+        if laser.targetPositionY < 0 {
+            self.positionY = 0
+        } else {
+            self.positionY = UInt32(laser.targetPositionY).byteSwapped
+        }
         if let target = laser.target {
             self.target = UInt32(target).byteSwapped
         } else {
@@ -315,13 +323,33 @@ struct SP_YOU {
             self.tractor = 0
         }
         //self.tractor = UInt8(player.tractor?.slot + 64 ?? 0)
-        self.damage = UInt32(player.damage).byteSwapped
-        self.shield = UInt32(player.shield).byteSwapped
-        self.etmp = UInt16(player.etmp).byteSwapped
-        self.wtmp = UInt16(player.wtmp).byteSwapped
+        if player.damage >= 0 {
+            self.damage = UInt32(player.damage).byteSwapped
+        } else {
+            self.damage = 0
+        }
+        if player.shield >= 0 {
+            self.shield = UInt32(player.shield).byteSwapped
+        } else {
+            self.shield = 0
+        }
+        if player.etmp >= 0 {
+            self.etmp = UInt16(player.etmp).byteSwapped
+        } else {
+            self.etmp = 0
+        }
+        if player.wtmp >= 0 {
+            self.wtmp = UInt16(player.wtmp).byteSwapped
+        } else {
+            self.wtmp = 0
+        }
         self.whydead = UInt16(player.whydead.rawValue).byteSwapped
         self.whodead = UInt16(player.whodead).byteSwapped
-        self.fuel = UInt32(player.fuel).byteSwapped
+        if player.fuel >= 0 {
+            self.fuel = UInt32(player.fuel).byteSwapped
+        } else {
+            self.fuel = 0
+        }
         
         //TODO flags
         self.flags = player.flags.byteSwapped
@@ -400,7 +428,11 @@ struct SP_PLANET {
     init(planet: Planet) {
         self.planetNum = UInt8(planet.planetID)
         self.owner = UInt8(planet.team.rawValue)
-        self.armies = UInt32(planet.armies).byteSwapped
+        if planet.armies >= 0 {
+            self.armies = UInt32(planet.armies).byteSwapped
+        } else {
+            self.armies = 0
+        }
         var flags: UInt16 = 0
         
         if planet.agri  {
