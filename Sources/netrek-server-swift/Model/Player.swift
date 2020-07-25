@@ -385,8 +385,9 @@ class Player: Thing {
                 } else {
                     attackLabel = attacker.team.letter + attacker.slot.hex
                 }
+                let killLabel = String(format: "%.2f",attacker.kills)
                 for player in universe.players {
-                    player.sendMessage(message: "\(victimLabel)\(armiesLabel) was kill \(attacker.kills) for \(attackLabel)")
+                    player.sendMessage(message: "\(victimLabel)\(armiesLabel) was kill \(killLabel) for \(attackLabel)")
                 }
             }
             if let planet = planet {

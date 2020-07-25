@@ -19,7 +19,15 @@ class RobotModel1: Robot {
         didSet {
             if strategy != oldValue, let me = me, let user = me.user {
                 for player in universe.humanPlayers.filter({$0.team == me.team}) {
-                    player.sendMessage(message: "\(me.team.letter)\(me.slot) \(user.name) I need to \(self.strategy.rawValue)")
+                    switch strategy {
+                        
+                    case .refuel:
+                        player.sendMessage(message: "\(me.team.letter)\(me.slot) \(user.name) Fuel situation critical!")
+                    case .repair:
+                        player.sendMessage(message: "\(me.team.letter)\(me.slot) \(user.name) We are heavily damaged!")
+                    case .dogfight:
+                        player.sendMessage(message: "\(me.team.letter)\(me.slot) \(user.name) Moving to engage the enemy!")
+                    }
                 }
             }
         }
