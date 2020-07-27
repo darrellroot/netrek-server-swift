@@ -36,7 +36,6 @@ class RobotController {
                 addRobot(team: team)
             }
         }
-        //TODO delete extra robots
         for team in Team.broncoTeams {
             if humans[team]! + robots[team]! > targetPlayersPerTeam && robots[team]! > 0 {
                 deleteRobot(team: team)

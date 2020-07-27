@@ -441,11 +441,15 @@ class Universe {
             Planet(planetID: 39, positionX: 86920, positionY: 68920, name: "Antares", team: .orion, homeworld: false),
             
         ]
+        for player in players {
+            player.homeworld = player.getRandomHomeworld()
+        }
         for player in activePlayers {
             player.impact(damage: 9999, whyDead: .genocide)
         }
         for player in humanPlayers {
             player.sendMessage(message: "A new war spreads across the new galaxy!")
+            player.sendInitialTransfer()
         }
     }
     

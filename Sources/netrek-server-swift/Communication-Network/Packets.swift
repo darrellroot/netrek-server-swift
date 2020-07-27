@@ -351,53 +351,7 @@ struct SP_YOU {
             self.fuel = 0
         }
         
-        //TODO flags
         self.flags = player.flags.byteSwapped
-        /*if player.shieldsUp { flags += 0x0001 }
-        if player.repair { flags += 0x0002 }
-        if player.bomb { flags += 0x0004 }
-        if player.orbit != nil { flags += 0x008 }
-        if player.cloak { flags += 0x010 }
-        if player.weaponsOverheated { flags += 0x0020 }
-        if player.enginesOverheated { flags += 0x0040 }
-        switch player.transporter {
-        case .beamup:
-            flags += 0x0100
-        case .beamdown:
-            flags += 0x0200
-        case .off:
-            break
-        }
-        if player.selfDestruct { flags += 0x0400 }
-        switch player.alertCondition {
-        case .green:
-            flags += 0x0800
-        case .yellow:
-            flags += 0x1000
-        case .red:
-            flags += 0x2000
-        }
-        if player.playerLock != nil {
-            flags += 0x4000
-        }
-        if player.planetLock != nil {
-            flags += 0x8000
-        }
-        if player.tractor != nil && player.tractorMode == .tractor { flags += 0x400000 }
-        if player.tractor != nil && player.tractorMode == .pressor { flags += 0x800000 }
-        logger.trace("SP_YOU flags \(flags)")
-        self.flags = flags.byteSwapped
-         */
-        // copilot 0x10000 not implemented
-        // robot 0x40000 not implemented
-        // dock 0x80000 not implemented
-        // refit 0x100000 not implemented
-        // refitting 0x200000 not implemented
-        // dockok 0x1000000 not implemented
-        // seen 0x2000000 not implemented
-        // observe 0x8000000 not implemented
-        // transwarm paradise 0x40000000 not implemented
-        // bprobot 0x80000000 not implemented
     }
     var size: Int {
         return 32
@@ -475,7 +429,7 @@ struct SP_PICKOK {
 //SP_LOGIN 17
 struct SP_LOGIN {
     var type: UInt8 = 17
-    var accept: UInt8 //TODO 0 means login failed
+    var accept: UInt8
     var paradise1: UInt8 = 0
     var paradise2: UInt8 = 0
     var flags: UInt32 = 0

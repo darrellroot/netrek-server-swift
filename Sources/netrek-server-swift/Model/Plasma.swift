@@ -233,7 +233,6 @@ class Plasma: Thing {
             if Date() > self.expiration {
                 logger.trace("Plasma expired")
                 self.state = .free
-                //TODO send update when freeing torps
             }
             self.updatePosition()
             if self.checkForHit() {

@@ -37,7 +37,8 @@ lifecycle.registerShutdown(label: "shutdownWarning",.sync(universe.shutdownWarni
 //third to last shutdown executed
 lifecycle.registerShutdown(label: "userDatabase", .sync(universe.userDatabase.save))
 
-lifecycle.registerShutdown(label: "backtrace",.sync(Backtrace.print))
+//lifecycle.registerShutdown(label: "backtrace",.sync(Backtrace.print))
+Backtrace.install()
 
 let netrekChannelHandler = NetrekChannelHandler(universe: universe)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 2)

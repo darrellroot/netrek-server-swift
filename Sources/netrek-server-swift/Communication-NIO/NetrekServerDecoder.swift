@@ -109,10 +109,16 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("PacketAnalyzer unable to decode message type 1")
                 printData(data, success: false)
             }
+            
             //messageString = NetrekMath.sanitizeString(messageString)
             guard let sender = universe.player(context: context) else {
                 logger.error("Unable to identify message sender for context \(context)")
                 return .continue
+            }
+            //TODO remove CRASHME
+            if messageString == "crash" {
+                var crashme: Double = Double.random(in: -5 ..< 5)
+                let crash = UInt32(crashme)
             }
             
             

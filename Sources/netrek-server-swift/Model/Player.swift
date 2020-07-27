@@ -43,8 +43,6 @@ class Player: Thing {
     }
     var armies = 0
     var maxArmies: Int {
-        //return min(4,self.ship.maxArmies)
-        //TODO after testing activate kill army limit
         switch self.ship {
         case .assault:
             return min(Int(3.0 * kills), self.ship.maxArmies)
@@ -311,7 +309,7 @@ class Player: Thing {
         self.status = .free
         self.universe = universe
         self.team = .independent
-        self.laser = Laser(universe: universe)
+        self.laser = Laser()
 
         for count in 0 ..< 8 {
             self.torpedoes.append(Torpedo(universe: self.universe, player: self, number: self.slot * 8 + count))
@@ -685,7 +683,7 @@ class Player: Thing {
         self.robot = robot
         self.status = .outfit
     }
-    func getRandomHomeworld() -> Planet {
+    public func getRandomHomeworld() -> Planet {
         var usedPlanets: [Planet] = []
         for player in universe.players {
             usedPlanets.append(player.homeworld)
@@ -1530,9 +1528,7 @@ class Player: Thing {
             }
         }
     }
-    private func beam() {
-        //TODO limit army capacity
-        
+    private func beam() {        
         // every 0.8 seconds by shortTimer
         guard let planet = self.orbit else {
             self.transporter = .off
@@ -1886,7 +1882,7 @@ class Player: Thing {
         //connection?.send(data: data)
     }
     // full transfer sent after CP_LOGIN
-    func sendInitialTransfer() {
+    public func sendInitialTransfer() {
         for player in self.universe.players {
             self.getSpPlLogin(player: player)
             self.getSpHostile(player: player)

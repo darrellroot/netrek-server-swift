@@ -27,11 +27,9 @@ class Laser {
     var targetPositionX: Double = 0.0
     var targetPositionY: Double = 0.0
     var target: Int? = nil
-    var universe: Universe
     weak var player: Player? = nil // set by parent after initialization
     
-    init(universe: Universe) {
-        self.universe = universe
+    init() {
         //self.player set by parent after initialization
     }
     
@@ -179,7 +177,7 @@ class Laser {
         DispatchQueue.main.asyncAfter(deadline: .now() + shooter.ship.laserRecharge) {
             self.status = .free
             let spLaser = MakePacket.spLaser(laser: self)
-            for player in self.universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
+            for player in universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
                 if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spLaser)

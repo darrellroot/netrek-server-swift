@@ -173,7 +173,6 @@ class Torpedo: Thing {
             if Date() > self.expiration {
                 logger.trace("Torp expired")
                 self.state = .free
-                //TODO send update when freeing torps
             }
             self.wobble()
             self.updatePosition()
@@ -189,7 +188,6 @@ class Torpedo: Thing {
                     }
                     logger.debug("Sending SpTorp to player \(player.slot)")
                 }
-
                 //player.connection?.send(data: spTorp)
             }
         case .explode:
