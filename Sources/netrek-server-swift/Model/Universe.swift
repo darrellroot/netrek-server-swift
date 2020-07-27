@@ -320,8 +320,8 @@ class Universe {
         for player in self.humanPlayers {
             player.flush()
         }
-        //metaserver update every 2 minutes
-        if timerCount % 120 * Int(self.updatesPerSecond) == 0 {
+        //metaserver update every 4 minutes
+        if timerCount % 240 * Int(self.updatesPerSecond) == 0 {
             if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "69.164.215.96", port: 3521)
                 metaserver.sendReport(ip: "63.170.91.110", port: 3521)
@@ -332,14 +332,12 @@ class Universe {
         }
         // stats report once per 30 minutes
         //TODO  change to 30 minutes
-        if timerCount % (180 * Int(self.updatesPerSecond)) == 0 {
+        if timerCount % (60 * Int(self.updatesPerSecond)) == 0 {
             userDatabase.updateStats()
             for player in humanPlayers {
                 player.statsReport()
             }
-        }
-        // save user database once per hour
-        if timerCount % (3600 * Int(self.updatesPerSecond)) == 0 {
+            // save user database after stats report
             try? userDatabase.save()
         }
     }

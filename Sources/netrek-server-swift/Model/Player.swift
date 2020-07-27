@@ -328,8 +328,8 @@ class Player: Thing {
             }
             self.sendSpPlayerInfo()
         }
-        let tHours = user.tournamentTicks / 3600
-        self.sendMessage(message: "Tournament Hours: \(tHours) offense: \(user.offense) bombing: \(user.bombing) planets: \(user.planets) rank: \(user.rank) DI: \(user.DI)")
+        let tHours = Double(user.tournamentTicks) / 3600
+        self.sendMessage(message: "T Hours: \(tHours.f2) Off: \(user.offense.f2) Bomb: \(user.bombing.f2) Planets: \(user.planets.f2) DI: \(user.DI.f2) rank: \(user.rank)")
     }
     
     public func explode(attacker: Player? = nil, planet: Planet? = nil) {
@@ -722,7 +722,7 @@ class Player: Thing {
         logger.info("New connection from \(self.remoteAddress?.description ?? "unknown")")
         do {
             logger.debug("sending SP MOTD")
-            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.3-alpha feedback@networkmom.net")
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.4-alpha feedback@networkmom.net")
             context.eventLoop.execute {
                 let buffer = context.channel.allocator.buffer(bytes: data)
                 _ =  context.channel.write(buffer)
@@ -1061,8 +1061,8 @@ class Player: Thing {
 
         self.newShip(ship: ship)
         
-        self.positionX = homeworld.positionX + Double.random(in: -5000 ..< 5000)
-        self.positionY = homeworld.positionY + Double.random(in: -5000 ..< 5000)
+        self.positionX = homeworld.positionX + Double.random(in: -9000 ..< 9000)
+        self.positionY = homeworld.positionY + Double.random(in: -9000 ..< 9000)
         if self.positionX < 0 {
             self.positionX = 1
         }

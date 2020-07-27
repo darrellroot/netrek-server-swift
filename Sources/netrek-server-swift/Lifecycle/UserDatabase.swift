@@ -23,7 +23,7 @@ class UserDatabase {
         guard users.count > 0 else {
             return 1.0
         }
-        var totalOffense = 0.1 // > 0 to prevent underflow
+        var totalOffense = 0.000001 // > 0 to prevent underflow
         for user in users {
             totalOffense += user.rawOffense
         }
@@ -34,7 +34,7 @@ class UserDatabase {
         guard users.count > 0 else {
             return 1.0
         }
-        var totalBombing = 0.1 // > 0 to prevent underflow
+        var totalBombing = 0.000001 // > 0 to prevent underflow
         for user in users {
             totalBombing += user.rawBombing
         }
@@ -45,7 +45,7 @@ class UserDatabase {
         guard users.count > 0 else {
             return 1.0
         }
-        var totalPlanets = 0.1 // > 0 to prevent underflow
+        var totalPlanets = 0.000001 // > 0 to prevent underflow
         for user in users {
             totalPlanets += user.rawPlanets
         }
@@ -104,6 +104,7 @@ class UserDatabase {
             logger.critical("Unable to decode user database from \(url) error \(error)")
             return
         }
+        self.updateStats()
         try! self.save()
     }
     
