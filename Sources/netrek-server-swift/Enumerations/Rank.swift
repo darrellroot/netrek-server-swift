@@ -42,4 +42,27 @@ enum Rank: Int, Codable {
             return 8
         }
     }
+    var description: String {
+        switch self {
+            
+        case .ensign:
+            return "Ensign"
+        case .lieutenant:
+            return "Lieutenant"
+        case .ltcmdr:
+            return "Lieutenant Commander"
+        case .commander:
+            return "Commander"
+        case .captain:
+            return "Captain"
+        case .fleetCaptain:
+            return "Fleet Captain"
+        case .commodore:
+            return "Commodore"
+        case .rearAdmiral:
+            return "Rear Admiral"
+        case .admiral:
+            return "Admiral"
+        }
+    }
 }

@@ -80,10 +80,11 @@ class MetaserverUDP {
         let freeCount = max(16 - playerCount,0)
         returnValue += "\(freeCount)\n"
         let tMode: String
-        if playerCount >= 8 {
-            tMode = "y"
-        } else {
+        switch universe.gameState {
+        case .intramural:
             tMode = "n"
+        case .tmode:
+            tMode = "y"
         }
         returnValue += "\(tMode)\n"
         returnValue += "n\n" //RSA

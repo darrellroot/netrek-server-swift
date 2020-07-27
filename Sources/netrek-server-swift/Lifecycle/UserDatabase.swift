@@ -19,6 +19,49 @@ class UserDatabase {
     let filename = "netrek.database"
     let fileManager = FileManager()
 
+    public func averageOffense() -> Double {
+        guard users.count > 0 else {
+            return 1.0
+        }
+        var totalOffense = 0.1 // > 0 to prevent underflow
+        for user in users {
+            totalOffense += user.rawOffense
+        }
+        return totalOffense / Double(users.count)
+    }
+    
+    public func averageBombing() -> Double {
+        guard users.count > 0 else {
+            return 1.0
+        }
+        var totalBombing = 0.1 // > 0 to prevent underflow
+        for user in users {
+            totalBombing += user.rawBombing
+        }
+        return totalBombing / Double(users.count)
+    }
+    
+    public func averagePlanets() -> Double {
+        guard users.count > 0 else {
+            return 1.0
+        }
+        var totalPlanets = 0.1 // > 0 to prevent underflow
+        for user in users {
+            totalPlanets += user.rawPlanets
+        }
+        return totalPlanets / Double(users.count)
+    }
+    
+    var cachedAverageOffense = 0.1
+    var cachedAverageBombing = 0.1
+    var cachedAveragePlanets = 0.1
+    
+    public func updateStats() {
+        self.cachedAverageOffense = averageOffense()
+        self.cachedAverageBombing = averageBombing()
+        self.cachedAveragePlanets = averagePlanets()
+    }
+    
     public func authenticate(name: String, password: String, userinfo: String) -> AuthenticationResult {
         
         guard let passwordData = password.data(using: .utf8) else {

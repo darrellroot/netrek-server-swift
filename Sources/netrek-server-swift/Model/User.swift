@@ -30,7 +30,7 @@ class User: Codable {
         case intramuralPlanets
         case maxKills
         case sbMaxKills
-        case tournamentTicks
+        case tournamentTicks // seconds
     }
     // user names starting with "guest" should not be saved in permanent storage.  See player.receivedCpLogin()
     static var guestID = 1
@@ -66,7 +66,30 @@ class User: Codable {
     var maxKills = 0.0
     var sbMaxKills = 0.0
     
-    var tournamentTicks = 1  //start at 1 to avoid division by zero
+    var tournamentTicks = 1  //start at 1 to avoid division by zero, measure in seconds
+    
+    var rawOffense: Double {
+        return Double(tKills) / Double(tournamentTicks)
+    }
+    var rawBombing: Double {
+        return Double(tArmies) / Double(tournamentTicks)
+    }
+    var rawPlanets: Double {
+        return Double(tPlanets) / Double(tournamentTicks)
+    }
+    var offense: Double {
+        return rawOffense / universe.userDatabase.cachedAverageOffense
+    }
+    var bombing: Double {
+        return rawBombing / universe.userDatabase.cachedAverageBombing
+    }
+    var planets: Double {
+        return rawPlanets / universe.userDatabase.cachedAveragePlanets
+    }
+    
+    var DI: Double {
+        return (offense + bombing + planets) * Double(tournamentTicks) / 3600.0
+    }
     
     init(name: String, password256Hash: String, userinfo: String) {
         self.name = name
@@ -80,6 +103,122 @@ class User: Codable {
         self.saveToDatabase = false
         self.password256Hash = ""
         self.userinfo = userinfo
+    }
+    
+    func considerPromotion() -> Bool {
+        //returns true if promoted
+        let DI = self.DI
+        let rating = self.offense + self.bombing + self.planets
+        switch self.rank {
+        
+        case .ensign:
+            if DI >= 2.0 && rating >= 1 {
+                self.rank = .lieutenant
+                return true
+            }
+            if DI >= 4.0 && rating > 0 {
+                self.rank = .lieutenant
+                return true
+            }
+        case .lieutenant:
+            if DI >= 8.0 && rating >= 2 {
+                self.rank = .ltcmdr
+                return true
+            }
+            if DI >= 16.0 && rating > 1 {
+                self.rank = .ltcmdr
+                return true
+            }
+            if DI >= 32.0 && rating > 0 {
+                self.rank = .ltcmdr
+                return true
+            }
+        case .ltcmdr:
+            if DI >= 24.0 && rating >= 3 {
+                self.rank = .commander
+                return true
+            }
+            if DI >= 48.0 && rating > 2 {
+                self.rank = .commander
+                return true
+            }
+            if DI >= 96.0 && rating > 1 {
+                self.rank = .commander
+                return true
+            }
+        case .commander:
+            if DI >= 60.0 && rating >= 4 {
+                self.rank = .captain
+                return true
+            }
+            if DI >= 120.0 && rating > 3 {
+                self.rank = .captain
+                return true
+            }
+            if DI >= 240.0 && rating > 2 {
+                self.rank = .captain
+                return true
+            }
+        case .captain:
+            if DI >= 100.0 && rating >= 5 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 200.0 && rating > 4 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 400.0 && rating > 3 {
+                self.rank = .fleetCaptain
+                return true
+            }
+
+        case .fleetCaptain:
+            if DI >= 150.0 && rating >= 6 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 300.0 && rating > 5 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 600.0 && rating > 4 {
+                self.rank = .fleetCaptain
+                return true
+            }
+
+        case .commodore:
+            if DI >= 210.0 && rating >= 7 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 420.0 && rating > 6 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 840.0 && rating > 5 {
+                self.rank = .fleetCaptain
+                return true
+            }
+
+        case .rearAdmiral:
+            if DI >= 320.0 && rating >= 8 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 640.0 && rating > 7 {
+                self.rank = .fleetCaptain
+                return true
+            }
+            if DI >= 1280.0 && rating > 6 {
+                self.rank = .fleetCaptain
+                return true
+            }
+
+        case .admiral:
+            break
+        }
+        return false
     }
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)

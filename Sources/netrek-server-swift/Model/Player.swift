@@ -318,6 +318,20 @@ class Player: Thing {
         self.plasma = Plasma(universe: self.universe, player: self, number: self.slot)
     }
     
+    public func statsReport() {
+        guard let user = user else {
+            return
+        }
+        if user.considerPromotion() {
+            for player in universe.humanPlayers {
+                player.sendMessage(message: "\(user.name) promoted to \(user.rank.description)")
+            }
+            self.sendSpPlayerInfo()
+        }
+        let tHours = user.tournamentTicks / 3600
+        self.sendMessage(message: "Tournament Hours: \(tHours) offense: \(user.offense) bombing: \(user.bombing) planets: \(user.planets) rank: \(user.rank) DI: \(user.DI)")
+    }
+    
     public func explode(attacker: Player? = nil, planet: Planet? = nil) {
         for player in universe.players.filter({$0.status == .alive}) {
             guard player !== self else {
@@ -476,6 +490,7 @@ class Player: Thing {
             player.sendMessage(message: "Player \(self.team.letter)\(self.slot) \(self.user?.name ?? "unknown") disconnected")
         }
         self.reset()
+        universe.setGameMode()
     }
     func newShip(ship: ShipType) {
         // warning: could be called from reset()
@@ -1630,10 +1645,7 @@ class Player: Thing {
         }
     }
     func shortTimerFired() {
-        //executed ten times per second
-        if universe.gameState == .tmode {
-            self.user?.tournamentTicks += 1
-        }
+        //executed FPS times per second
         
         if self.status == .alive {
             //every half second
@@ -1693,6 +1705,10 @@ class Player: Thing {
     }
     
     func secondTimerFired() {
+        if universe.gameState == .tmode {
+            self.user?.tournamentTicks += 1
+        }
+
         if var selfDestructTimer = self.selfDestructTimer {
             selfDestructTimer -= 1
             self.selfDestructTimer = selfDestructTimer

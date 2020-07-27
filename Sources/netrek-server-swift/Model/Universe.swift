@@ -130,6 +130,7 @@ class Universe {
     var robotController = RobotController()
         
     var gameState: GameState = .intramural
+    let tModeThreshold = 1
         
     var metaserver: MetaserverUDP? = nil
 
@@ -329,8 +330,16 @@ class Universe {
                 logger.error("Error: unable to send to metaserver")
             }
         }
+        // stats report once per 30 minutes
+        //TODO  change to 30 minutes
+        if timerCount % (180 * Int(self.updatesPerSecond)) == 0 {
+            userDatabase.updateStats()
+            for player in humanPlayers {
+                player.statsReport()
+            }
+        }
         // save user database once per hour
-        if timerCount % 3600 * Int(self.updatesPerSecond) == 0 {
+        if timerCount % (3600 * Int(self.updatesPerSecond)) == 0 {
             try? userDatabase.save()
         }
     }
@@ -543,8 +552,17 @@ class Universe {
         if let player = self.players.first(where: {$0.status == .free}) {
             player.connected(context: context)
         }
+        self.setGameMode()
     }
+    
+    public func setGameMode() {
+        if self.humanPlayers.count >= tModeThreshold {
+            self.gameState = .tmode
+        } else {
+            self.gameState = .intramural
+        }
 
+    }
     
     /*func send(playerid: Int, data: Data) {
         guard let player = players[safe: playerid] else {
