@@ -183,12 +183,13 @@ class Universe {
         }
         if netrekOptions.domainName != nil {
             self.metaserver = MetaserverUDP(universe: self)
-            if let metaserver = self.metaserver {
+            //we send to metaserver later in timer
+            /*if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "161.35.226.186", port: 3521)
             } else {
                 //cannot log here
                 print("Error: unable to send to metaserver")
-            }
+            }*/
         } else {
             //cannot log here
             print("No metaserver specified on CLI: skipping metaserver reports")
@@ -325,7 +326,6 @@ class Universe {
             if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "69.164.215.96", port: 3521)
                 metaserver.sendReport(ip: "63.170.91.110", port: 3521)
-
             } else {
                 logger.error("Error: unable to send to metaserver")
             }
