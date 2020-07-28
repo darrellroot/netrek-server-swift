@@ -130,7 +130,7 @@ class Universe {
     var robotController = RobotController()
         
     var gameState: GameState = .intramural
-    let tModeThreshold = 1
+    let tModeThreshold = 6
         
     var metaserver: MetaserverUDP? = nil
 
