@@ -98,7 +98,7 @@ class Planet: Thing, Equatable {
             if self.agri {
                 self.armies += 1
             }
-        case 5 ..< 50:
+        case 5 ..< 30:
             if Int.random(in: 0 ..< 10) == 0 {
                 self.armies += Int.random(in: 1 ..< 3)
             }
