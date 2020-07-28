@@ -33,8 +33,6 @@ This does not use any Apple-specific frameworks.  It is developed on MacOS and r
 
 ### Not currently implemented:
 
-* Remembering statistics between server restarts
-* Rank logic
 * Robots do not bomb or planet take
 * Launching robots when attacking 3rd party planets
 * Observers
@@ -45,11 +43,11 @@ This does not use any Apple-specific frameworks.  It is developed on MacOS and r
 * Short packets
 * Coups
 * War logic (you are always at war with other teams)
-* Statistics need work
 
 ### Supported, but everything needs more testing:
 
 * IPv6 (and IPv4) TCP Sockets!
+* Rank logic
 * Messages
 * Speed / direction
 * Laser
@@ -58,6 +56,7 @@ This does not use any Apple-specific frameworks.  It is developed on MacOS and r
 * Refitting ships at homeworld
 * Metaserver submissions
 * shields
+* Remembering statistics between server restarts
 * repair
 * orbit
 * Robots dogfight
