@@ -326,6 +326,7 @@ class Player: Thing {
             for player in universe.humanPlayers {
                 player.sendMessage(message: "\(user.name) promoted to \(user.rank.description)")
             }
+            self.needSpPlayerInfo = true
             self.sendSpPlayerInfo()
         }
         let tHours = Double(user.tournamentTicks) / 3600
