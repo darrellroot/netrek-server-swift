@@ -321,8 +321,8 @@ class Universe {
         for player in self.humanPlayers {
             player.flush()
         }
-        //metaserver update every 4 minutes
-        if timerCount % 240 * Int(self.updatesPerSecond) == 0 {
+        //metaserver update every 3 minutes
+        if (timerCount * Int(self.updatesPerSecond)) % 180 == 0 {
             if let metaserver = self.metaserver {
                 metaserver.sendReport(ip: "69.164.215.96", port: 3521)
                 metaserver.sendReport(ip: "63.170.91.110", port: 3521)
