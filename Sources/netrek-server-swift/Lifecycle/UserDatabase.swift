@@ -84,6 +84,8 @@ class UserDatabase {
             return .failure
         }
         logger.info("Authentication succeeded for user \(name)")
+        //update userinfo in database
+        existingUser.userinfo = userinfo
         return .success(existingUser)
     }
     init() {
