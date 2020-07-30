@@ -14,7 +14,7 @@ enum PlanetFlags: UInt16 {
     case agri = 0x040
 }
 
-class Planet: Thing, Equatable {
+class Planet: Thing, Equatable, Codable {
     
     var needsUpdate = false
     

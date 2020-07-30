@@ -109,7 +109,7 @@ class UserDatabase {
     }
     
     public func save() throws {
-        print("saving data")
+        print("saving user database")
         let encoder = JSONEncoder()
         
         let directory = netrekOptions.directory

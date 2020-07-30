@@ -18,6 +18,9 @@ class Universe {
     
     var timerCount = 0
     
+    static let planetFilename = "netrek.planets"
+    let fileManager = FileManager()
+
     static let startPlanets = [
         Planet(planetID: 0, positionX: 20000, positionY: 80000, name: "Earth", team: .federation, homeworld: true),
         Planet(planetID: 1, positionX: 10000, positionY: 60000, name: "Rigel", team: .federation, homeworld: false),
@@ -149,6 +152,20 @@ class Universe {
     init() {
         //logger.info("Universe.init")
         
+        // attempt to load planet database
+        
+        var url = URL(fileURLWithPath: netrekOptions.directory)
+        url.appendPathComponent(Universe.planetFilename)
+        let decoder = JSONDecoder()
+        do {
+            let data = try Data(contentsOf: url)
+            let planets = try decoder.decode([Planet].self, from: data)
+            self.planets = planets
+        } catch {
+            logger.critical("Unable to read planet database from \(url) error \(error)")
+            logger.critical("Using default planet list")
+        }
+
         //planets = Universe.startPlanets
         for slotnum in 0 ..< Universe.MAXPLAYERS {
             let homeworld: Planet?
@@ -242,6 +259,32 @@ class Universe {
      SP_PLANET_LOC pnum= 39 x= 86920 y= 68920 name= Antares
      */
     
+    func savePlanets() {
+        print("saving planet database")
+        let encoder = JSONEncoder()
+        let directory = netrekOptions.directory
+        if !fileManager.directoryExists(directory) {
+            do {
+                try fileManager.createDirectory(atPath: directory, withIntermediateDirectories: false)
+            } catch {
+                logger.critical("\(#file) \(#function) Unable to create directory \(directory) error \(error)")
+                return
+                //fatalError("\(#file) \(#function) Unable to create directory \(directory) error \(error)")
+            }
+        }
+
+        var url = URL(fileURLWithPath: netrekOptions.directory)
+        url.appendPathComponent(Universe.planetFilename)
+        if let encoded = try? encoder.encode(planets) {
+            do {
+                try encoded.write(to: url, options: .atomic)
+            } catch {
+                logger.critical("Unable to write planet database to \(url)")
+                return
+            }
+        }
+        logger.info("Saved planet database to url \(url)")
+    }
     public func shutdownWarning() {
         print("sending shutdown warnings")
         logger.info("Sending shutdown warnings")
@@ -330,6 +373,10 @@ class Universe {
                 logger.error("Error: unable to send to metaserver")
             }
         }
+        //save planets once per minute
+        if timerCount % (60 * Int(self.updatesPerSecond)) == 0 {
+            self.savePlanets()
+        }
         // stats report once per 30 minutes
         //TODO  change to 30 minutes
         if timerCount % (60 * Int(self.updatesPerSecond)) == 0 {
@@ -340,6 +387,7 @@ class Universe {
             // save user database after stats report
             try? userDatabase.save()
         }
+        
     }
     public func checkForWin() {
         switch netrekOptions.gameStyle {

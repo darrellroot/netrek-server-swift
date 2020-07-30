@@ -10,7 +10,7 @@ import Foundation
 
 // teams_numeric = {IND: -1, FED: 0, ROM: 1, KLI: 2, ORI: 3} for joining games
 
-enum Team: Int, CaseIterable {
+enum Team: Int, CaseIterable, Codable {
     
     static let broncoTeams = [Team.federation,Team.roman]
     static let empireTeams = [Team.federation,Team.roman,Team.kazari,Team.orion]
