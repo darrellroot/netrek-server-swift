@@ -191,36 +191,36 @@ enum ShipType: Int, CaseIterable {
             return 60000
         }
     }
-    var weaponCoolRate: Int {
+    var weaponCoolRate: Int { // per second
         switch self {
         case .scout:
-            return 3
+            return 30
         case .destroyer:
-            return 2
+            return 20
         case .cruiser:
-            return 2
+            return 20
         case .battleship:
-            return 3
+            return 30
         case .assault:
-            return 2
+            return 20
         case .starbase:
-            return 4
+            return 40
         }
     }
-    var engineCoolRate: Int {
+    var engineCoolRate: Int { // per second
         switch self {
         case .scout:
-            return 8
+            return 80
         case .destroyer:
-            return 7
+            return 70
         case .cruiser:
-            return 6
+            return 60
         case .battleship:
-            return 6
+            return 60
         case .assault:
-            return 6
+            return 60
         case .starbase:
-            return 4
+            return 40
         }
     }
     var tractorRange: Double {

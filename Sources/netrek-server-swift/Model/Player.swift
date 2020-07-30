@@ -14,8 +14,8 @@ class Player: Thing {
     static let orbitRange = 900.0 // for entering orbit
     static let detDist = 1700.0 // for detonating enemy torp
     static let planetRange = 1500.0 //range at which planet can attack player
-    static let tractorCost = 20
-    static let tractorHeat = 5
+    static let tractorCost = 200 // cost per second
+    static let tractorHeat = 50 // heat per second
     var slot: Int {
         didSet {
             self.needSpPlayerInfo = true
@@ -1253,7 +1253,7 @@ class Player: Thing {
             self.updateOrbit()
             return
         }
-        self.etmp += Int(self.speed)
+        self.etmp += Int(self.speed * 10 / universe.updatesPerSecond)
         
         positionX += Globals.WARP1 * Double(self.speed) * cos(direction) / universe.updatesPerSecond
         positionY -= Globals.WARP1 * Double(self.speed) * sin(direction) / universe.updatesPerSecond
@@ -1413,7 +1413,7 @@ class Player: Thing {
         }
     }
     func updateFuel() {
-        if fuel < Int(self.speed) * self.ship.warpCost {
+        if fuel < Int(self.speed) * self.ship.warpCost / Int(universe.updatesPerSecond) {
             let reducedSpeed = Double(Int(self.ship.recharge / self.ship.warpCost) - 1)
             if reducedSpeed < self.speed {
                 self.speed = reducedSpeed
@@ -1605,14 +1605,14 @@ class Player: Thing {
             self.sendMessage(message: "Engines overheated: disabling tractor beam")
             return
         }
-        guard self.fuel >= Player.tractorCost else {
+        guard self.fuel >= (Player.tractorCost / Int(universe.updatesPerSecond)) else {
             self.tractorMode = .off
             self.tractor = nil
             self.sendMessage(message: "Insufficient fuel for tractor beam")
             return
         }
-        self.fuel -= Player.tractorCost
-        self.etmp += Player.tractorHeat
+        self.fuel -= Player.tractorCost / Int(universe.updatesPerSecond)
+        self.etmp += Player.tractorHeat / Int(universe.updatesPerSecond)
         self.orbit = nil
         target.orbit = nil
         
@@ -1661,8 +1661,8 @@ class Player: Thing {
             if universe.timerCount % 8 == 0 && self.transporter != .off {
                 self.beam()
             }
-            self.wtmp -= self.ship.weaponCoolRate
-            self.etmp -= self.ship.engineCoolRate
+            self.wtmp -= self.ship.weaponCoolRate / Int(universe.updatesPerSecond)
+            self.etmp -= self.ship.engineCoolRate / Int(universe.updatesPerSecond)
             self.updateRepair()
             self.updateFuel()
             self.updateSpeed()
