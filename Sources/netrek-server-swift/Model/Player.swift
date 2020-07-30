@@ -15,7 +15,7 @@ class Player: Thing {
     static let detDist = 1700.0 // for detonating enemy torp
     static let planetRange = 1500.0 //range at which planet can attack player
     static let tractorCost = 200 // cost per second
-    static let tractorHeat = 50 // heat per second
+    static let tractorHeat = 50.0 // heat per second
     var slot: Int {
         didSet {
             self.needSpPlayerInfo = true
@@ -69,7 +69,7 @@ class Player: Thing {
             }
         }
     }
-    var etmp = 0 {
+    var etmp = 0.0 {
         didSet {
             if etmp >= 1000 {
                 self.enginesOverheated = true
@@ -1253,7 +1253,7 @@ class Player: Thing {
             self.updateOrbit()
             return
         }
-        self.etmp += Int(self.speed * 10 / universe.updatesPerSecond)
+        self.etmp += self.speed * 10 / universe.updatesPerSecond
         
         positionX += Globals.WARP1 * Double(self.speed) * cos(direction) / universe.updatesPerSecond
         positionY -= Globals.WARP1 * Double(self.speed) * sin(direction) / universe.updatesPerSecond
@@ -1612,7 +1612,7 @@ class Player: Thing {
             return
         }
         self.fuel -= Player.tractorCost / Int(universe.updatesPerSecond)
-        self.etmp += Player.tractorHeat / Int(universe.updatesPerSecond)
+        self.etmp += Player.tractorHeat / universe.updatesPerSecond
         self.orbit = nil
         target.orbit = nil
         
@@ -1662,7 +1662,7 @@ class Player: Thing {
                 self.beam()
             }
             self.wtmp -= self.ship.weaponCoolRate / Int(universe.updatesPerSecond)
-            self.etmp -= self.ship.engineCoolRate / Int(universe.updatesPerSecond)
+            self.etmp -= self.ship.engineCoolRate / universe.updatesPerSecond
             self.updateRepair()
             self.updateFuel()
             self.updateSpeed()

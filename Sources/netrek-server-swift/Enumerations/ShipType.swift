@@ -207,7 +207,7 @@ enum ShipType: Int, CaseIterable {
             return 40
         }
     }
-    var engineCoolRate: Int { // per second
+    var engineCoolRate: Double { // per second
         switch self {
         case .scout:
             return 80
