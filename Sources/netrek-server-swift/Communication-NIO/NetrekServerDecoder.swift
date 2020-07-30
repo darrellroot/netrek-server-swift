@@ -116,10 +116,10 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             //TODO remove CRASHME
-            if messageString == "crash34223" {
+            /*if messageString == "crash34223" {
                 var crashme: Double = Double.random(in: -5 ..< 5)
                 let crash = UInt32(crashme)
-            }
+            }*/
             if messageString == "reset34223" {
                 universe.empireReset()
             }
