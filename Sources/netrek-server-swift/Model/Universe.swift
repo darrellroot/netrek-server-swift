@@ -260,7 +260,7 @@ class Universe {
      */
     
     func savePlanets() {
-        print("saving planet database")
+        logger.info("saving planet database")
         let encoder = JSONEncoder()
         let directory = netrekOptions.directory
         if !fileManager.directoryExists(directory) {
@@ -375,6 +375,7 @@ class Universe {
         }
         //save planets once per minute
         if timerCount % (60 * Int(self.updatesPerSecond)) == 0 {
+            logger.info("Attempting to save planets")
             self.savePlanets()
         }
         // stats report once per 30 minutes
