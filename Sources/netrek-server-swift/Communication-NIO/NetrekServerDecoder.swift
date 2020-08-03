@@ -128,7 +128,60 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             logger.debug("Received CP_MESSAGE 1 to group \(group) indiv \(indiv) message \(messageString) from \(sender.slot)")
             //let spMessage = MakePacket.spMessage(message: messageString, from: UInt8(sender.slot))
             
-            switch group {
+            switch (group & 0x1f) {
+                /* from netrek-server-vanilla struct.h, not fully understood
+                 /* order flags by importance (0x100 - 0x400) */
+                 /* restructuring of message flags to squeeze them all into 1 byte - jmn */
+                 /* hopefully quasi-back-compatible:
+                    MVALID, MINDIV, MTEAM, MALL, MGOD use up 5 bits. this leaves us 3 bits.
+                    since the server only checks for those flags when deciding message
+                    related things and since each of the above cases only has 1 flag on at
+                    a time we can overlap the meanings of the flags */
+
+                 #define MINDIV 0x02
+                 /* these go with MINDIV flag */
+                 #ifdef STDBG
+                 #define MDBG   0x20
+                 #endif
+                 #define MCONFIG 0x40
+                 #define MDIST  0x60
+                 #define DISTR  0x40
+
+                 #define MTEAM  0x04
+                 /* these go with MTEAM flag */
+                 #define MTAKE  0x20
+                 #define MDEST  0x40
+                 #define MBOMB  0x60
+                 #define MCOUP1 0x80
+                 #define MCOUP2 0xA0
+                 #define MDISTR 0xC0     /* flag distress messages - client thing really but
+                                            stick it in here for consistency */
+
+                 #define MALL   0x08
+                 /* these go with MALL flag */
+                 #define MGENO  0x20     /* MGENO is not used in INL server but belongs here */
+                 #define MCONQ  0x20     /* not enough bits to distinguish MCONQ from MGENO :( */
+                 #define MKILLA 0x40
+                 #define MKILLP 0x60
+                 #define MKILL  0x80
+                 #define MLEAVE 0xA0
+                 #define MJOIN  0xC0
+                 #define MGHOST 0xE0
+
+                 #define MWHOMSK  0x1f   /* mask with this to find who msg to */
+                 #define MWHATMSK 0xe0   /* mask with this to find what message about */
+
+                 #define MMASK  0x3F0
+
+                 /* Client to Server macros.  BE AWARE that some values will not work correctly.
+                    Only values that ARE NOT used in handleMessageReq() in socket.c are
+                    acceptable.
+                 */
+
+                 #define FMMACRO 0x80    /* From client only. Used to tag multi-line macros */
+                 #define MMACRO 0x100    /* Server only. Used to tag multi-line macros */
+
+                 */
             case 8: // MALL
                 let prefix = "\(sender.team.letter)\(sender.slot)->ALL: "
                 let spMessage = MakePacket.spMessage(message: prefix + messageString, from: UInt8(sender.slot))

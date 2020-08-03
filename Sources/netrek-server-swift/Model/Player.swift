@@ -1099,7 +1099,7 @@ class Player: Thing {
             self.sendMessage(message: "Engines still overheated!")
             return
         }
-        guard speed >= 0 && speed <= 100 else {
+        guard speed >= 0 else {
             logger.error("\(#file) \(#function) received invalid speed \(speed)")
             return
         }
@@ -1440,7 +1440,7 @@ class Player: Thing {
                 self.cloak = false
                 self.sendMessage(message: "Cloak failed due to fuel shortage")
             }
-            self.fuel -= self.ship.cloakCost
+            self.fuel -= self.ship.cloakCost / Int(universe.updatesPerSecond)
         }
     }
     func updateRepair() {
