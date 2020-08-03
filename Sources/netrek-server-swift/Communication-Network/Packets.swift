@@ -474,7 +474,12 @@ struct SP_FLAGS {
         if player.cloak {
             flags += PlayerStatus.cloak.rawValue
         }*/
-        self.tractor = UInt8(player.tractor?.slot ?? 0)
+        if let tractor = player.tractor {
+            self.tractor = UInt8(tractor.slot + 0x40)
+        } else {
+            self.tractor = 0
+        }
+        //self.tractor = UInt8(player.tractor?.slot ?? 0)
         self.flags = player.flags.byteSwapped
     }
     var size: Int {
