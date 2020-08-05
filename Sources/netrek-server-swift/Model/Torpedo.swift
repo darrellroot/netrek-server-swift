@@ -75,8 +75,8 @@ class Torpedo: Thing {
     
     func reset() {
         self.state = .free
-        self.positionX = 0
-        self.positionY = 0
+        //self.positionX = 0
+        //self.positionY = 0
         self.speed = 15
     }
     
@@ -101,6 +101,11 @@ class Torpedo: Thing {
         self.speed = torpSpeed
         
         expiration = Date(timeIntervalSinceNow: player.ship.torpFuse)
+        let spTorp = MakePacket.spTorp(torpedo: self)
+        //always send torp to all players when fired
+        for player in universe.players.filter({$0.status != .free}) {
+            player.sendData(spTorp)
+        }
     }
     
     func updatePosition() {
@@ -145,7 +150,9 @@ class Torpedo: Thing {
     func explode() {
         self.state = .explode
         self.expiration = Date()
+        let spTorp = MakePacket.spTorp(torpedo: self)
         for player in universe.players {
+            player.sendData(spTorp)
             guard player.team != self.team && player.status == .alive else {
                 continue
             }
@@ -183,8 +190,11 @@ class Torpedo: Thing {
             }
             let spTorp = MakePacket.spTorp(torpedo: self)
             for player in universe.players.filter( {$0.status != .free} ) {
-                logger.debug("Sending SpTorp to player \(player.slot)")
-                player.sendData(spTorp)
+                //only send torp to player if within 1/10th of galaxy size
+                if abs(player.positionX - self.positionX) < Globals.GalaxyWidth / 10 && abs(player.positionY - self.positionY) < Globals.GalaxyWidth / 10 {
+                    logger.debug("Sending SpTorp to player \(player.slot)")
+                    player.sendData(spTorp)
+                }
                 /*if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spTorp)
