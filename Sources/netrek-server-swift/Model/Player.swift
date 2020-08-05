@@ -25,6 +25,14 @@ class Player: Thing {
     let universe: Universe
     //var connection: ServerConnection?
     var context: ChannelHandlerContext?
+    private var tcpBuffer: ByteBuffer?
+    var human: Bool {
+        if self.context != nil && self.status != .free {
+            return true
+        } else {
+            return false
+        }
+    }
     var remoteAddress: SocketAddress? = nil
 
     //in empire mode each slot has a static homeworld
@@ -446,24 +454,34 @@ class Player: Thing {
             
             let spPStatus = MakePacket.spPlayerStatus(player: self)
             for player in self.universe.players.filter({$0.status == .alive || $0.status == .explode }) {
-                if let context = player.context {
+                player.sendData(spPStatus)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: spPStatus)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(spPStatus)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: spPStatus)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 //player.connection?.send(data: spPStatus)
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.status = .dead
                 let spPlayerStatus = MakePacket.spPlayerStatus(player: self)
                 for player in self.universe.activePlayers {
-                    if let context = player.context {
+                    player.sendData(spPlayerStatus)
+                    /*if let context = player.context {
                         context.eventLoop.execute {
-                            let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
-                            _ = context.channel.write(buffer)
+                            if self.tcpBuffer != nil {
+                                self.tcpBuffer?.writeBytes(spPlayerStatus)
+                                //_ = context.channel.write(self.tcpBuffer!)
+                            }
+                            //let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
+                            //_ = context.channel.write(buffer)
                         }
-                    }
+                    }*/
 
                     //player.connection?.send(data: spPStatus)
                 }
@@ -472,12 +490,17 @@ class Player: Thing {
                 self.status = .outfit
                 let spPlayerStatus = MakePacket.spPlayerStatus(player: self)
                 for player in self.universe.activePlayers {
-                    if let context = player.context {
+                    player.sendData(spPlayerStatus)
+                    /*if let context = player.context {
                         context.eventLoop.execute {
-                            let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
-                            _ = context.channel.write(buffer)
+                            if self.tcpBuffer != nil {
+                                self.tcpBuffer?.writeBytes(spPlayerStatus)
+                                //_ = context.channel.write(self.tcpBuffer!)
+                            }
+                            //let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
+                            //_ = context.channel.write(buffer)
                         }
-                    }
+                    }*/
 
                     //player.connection?.send(data: spPStatus)
                 }
@@ -535,6 +558,7 @@ class Player: Thing {
     }
     func reset() {
         logger.info("player \(slot) resetting")
+        self.tcpBuffer = nil
         self.context = nil
         self.remoteAddress = nil
         //self.connection = nil
@@ -550,26 +574,36 @@ class Player: Thing {
             torpedo.reset()
         }
         for player in universe.players.filter ({ $0.status != .free}) {
-            if let context = player.context {
+            player.sendData(spPlayerStatus)
+            /*if let context = player.context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(spPlayerStatus)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: spPlayerStatus)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
             //player.connection?.send(data: spPStatus)
 
         }
     }
     func enterOrbit() {
         guard self.speed <= 2.5 else {
-            let spMessage = MakePacket.spMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!", from: 255)
-            if let context = context {
+            //let spMessage = MakePacket.spMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!", from: 255)
+            self.sendMessage(message: "Helmsman: Captain, the maximum safe speed for docking or orbiting is warp 2!")
+            /*if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(spMessage)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                    //_ = context.channel.write(buffer)
                 }
 
-            }
+            }*/
             return
         }
         self.orbit = nil
@@ -580,26 +614,36 @@ class Player: Thing {
             }
         }
         guard let orbit = self.orbit else {
-            let spMessage = MakePacket.spMessage(message: "Captain: We are not in orbit range of a planet", from: 255)
-            if let context = context {
+            //let spMessage = MakePacket.spMessage(message: "Captain: We are not in orbit range of a planet", from: 255)
+            self.sendMessage(message: "Captain: We are not in orbit range of a planet")
+            /*if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(spMessage)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
 
             //self.connection?.send(data: spMessage)
             return
         }
         
         self.orbitRadian = atan2(-1 * self.positionY - orbit.positionY, self.positionX - orbit.positionX)
-        let spMessage = MakePacket.spMessage(message: "Entering standard orbit of \(orbit.name)", from: 255)
+        self.sendMessage(message: "Entering standard orbit of \(orbit.name)")
+        /*let spMessage = MakePacket.spMessage(message: "Entering standard orbit of \(orbit.name)", from: 255)
         if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: spMessage)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(spMessage)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: spMessage)
+                ///_ = context.channel.write(buffer)
             }
-        }
+        }*/
 
         //self.connection?.send(data: spMessage)
         self.speed = 1
@@ -718,16 +762,22 @@ class Player: Thing {
             self.homeworld = getRandomHomeworld()
         }
         self.context = context
+        //self.tcpBuffer = context.channel.allocator.buffer(capacity: 3000)
         self.status = .outfit
         self.remoteAddress = context.remoteAddress
         logger.info("New connection from \(self.remoteAddress?.description ?? "unknown")")
         do {
             logger.debug("sending SP MOTD")
-            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.4-alpha feedback@networkmom.net")
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ =  context.channel.write(buffer)
-            }
+            let data = MakePacket.spMotd(motd: "Experimental Swift Netrek Server version 0.5-alpha feedback@networkmom.net")
+            self.sendData(data)
+            /*context.eventLoop.execute {
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ =  context.channel.write(buffer)
+            }*/
         }
 
         //TODO implement queue
@@ -759,14 +809,19 @@ class Player: Thing {
         }
     }
     func sendSpYou() {
-        let data = MakePacket.spYou(player: self)
+        let spYou = MakePacket.spYou(player: self)
         logger.debug("sending SP_YOU")
-        if let context = context {
+        self.sendData(spYou)
+        /*if let context = context {
             context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data)
-                    _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(spYou)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: spYou)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
 
         //self.connection?.send(data: data)
     }
@@ -779,12 +834,17 @@ class Player: Thing {
             //which means from server
             data = MakePacket.spMessage(message: message, from: 255)
         }
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
 
         //connection?.send(data: data)
     }
@@ -997,12 +1057,17 @@ class Player: Thing {
             guard Team.broncoTeams.contains(team) else {
                 self.sendMessage(message: "I cannot allow that.  Pick another team or ship")
                 let data2 = MakePacket.spPickOk(false)
-                if let context = context {
+                self.sendData(data2)
+                /*if let context = context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data2)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data2)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data2)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 return false
             }
         }
@@ -1010,23 +1075,34 @@ class Player: Thing {
             self.sendMessage(message: "Outfiting ship not available in state \(self.status.rawValue)")
             
             let data2 = MakePacket.spPickOk(false)
+            self.sendData(data2)
+            /*
             if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(data2)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: data2)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
             return false
         }
         guard ship != .starbase else {
             self.sendMessage(message: "You need at least 2 kills then refit at your homeworld to launch a starbase")
             let data2 = MakePacket.spPickOk(false)
-            if let context = context {
+            self.sendData(data2)
+            /*if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data2)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(data2)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: data2)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
             return false
         }
         if netrekOptions.gameStyle == .bronco {
@@ -1035,12 +1111,18 @@ class Player: Thing {
                 self.sendMessage(message: "Unexpected server error, cannot find homeworld")
 
                 let data2 = MakePacket.spPickOk(false)
+                self.sendData(data2)
+                /*
                 if let context = context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data2)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data2)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data2)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 return false
             }
             self.homeworld = homeworld
@@ -1081,12 +1163,17 @@ class Player: Thing {
         self.sendMessage(message: "Admiralty: we expect all sentients to do their duty!")
 
         let data2 = MakePacket.spPickOk(true)
-        if let context = context {
+        self.sendData(data2)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data2)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data2)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data2)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
 
         return true
         //connection?.send(data: data2)
@@ -1147,12 +1234,17 @@ class Player: Thing {
             self.user = user
             let data = MakePacket.spLogin(success: true)
             logger.info("Sending SP_LOGIN success to player \(self.slot)")
-            if let context = context {
+            self.sendData(data)
+            /*if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(data)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: data)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
             for player in universe.humanPlayers {
                 player.sendMessage(message: "\(self.user?.name ?? "unknown") joined game in slot \(self.slot.hex)")
             }
@@ -1166,23 +1258,33 @@ class Player: Thing {
                 logger.info("Sending SP_LOGIN failure to player \(self.slot)")
                 self.sendMessage(message: "Incorrect password for existing user \(name)")
                 let spLogin = MakePacket.spLogin(success: false)
-                if let context = context {
+                self.sendData(spLogin)
+                /*if let context = context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: spLogin)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(spLogin)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: spLogin)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 return
             case .success(let user),.newUser(let user):
                 self.user = user
                 let data = MakePacket.spLogin(success: true)
                 logger.info("Sending SP_LOGIN success to player \(self.slot)")
-                if let context = context {
+                self.sendData(data)
+                /*if let context = context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 if case AuthenticationResult.newUser = authenticationResult {
                     self.sendMessage(message: "New user \(name) added to server user database")
                 }
@@ -1202,12 +1304,17 @@ class Player: Thing {
         for planet in universe.planets {
             let data = MakePacket.spPlanetLoc(planet: planet)
             logger.debug("Sending SP_PLANET_LOC for planet \(planet.planetID) to \(self.slot)")
-            if let context = context {
+            self.sendData(data)
+            /*if let context = context {
                 context.eventLoop.execute {
-                    let buffer = context.channel.allocator.buffer(bytes: data)
-                    _ = context.channel.write(buffer)
+                    if self.tcpBuffer != nil {
+                        self.tcpBuffer?.writeBytes(data)
+                        //_ = context.channel.write(self.tcpBuffer!)
+                    }
+                    //let buffer = context.channel.allocator.buffer(bytes: data)
+                    //_ = context.channel.write(buffer)
                 }
-            }
+            }*/
 
             //connection?.send(data: data)
         }
@@ -1282,14 +1389,19 @@ class Player: Thing {
     }
     func sendSpMask() {
         let data = MakePacket.spMask(universe: universe)
-        if let context = context {
-            context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
-            }
-        }
-        //connection?.send(data: data)
         logger.debug("Sending SP_MASK to player \(self.slot)")
+        self.sendData(data)
+        /*if let context = context {
+            context.eventLoop.execute {
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
+            }
+        }*/
+        //connection?.send(data: data)
     }
     
     func updateDirection() {
@@ -1638,10 +1750,34 @@ class Player: Thing {
             }
         }
     }
+    func sendData(_ data: Data) {
+        if let context = self.context {
+            context.eventLoop.execute {
+                if self.tcpBuffer == nil {
+                    self.tcpBuffer = context.channel.allocator.buffer(capacity: 3000)
+                }
+                self.tcpBuffer?.writeBytes(data)
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
+                /*if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }*/
+            }
+        }
+    }
     func flush() {
         if let context = self.context {
             context.eventLoop.execute {
-                context.channel.flush()
+                if self.tcpBuffer != nil {
+                    _ = context.channel.writeAndFlush(self.tcpBuffer!)
+                    self.tcpBuffer = nil
+                }
+                //context.channel.flush()
+                /*if self.tcpBuffer != nil {
+                    _ = context.channel.writeAndFlush(self.tcpBuffer!)
+                    self.tcpBuffer?.discardReadBytes()
+                }*/
             }
         }
     }
@@ -1690,12 +1826,17 @@ class Player: Thing {
         //this sends this players stats to all players
         if let spStats = MakePacket.spStats(player: self) {
             for player in self.universe.players {
-                if let context = player.context {
+                player.sendData(spStats)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: spStats)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(spStats)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: spStats)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
 
                 //player.connection?.send(data: spStats)
             }
@@ -1771,12 +1912,17 @@ class Player: Thing {
     func getSpPlanet(planet: Planet) {
         let data = MakePacket.spPlanet(planet: planet)
         logger.debug("Sending SP_PLANET for planet \(planet.planetID) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     
@@ -1785,12 +1931,17 @@ class Player: Thing {
             let data = MakePacket.spHostile(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_HOSTILE for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             self.needSpHostile = false
         }
@@ -1799,12 +1950,17 @@ class Player: Thing {
         player.needSpHostile = false
         let data = MakePacket.spHostile(player: player)
         logger.debug("Sending SP_HOSTILE for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     //send my playerLogin to others
@@ -1813,12 +1969,17 @@ class Player: Thing {
             let data = MakePacket.spPlLogin(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_PL_LOGIN for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             user.needSpPlLogin = false
         }
@@ -1827,12 +1988,17 @@ class Player: Thing {
     func getSpPlLogin(player: Player) {
         let data = MakePacket.spPlLogin(player: player)
         logger.debug("Sending SP_PL_LOGIN for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     func sendSpPlayerInfo() {
@@ -1840,12 +2006,17 @@ class Player: Thing {
             let data = MakePacket.spPlayerInfo(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_PLAYER_INFO 2 for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             self.needSpPlayerInfo = false
         }
@@ -1853,12 +2024,17 @@ class Player: Thing {
     func getSpPlayerInfo(player: Player) {
         let data = MakePacket.spPlayerInfo(player: player)
         logger.debug("Sending SP_PLAYER_INFO 2 for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     func sendSpKills() {
@@ -1866,12 +2042,17 @@ class Player: Thing {
             let data = MakePacket.spKills(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_KILLS_2 for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             self.needSpKills = false
         }
@@ -1879,23 +2060,33 @@ class Player: Thing {
     func getSpKills(player: Player) {
         let data = MakePacket.spKills(player: player)
         logger.debug("Sending SP_KILLS_2 for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     func getSpFlags(player: Player) {
         let data = MakePacket.spFlags(player: player)
         logger.debug("Sending SP_Flags for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     // full transfer sent after CP_LOGIN
@@ -1916,12 +2107,17 @@ class Player: Thing {
             let data = MakePacket.spPlayerStatus(player: self)
             for player in universe.humanPlayers {
                 logger.debug("Sending SP_PStatus for player \(self.slot) to \(player.slot)")
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
-                        let buffer = context.channel.allocator.buffer(bytes: data)
-                        _ = context.channel.write(buffer)
+                        if self.tcpBuffer != nil {
+                            self.tcpBuffer?.writeBytes(data)
+                            //_ = context.channel.write(self.tcpBuffer!)
+                        }
+                        //let buffer = context.channel.allocator.buffer(bytes: data)
+                        //_ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             self.needSpPlayerStatus = false
         }
@@ -1929,23 +2125,33 @@ class Player: Thing {
     func getSpPlayerStatus(player: Player) {
         let data = MakePacket.spPlayerStatus(player: player)
         logger.debug("Sending SP_PStatus for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
     func getSpPlayer(player: Player) {
         let data = MakePacket.spPlayer(player: player)
         logger.debug("Sending SP_Player for player \(player.slot) to \(self.slot)")
-        if let context = context {
+        self.sendData(data)
+        /*if let context = context {
             context.eventLoop.execute {
-                let buffer = context.channel.allocator.buffer(bytes: data)
-                _ = context.channel.write(buffer)
+                if self.tcpBuffer != nil {
+                    self.tcpBuffer?.writeBytes(data)
+                    //_ = context.channel.write(self.tcpBuffer!)
+                }
+                //let buffer = context.channel.allocator.buffer(bytes: data)
+                //_ = context.channel.write(buffer)
             }
-        }
+        }*/
         //connection?.send(data: data)
     }
 }

@@ -74,7 +74,7 @@ class Universe {
         return self.players.filter({$0.status == .alive})
     }
     var humanPlayers: [Player] {
-        return self.players.filter({$0.status != .free && $0.context != nil})
+        return self.players.filter({$0.human})
     }
     
     var planets: [Planet] = [
@@ -317,12 +317,13 @@ class Universe {
             logger.debug("Sending SP_PLANETs for \(planet.name)")
             let data = MakePacket.spPlanet(planet: planet)
             for player in activePlayers {
-                if let context = player.context {
+                player.sendData(data)
+                /*if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: data)
                         _ = context.channel.write(buffer)
                     }
-                }
+                }*/
             }
             planet.needsUpdate = false
         }

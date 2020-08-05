@@ -166,24 +166,26 @@ class Laser {
         }
         let spLaser = MakePacket.spLaser(laser: self)
         for player in universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
-            if let context = player.context {
+            player.sendData(spLaser)
+            /*if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spLaser)
                     _ = context.channel.write(buffer)
                 }
-            }
+            }*/
             //player.connection?.send(data: spLaser)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + shooter.ship.laserRecharge) {
             self.status = .free
             let spLaser = MakePacket.spLaser(laser: self)
             for player in universe.players.filter( { $0.status == .alive || $0.status == .explode }) {
-                if let context = player.context {
+                player.sendData(spLaser)
+                /*if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spLaser)
                         _ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 //player.connection?.send(data: spLaser)
             }
         }

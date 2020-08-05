@@ -207,7 +207,7 @@ class MakePacket {
         var mask = 0
         //count human players
         for player in universe.players {
-            if player.status != .free && player.context != nil {
+            if player.status != .free && player.human {
                 playerCount[player.team]! += 1
             }
         }

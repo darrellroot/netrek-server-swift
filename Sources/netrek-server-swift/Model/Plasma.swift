@@ -40,12 +40,13 @@ class Plasma: Thing {
         didSet {
             let spPlasmaInfo = MakePacket.spPlasmaInfo(plasma: self)
             for player in self.universe.players.filter( { $0.status != .free }) {
-                if let context = player.context {
+                player.sendData(spPlasmaInfo)
+                /*if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spPlasmaInfo)
                         _ = context.channel.write(buffer)
                     }
-                }
+                }*/
                 logger.debug("Sending SPlasmaInfo")
             }
         }
@@ -191,13 +192,14 @@ class Plasma: Thing {
         self.state = .free
         let spPlasma = MakePacket.spPlasma(plasma: self)
         for player in universe.players.filter( {$0.status != .free} ) {
-            if let context = player.context {
+            player.sendData(spPlasma)
+            /*if let context = player.context {
                 context.eventLoop.execute {
                     let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                     _ = context.channel.write(buffer)
                     logger.debug("Sending SpPlasma to player \(player.slot)")
                 }
-            }
+            }*/
             //player.connection?.send(data: spTorp)
         }
     }
@@ -240,13 +242,15 @@ class Plasma: Thing {
             }
             let spPlasma = MakePacket.spPlasma(plasma: self)
             for player in universe.players.filter( {$0.status != .free} ) {
-                if let context = player.context {
+                logger.debug("Sending SpPlasma to player \(player.slot)")
+                player.sendData(spPlasma)
+                /*if let context = player.context {
                     context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                         _ = context.channel.write(buffer)
                     }
                     logger.debug("Sending SpPlasma to player \(player.slot)")
-                }
+                }*/
 
                 //player.connection?.send(data: spTorp)
             }
@@ -255,13 +259,14 @@ class Plasma: Thing {
                 self.state = .free
                 let spPlasma = MakePacket.spPlasma(plasma: self)
                 for player in universe.players.filter( {$0.status != .free} ) {
-                    if let context = player.context {
+                    logger.debug("Sending SpPlasma to player \(player.slot)")
+                    player.sendData(spPlasma)
+                    /*if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spPlasma)
                             _ = context.channel.write(buffer)
-                            logger.debug("Sending SpPlasma to player \(player.slot)")
                         }
-                    }
+                    }*/
                 }
             }
         }

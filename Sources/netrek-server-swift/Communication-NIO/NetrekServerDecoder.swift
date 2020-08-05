@@ -186,12 +186,13 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 let prefix = "\(sender.team.letter)\(sender.slot)->ALL: "
                 let spMessage = MakePacket.spMessage(message: prefix + messageString, from: UInt8(sender.slot))
                 for player in universe.players.filter({ $0.status != .free}) {
-                    if let context = player.context {
+                    player.sendData(spMessage)
+                    /*if let context = player.context {
                         context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
                             _ = context.channel.write(buffer)
                         }
-                    }
+                    }*/
                     //player.connection?.send(data: spMessage)
                 }
             case 4: // TEAM
@@ -204,10 +205,11 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 
                 for player in universe.players.filter({ $0.status != .free && $0.team.rawValue == indiv}) {
                     if let context = player.context {
-                        context.eventLoop.execute {
+                        player.sendData(spMessage)
+                        /*context.eventLoop.execute {
                             let buffer = context.channel.allocator.buffer(bytes: spMessage)
                             _ = context.channel.write(buffer)
-                        }
+                        }*/
                         //player.connection?.send(data: spMessage)
                     }
                 }
@@ -220,10 +222,11 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 let prefix = "\(sender.team.letter)\(sender.slot)->\(player.team.letter)\(player.slot): "
                 let spMessage = MakePacket.spMessage(message: prefix + messageString, from: UInt8(sender.slot))
                 if let context = player.context {
-                    context.eventLoop.execute {
+                    player.sendData(spMessage)
+                    /*context.eventLoop.execute {
                         let buffer = context.channel.allocator.buffer(bytes: spMessage)
                         _ = context.channel.write(buffer)
-                    }
+                    }*/
                 }
                 //player.connection?.send(data: spMessage)
             default:

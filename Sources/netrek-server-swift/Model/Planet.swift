@@ -80,7 +80,7 @@ class Planet: Thing, Equatable, Codable {
     public func pop() {
         logger.debug("POP-Before planet \(self.name) armies \(armies)")
         // dont pop if no humans playing
-        guard let _ = universe.players.first(where: {$0.context != nil && $0.status != .free}) else {
+        guard let _ = universe.players.first(where: {$0.human && $0.status != .free}) else {
             return
         }
         
