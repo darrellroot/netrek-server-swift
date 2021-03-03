@@ -115,6 +115,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("Unable to identify message sender for context \(context)")
                 return .continue
             }
+            sender.receivedNetwork()
             //TODO remove CRASHME
             /*if messageString == "crash34223" {
                 var crashme: Double = Double.random(in: -5 ..< 5)
@@ -243,6 +244,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for context \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedCpSpeed(speed: speed)
 
         case 3: //CP_DIRECTION 3
@@ -255,6 +257,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for context \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedCpDirection(netrekDirection: direction)
         case 4: //CP_LASER 4
             let direction = data[1]
@@ -265,6 +268,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.fireLaser(direction: direction)
         case 5: //CP_PLASMA 5
             let direction = Int(data[1])
@@ -275,6 +279,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.firePlasma(direction: NetrekMath.directionNetrek2Radian(direction))
             //player.sendMessage(message: "Plasma torpedoes not implemented on this server")
             
@@ -287,6 +292,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.fireTorpedo(direction: NetrekMath.directionNetrek2Radian(direction))
 
         case 7: //CP_QUIT 7
@@ -299,6 +305,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             //player.sendMessage(message: "Goodbye!  Report issues to feedback@networkmom.net")
+            player.receivedNetwork()
             player.receivedCpQuit()
             //player.reset()
             //_ = context.close()
@@ -328,6 +335,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
             }
             logger.debug("Received CP_LOGIN 8 name \(name) userinfo \(userinfo)")
             if let player = universe.player(context: context) {
+                player.receivedNetwork()
                 player.receivedCpLogin(name: name, password: password, userinfo: userinfo)
             }
         case 9: // CP_OUTFIT 9
@@ -360,6 +368,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for context address \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             guard let ship = shipOptional else {
                 logger.error("\(#file) \(#function) error received invalid ship type \(shipInt)")
                 return .continue
@@ -375,6 +384,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.sendMessage(message: "On this server, you are always at war")
 
         case 11: // CP_PRACTR
@@ -386,6 +396,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.sendMessage(message: "Practice robot not implemented")
 
         case 12: // CP_SHIELD
@@ -397,6 +408,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             if state == 1 {
                 player.receivedCpShield(up: true)
                 //player.shieldsUp = true
@@ -414,6 +426,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             if state == 1 {
                 player.receivedRepair(true)
                 player.sendMessage(message: "Damage control parties to all decks!")
@@ -431,6 +444,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.enterOrbit()
 
         case 15: //CP_PLANLOCK 15
@@ -442,6 +456,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedPlanetLock(planetID: planetNum)
 
         case 16: //CP_PLAYLOCK 16
@@ -453,6 +468,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedPlayerLock(playerID: playerNum)
 
         case 17: //CP_BOMB 17
@@ -464,6 +480,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedCpBomb()
 
         case 18: //CP_BEAM 18
@@ -475,6 +492,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             switch state {
             case 1:
                 player.receivedCbBeam(up: true)
@@ -493,6 +511,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             if state == 1 {
                 player.activateCloak(true)
             } else {
@@ -508,6 +527,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedDetTorp()
 
         case 21: //CP_DET_MYTORP 21
@@ -518,6 +538,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedDetMyTorp()
 
         case 22: //CP_COPILOT 22
@@ -530,6 +551,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             logger.info("CP_COPILOT not implemented on this server for connection \(context.remoteAddress?.description ?? "unknown")")
+            player.receivedNetwork()
             player.sendMessage(message: "CP_COPILOT not implemented on this server")
 
         case 23: // CP_REFIT 23
@@ -541,6 +563,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             logger.info("CP_REFIT ship \(ship)")
             var newShipOptional: ShipType? = nil
             for shipType in ShipType.allCases {
@@ -563,6 +586,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedCpTractor(state: state, target: playerNum, mode: .tractor)
         
         case 25: // CP_REPRESS 25
@@ -574,6 +598,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             player.receivedCpTractor(state: state, target: playerNum, mode: .pressor)
             
         case 26: // CP_COUP 26
@@ -585,6 +610,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 logger.error("\(#file) \(#function) error unable to identify player for connection \(context.remoteAddress?.description ?? "unknown")")
                 return .continue
             }
+            player.receivedNetwork()
             logger.info("CP_COUP not implemented on this server")
             player.sendMessage(message: "CP_COUP not implemented on this server")
 
@@ -608,6 +634,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             logger.info("CP_OPTIONS not implemented on this server")
+            player.receivedNetwork()
             player.sendMessage(message: "CP_OPTIONS not implemented on this server")
 
         case 29: //CP_BYE 29
@@ -635,6 +662,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             logger.info("CP_DOCKPERM not implemented on this server")
+            player.receivedNetwork()
             player.sendMessage(message: "CP_DOCKPERM not implemented on this server")
 
        case 31: //CP_UPDATES 31
@@ -661,6 +689,7 @@ final class NetrekServerDecoder: ByteToMessageDecoder {
                 return .continue
             }
             logger.info("CP_RESETSTATS not implemented on this server")
+            player.receivedNetwork()
             player.sendMessage(message: "CP_RESETSTATS not implemented on this server")
 
         case 33: //CP_RESERVED 33

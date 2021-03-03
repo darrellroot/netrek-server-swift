@@ -13,6 +13,8 @@ struct Globals {
     //static let NAME_LEN = 16
     static let WARP1 = 200.0 // netrek units moved per second at warp 1
     static let GalaxyWidth = 100000.0
+    
+    static let GhostbustTimer = 300.0
 }
 let PACKET_SIZES: [Int: Int] =
     [0:0, // NULL

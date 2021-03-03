@@ -25,6 +25,7 @@ class Player: Thing {
     let universe: Universe
     //var connection: ServerConnection?
     var context: ChannelHandlerContext?
+    var lastReceivedNetwork = Date() // for Ghostbust disconnection timer
     private var tcpBuffer: ByteBuffer?
     var human: Bool {
         if self.context != nil && self.status != .free {
@@ -324,6 +325,10 @@ class Player: Thing {
         }
         self.laser.player = self
         self.plasma = Plasma(universe: self.universe, player: self, number: self.slot)
+    }
+    
+    public func receivedNetwork() {
+        self.lastReceivedNetwork = Date()
     }
     
     public func statsReport() {
@@ -761,6 +766,7 @@ class Player: Thing {
         if netrekOptions.gameStyle == .empire {
             self.homeworld = getRandomHomeworld()
         }
+        self.lastReceivedNetwork = Date()
         self.context = context
         //self.tcpBuffer = context.channel.allocator.buffer(capacity: 3000)
         self.status = .outfit
@@ -1844,6 +1850,18 @@ class Player: Thing {
     }
     func minuteTimerFired() {
         self.sendSpStats()
+        if self.human {
+            debugPrint("time since last command \(Date().timeIntervalSince(self.lastReceivedNetwork))")
+        }
+        if self.human && Date().timeIntervalSince(self.lastReceivedNetwork) > Globals.GhostbustTimer {
+            logger.error("Player \(self.slot) Ghostbusted")
+            for player in universe.humanPlayers {
+                player.sendMessage(message: "\(self.team.letter)\(self.slot.hex) idle for \(Globals.GhostbustTimer) seconds.  Ghostbusted by server")
+            }
+            //self.sendMessage(message: "Idle for \(Globals.GhostbustTimer) seconds.  Disconnected by Server")
+            self.flush()
+            self.reset()
+        }
     }
     
     func secondTimerFired() {
