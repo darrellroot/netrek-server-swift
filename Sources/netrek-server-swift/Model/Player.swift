@@ -1850,9 +1850,9 @@ class Player: Thing {
     }
     func minuteTimerFired() {
         self.sendSpStats()
-        if self.human {
+        /*if self.human {
             debugPrint("time since last command \(Date().timeIntervalSince(self.lastReceivedNetwork))")
-        }
+        }*/
         if self.human && Date().timeIntervalSince(self.lastReceivedNetwork) > Globals.GhostbustTimer {
             logger.error("Player \(self.slot) Ghostbusted")
             for player in universe.humanPlayers {
