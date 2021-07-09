@@ -15,6 +15,7 @@ struct Globals {
     static let GalaxyWidth = 100000.0
     
     static let GhostbustTimer = 300.0
+    static let MaxPlayingTime = 60.0 * 60.0 * 24.0 // 1 day
 }
 let PACKET_SIZES: [Int: Int] =
     [0:0, // NULL

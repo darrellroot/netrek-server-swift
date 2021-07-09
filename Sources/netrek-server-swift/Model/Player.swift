@@ -25,6 +25,7 @@ class Player: Thing {
     let universe: Universe
     //var connection: ServerConnection?
     var context: ChannelHandlerContext?
+    let playerCreatedDate = Date()
     var lastReceivedNetwork = Date() // for Ghostbust disconnection timer
     private var tcpBuffer: ByteBuffer?
     var human: Bool {
@@ -1850,18 +1851,24 @@ class Player: Thing {
     }
     func minuteTimerFired() {
         self.sendSpStats()
-        /*if self.human {
-            debugPrint("time since last command \(Date().timeIntervalSince(self.lastReceivedNetwork))")
-        }*/
-        if self.human && Date().timeIntervalSince(self.lastReceivedNetwork) > Globals.GhostbustTimer {
-            logger.error("Player \(self.slot) Ghostbusted")
-            for player in universe.humanPlayers {
-                player.sendMessage(message: "\(self.team.letter)\(self.slot.hex) idle for \(Globals.GhostbustTimer) seconds.  Ghostbusted by server")
-            }
-            //self.sendMessage(message: "Idle for \(Globals.GhostbustTimer) seconds.  Disconnected by Server")
-            self.flush()
-            self.reset()
+        // trying to prevent idle slots from gradually growing
+        if self.human && Date().timeIntervalSince(self.playerCreatedDate) > Globals.MaxPlayingTime {
+            self.ghostbust(message: "\(self.team.letter)\(self.slot.hex) exceeded max playing time \(Globals.MaxPlayingTime) seconds.  Ghostbusted by server");
         }
+        // if human player doesnt respond in 5 minues, nuke him
+        if self.human && Date().timeIntervalSince(self.lastReceivedNetwork) > Globals.GhostbustTimer {
+            self.ghostbust(message: "\(self.team.letter)\(self.slot.hex) idle for \(Globals.GhostbustTimer) seconds.  Ghostbusted by server");
+        }
+    }
+    
+    func ghostbust(message: String) {
+        logger.error("Player \(self.slot) Ghostbusted \(message)")
+        for player in universe.humanPlayers {
+            player.sendMessage(message: message)
+        }
+        //self.sendMessage(message: "Idle for \(Globals.GhostbustTimer) seconds.  Disconnected by Server")
+        self.flush()
+        self.reset()
     }
     
     func secondTimerFired() {
