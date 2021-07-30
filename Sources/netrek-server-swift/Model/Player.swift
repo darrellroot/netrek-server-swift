@@ -25,7 +25,7 @@ class Player: Thing {
     let universe: Universe
     //var connection: ServerConnection?
     var context: ChannelHandlerContext?
-    let playerCreatedDate = Date()
+    var playerCreatedDate = Date()
     var lastReceivedNetwork = Date() // for Ghostbust disconnection timer
     private var tcpBuffer: ByteBuffer?
     var human: Bool {
@@ -768,6 +768,7 @@ class Player: Thing {
             self.homeworld = getRandomHomeworld()
         }
         self.lastReceivedNetwork = Date()
+        self.playerCreatedDate = Date()
         self.context = context
         //self.tcpBuffer = context.channel.allocator.buffer(capacity: 3000)
         self.status = .outfit
