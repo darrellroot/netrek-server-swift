@@ -17,9 +17,12 @@ final class NetrekChannelHandler: ChannelInboundHandler {
         self.universe = universe
     }
     public func channelActive(context: ChannelHandlerContext) {
-        let remoteAddress = context.remoteAddress!
+        if let remoteAddress = context.remoteAddress {
         //let channel = context.channel
-        logger.info("New channel from \(remoteAddress)")
+            logger.info("New channel from \(remoteAddress)")
+        } else {
+            logger.info("New channel but context is nil")
+        }
     }
     public func channelInactive(context: ChannelHandlerContext) {
         //let channel = context.channel
