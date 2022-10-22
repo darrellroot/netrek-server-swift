@@ -328,7 +328,7 @@ class Universe {
             planet.needsUpdate = false
         }
     }
-    @objc func timerFired() {
+    func timerFired() {
         self.timerCount += 1
         //logger.trace("\(#file) \(#function) count \(self.timerCount)")
         self.sendPlanetUpdates()
